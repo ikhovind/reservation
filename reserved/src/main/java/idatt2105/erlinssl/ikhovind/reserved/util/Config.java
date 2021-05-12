@@ -1,6 +1,9 @@
 package idatt2105.erlinssl.ikhovind.reserved.util;
 
 import idatt2105.erlinssl.ikhovind.reserved.model.User;
+import idatt2105.erlinssl.ikhovind.reserved.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -23,6 +26,8 @@ import java.util.Properties;
 
 @Configuration
 @EnableJpaRepositories
+@ComponentScan
+@EntityScan
 public class Config {
     @Bean
     public PasswordEncoder encoder() {
