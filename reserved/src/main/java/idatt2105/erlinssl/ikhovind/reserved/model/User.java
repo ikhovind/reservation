@@ -13,20 +13,18 @@ import javax.persistence.Id;
 @Getter
 @Setter
 public class User {
-    private int id;
+    private Integer id;
     private String firstName;
     private String lastName;
     private String email;
     private String password;
-    private String salt;
     private boolean admin;
 
-    public User(String firstName, String lastName, String email, String password, String salt, boolean admin) {
+    public User(String firstName, String lastName, String email, String password, boolean admin) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
         this.password = password;
-        this.salt = salt;
         this.admin = admin;
     }
 
