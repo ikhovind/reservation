@@ -5,15 +5,12 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
 
 @Entity
-@NoArgsConstructor
 @Getter
 @Setter
-public class User {
-    private Integer id;
+@NoArgsConstructor
+public class User extends BaseModel {
     private String firstName;
     private String lastName;
     private String email;
@@ -26,15 +23,5 @@ public class User {
         this.email = email;
         this.password = password;
         this.admin = admin;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    @Id
-    @GeneratedValue
-    public int getId() {
-        return id;
     }
 }
