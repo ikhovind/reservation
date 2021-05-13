@@ -63,7 +63,7 @@ public class RoomController {
                 Room newRoom = new Room(map.get("roomName"));
                 roomService.saveRoom(newRoom);
                 response.put("result", true);
-                response.put("room", newRoom.toJson().toMap());
+                response.put("room", newRoom.toJson().toString());
                 log.info("single room saved successfully");
                 return ResponseEntity.status(201).body(response.toMap());
             }
@@ -75,6 +75,7 @@ public class RoomController {
             return ResponseEntity.badRequest().body(response.toMap());
         }
         catch (Exception e){
+            e.printStackTrace();
             log.error("unknown error", e);
             response.put("error", "of type " + e.getClass().toGenericString());
             return ResponseEntity.badRequest().body(response.toMap());
