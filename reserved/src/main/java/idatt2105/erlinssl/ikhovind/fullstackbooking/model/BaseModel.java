@@ -5,13 +5,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.Type;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import javax.persistence.Column;
-import javax.persistence.EntityListeners;
-import javax.persistence.Id;
-import javax.persistence.MappedSuperclass;
+import javax.persistence.*;
 import java.sql.Timestamp;
 import java.util.UUID;
 
@@ -23,7 +21,9 @@ import java.util.UUID;
 @SuperBuilder
 public class BaseModel {
     @Id
-    private UUID uid = Generators.timeBasedGenerator().generate();
+    @GeneratedValue
+    @Type(type = "org.hibernate.type.UUIDCharType")
+    private UUID uid = Generators.randomBasedGenerator().generate();
     @CreatedDate
     @Column(name = "created_date")
     private Timestamp createdDate;

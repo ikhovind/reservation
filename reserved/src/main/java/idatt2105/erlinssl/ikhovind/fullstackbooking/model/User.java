@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 
 @Entity
@@ -13,6 +14,7 @@ import javax.persistence.Entity;
 public class User extends BaseModel {
     private String firstName;
     private String lastName;
+    @Column(unique = true)
     private String email;
     private String password;
     private boolean admin;

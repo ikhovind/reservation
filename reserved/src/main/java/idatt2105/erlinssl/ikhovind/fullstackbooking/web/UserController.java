@@ -5,22 +5,43 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.UUID;
 
 @CrossOrigin(origins = "*")
 @Controller
-@RequestMapping("/Users")
+@RequestMapping("/users")
 public class UserController {
     @Autowired
     private UserService userService;
 
-    @GetMapping(value = "")
+    @PostMapping(value = "")
     public ResponseEntity test(){
-        User user = new User("1","2","3","4",false);
+        User user = new User("1","2","2","4",false);
         userService.registerNewUserAccount(user);
         return ResponseEntity
                 .ok().body("hei");
+    }
+
+    @GetMapping(value = "/{uid}")
+    public ResponseEntity getUser(@PathVariable UUID uid) {
+        return ResponseEntity
+                .ok()
+                .body(userService.getSingleUser(uid));
+    }
+
+    @GetMapping(value = "")
+    public ResponseEntity getAllUsers() {
+        List<UUID> ids = new ArrayList<>();
+        for (User u : userService.getAllUsers()) {
+            ids.add(u.getUid());
+        }
+        return ResponseEntity
+                .ok()
+                .body(ids.toString());
     }
 }
