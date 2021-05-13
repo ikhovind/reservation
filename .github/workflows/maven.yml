@@ -36,7 +36,6 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Set up JDK 11
-      uses: actions/setup-java@v2
       with:
         java-version: '11'
         distribution: 'adopt'
@@ -44,11 +43,10 @@ jobs:
       env:
         APPLICATION_PROPERTIES: ${{ secrets.APPLICATION_PROPERTIES }}
       run: |
-        mkdir ~/reserved/src/main/resources
-        touch ~/reserved/src/main/resources/application.properties
         ls
         ls reserved/src/main/
-        pwd
+        mkdir ~/reserved/src/main/resources
+        touch ~/reserved/src/main/resources/application.properties
         'echo "$APPLICATION_PROPERTIES" > ~/reserved/src/main/resources/application.properties'
         mvn clean test --file reserved/pom.xml
 
