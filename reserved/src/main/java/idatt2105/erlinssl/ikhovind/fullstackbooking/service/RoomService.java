@@ -31,7 +31,7 @@ public class RoomService {
     }
 
     public boolean editRoom(Room room){
-        if(roomRepository.existsById(room.getUid())) {
+        if(roomRepository.existsById(room.getId())) {
             roomRepository.save(room);
         }
         return false;

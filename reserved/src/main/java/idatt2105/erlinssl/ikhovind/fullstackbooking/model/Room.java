@@ -26,7 +26,7 @@ public class Room extends BaseModel {
 
     public JSONObject toJson() {
         JSONObject room = new JSONObject();
-        room.put("uid", getUid());
+        room.put("uid", getId());
         room.put("roomName", roomName);
         return room;
     }
