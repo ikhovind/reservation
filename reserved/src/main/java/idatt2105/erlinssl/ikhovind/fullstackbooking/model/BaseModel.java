@@ -23,7 +23,7 @@ public class BaseModel {
     @Id
     @GeneratedValue
     @Type(type = "org.hibernate.type.UUIDCharType")
-    private UUID uid = Generators.randomBasedGenerator().generate();
+    private UUID id = Generators.randomBasedGenerator().generate();
     @CreatedDate
     @Column(name = "created_date")
     private Timestamp createdDate;

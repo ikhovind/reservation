@@ -12,6 +12,7 @@ import javax.persistence.Entity;
 @NoArgsConstructor
 public class Section extends BaseModel {
     private String sectionName;
+    private String sectionDesc;
 
     public Section(String sectionName) {
         this.sectionName = sectionName;
