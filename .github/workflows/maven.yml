@@ -38,9 +38,11 @@ jobs:
       run: |
         ls
         ls reserved/src/main/
-        mkdir ~/reserved/src/main/resources
-        touch ~/reserved/src/main/resources/application.properties
-        'echo "$APPLICATION_PROPERTIES" > ~/reserved/src/main/resources/application.properties'
+        mkdir reserved/src/main/resources
+        ls reserved/src/main/
+        touch reserved/src/main/resources/application.properties
+        ls reserved/src/main/
+        'echo "$APPLICATION_PROPERTIES" > reserved/src/main/resources/application.properties'
         mvn clean test --file reserved/pom.xml
 
   deploy:
