@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import java.util.HashMap;
 import java.util.Map;
 
 @Slf4j
@@ -30,24 +29,24 @@ public class LoginController {
     SecurityService securityService;
 
     @PostMapping(value = "", consumes = "application/json", produces = "application/json")
-    public ResponseEntity login(@RequestBody HashMap<String, String> map) {
-        JSONObject json = new JSONObject();
+    public ResponseEntity login(@RequestBody Map<String, String> map) {
+        JSONObject jsonBody = new JSONObject();
         User user = userService.getSingleUserByEmail(map.get("email"));
-        if(user==null || !userService.verifyPassword(user, map.get("password"))){
-            json.put("result", false);
-            json.put("error", "invalid email or password");
+        if (user == null || !userService.verifyPassword(user, map.get("password"))) {
+            jsonBody.put("result", false);
+            jsonBody.put("error", "invalid email or password");
             return ResponseEntity
                     .badRequest()
-                    .body(json.toMap());
+                    .body(jsonBody.toMap());
         }
         HttpHeaders headers = new HttpHeaders();
-        json.put("result", true);
-        json.put("userid", user.getId());
-        String token = securityService.createToken(user.getId()+"="+user.getUserType(), Constants.TTL_MILLIS);
-        json.put("token", token);
+        jsonBody.put("result", true);
+        jsonBody.put("userid", user.getId());
+        String token = securityService.createToken(user.getId() + "=" + user.getUserType(), Constants.TTL_MILLIS);
+        jsonBody.put("token", token);
 
         return ResponseEntity
                 .ok()
-                .body(json.toMap());
+                .body(jsonBody.toMap());
     }
 }

@@ -4,16 +4,15 @@ import idatt2105.erlinssl.ikhovind.fullstackbooking.model.User;
 import idatt2105.erlinssl.ikhovind.fullstackbooking.repo.UserRepository;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityNotFoundException;
-import java.util.Collections;
-import java.util.List;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @NoArgsConstructor
 @AllArgsConstructor
@@ -35,7 +34,7 @@ public class UserService {
         return userRepository.save(newUser);
     }
 
-    public boolean verifyPassword(User user, String password){
+    public boolean verifyPassword(User user, String password) {
         return encoder.matches(password, user.getPassword());
     }
 
@@ -53,10 +52,10 @@ public class UserService {
     }
 
     public Iterable<User> findUsersByName(String firstName, String lastName) {
-        return userRepository.findByFirstNameLikeAndLastNameLike(firstName+"%", lastName+"%");
+        return userRepository.findByFirstNameLikeAndLastNameLike(firstName + "%", lastName + "%");
     }
 
-    private boolean emailExist(String email){
-        return false;
+    private boolean emailExist(String email) {
+        return userRepository.existsByEmail(email);
     }
 }
