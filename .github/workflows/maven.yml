@@ -41,13 +41,16 @@ jobs:
         java-version: '11'
         distribution: 'adopt'
     - name: Build with Maven
-      run: |
-        mkdir reserved/src/main/resources
-        touch reserved/src/main/resources/application.properties
-        'echo "$APPLICATION_PROPERTIES" > reserved/src/main/resources/application.properties'
-        mvn clean test --file reserved/pom.xml
       env:
         APPLICATION_PROPERTIES: ${{ secrets.APPLICATION_PROPERTIES }}
+      run: |
+        mkdir ~/reserved/src/main/resources
+        touch ~/reserved/src/main/resources/application.properties
+        ls
+        ls reserved/src/main/
+        pwd
+        'echo "$APPLICATION_PROPERTIES" > ~/reserved/src/main/resources/application.properties'
+        mvn clean test --file reserved/pom.xml
 
   deploy:
       runs-on: ubuntu-latest
