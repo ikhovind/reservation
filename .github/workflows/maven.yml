@@ -37,7 +37,7 @@ jobs:
       run: |
         mkdir reserved/src/main/resources
         touch reserved/src/main/resources/application.properties
-        echo "$APPLICATION_PROPERTIES" > reserved/src/main/resources/application.properties
+        'echo "$APPLICATION_PROPERTIES" > reserved/src/main/resources/application.properties'
         mvn clean test --file reserved/pom.xml
   deploy:
       runs-on: ubuntu-latest
