@@ -10,6 +10,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityNotFoundException;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -38,13 +39,17 @@ public class UserService {
         return encoder.matches(password, user.getPassword());
     }
 
+    public User getSingleUser(UUID uid) {
+        return userRepository.findById(uid)
+                .orElseThrow(EntityNotFoundException::new);
+    }
+
     public Iterable<User> getAllUsers() {
         return userRepository.findAll();
     }
 
-    public User getSingleUser(UUID uid) {
-        return userRepository.findById(uid)
-                .orElseThrow(EntityNotFoundException::new);
+    public Iterable<User> findUsersByName(String firstName, String lastName) {
+        return userRepository.findByFirstNameLikeAndLastNameLike(firstName+"%", lastName+"%");
     }
 
     private boolean emailExist(String email){

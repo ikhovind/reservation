@@ -1,16 +1,14 @@
 package idatt2105.erlinssl.ikhovind.fullstackbooking.web;
 import idatt2105.erlinssl.ikhovind.fullstackbooking.model.User;
 import idatt2105.erlinssl.ikhovind.fullstackbooking.service.UserService;
+import org.json.JSONArray;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.UUID;
+import java.sql.Timestamp;
+import java.util.*;
 
 @CrossOrigin(origins = "*")
 @Controller
@@ -21,7 +19,7 @@ public class UserController {
 
     @PostMapping(value = "")
     public ResponseEntity test(){
-        User user = new User("1","2","3@2","4",false);
+        User user = new User("1","2","1234", "email2","4", new Timestamp(new Date().getTime()), false);
         System.out.println(user.getPassword());
         System.out.println("matches? " + userService.verifyPassword(user, "4"));
         userService.registerNewUserAccount(user);
@@ -37,13 +35,22 @@ public class UserController {
     }
 
     @GetMapping(value = "")
-    public ResponseEntity getAllUsers() {
-        List<UUID> ids = new ArrayList<>();
-        for (User u : userService.getAllUsers()) {
-            ids.add(u.getUid());
+    public ResponseEntity getAllUsers(@RequestParam(value = "firstName", required = false, defaultValue = "") String firstName,
+                                      @RequestParam(value = "lastName", required = false, defaultValue = "") String lastName) {
+
+        JSONArray users = new JSONArray();
+        if(firstName.isBlank() && lastName.isBlank()) {
+            for (User u : userService.getAllUsers()) {
+                users.put(u.toJson());
+            }
+        } else {
+            for (User u : userService.findUsersByName(firstName, lastName)) {
+                users.put(u.toJson());
+            }
         }
+
         return ResponseEntity
                 .ok()
-                .body(ids.toString());
+                .body(users.toList());
     }
 }
