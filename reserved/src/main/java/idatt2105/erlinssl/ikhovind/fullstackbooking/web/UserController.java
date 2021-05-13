@@ -21,7 +21,9 @@ public class UserController {
 
     @PostMapping(value = "")
     public ResponseEntity test(){
-        User user = new User("1","2","2","4",false);
+        User user = new User("1","2","3@2","4",false);
+        System.out.println(user.getPassword());
+        System.out.println("matches? " + userService.verifyPassword(user, "4"));
         userService.registerNewUserAccount(user);
         return ResponseEntity
                 .ok().body("hei");
