@@ -27,9 +27,9 @@ public class User extends BaseModel {
     @OneToMany(fetch = FetchType.EAGER)
     private List<Reservation> reservations;
     private Timestamp valid_until;
-    private boolean admin;
+    private int userType;
 
-    public User(String firstName, String lastName, String phone, String email, String password, Timestamp valid_until, boolean admin) {
+    public User(String firstName, String lastName, String phone, String email, String password, Timestamp valid_until, int userType) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.phone = phone;
@@ -37,12 +37,12 @@ public class User extends BaseModel {
         this.password = password;
         this.valid_until = valid_until;
         this.reservations = new ArrayList<>();
-        this.admin = admin;
+        this.userType = userType;
     }
 
     public JSONObject toJson() {
         JSONObject res = new JSONObject();
-        res.put("uid", getUid());
+        res.put("id", getId());
         res.put("firstName", firstName);
         res.put("lastName", lastName);
         res.put("phone", phone);
@@ -50,7 +50,7 @@ public class User extends BaseModel {
         //res.put("password",password);
         res.put("reservations", reservations);
         res.put("valid_until", valid_until);
-        res.put("admin", admin);
+        res.put("admin", userType);
 
         return res;
     }

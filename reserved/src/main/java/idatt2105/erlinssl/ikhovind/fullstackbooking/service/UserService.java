@@ -39,6 +39,10 @@ public class UserService {
         return encoder.matches(password, user.getPassword());
     }
 
+    public User getSingleUserByEmail(String email) {
+        return userRepository.findUserByEmail(email.toLowerCase());
+    }
+
     public User getSingleUser(UUID uid) {
         return userRepository.findById(uid)
                 .orElseThrow(EntityNotFoundException::new);
