@@ -17,9 +17,8 @@ public class RoomService {
         return roomRepository.findAll();
     }
 
-    public boolean saveRoom(Room room) {
-        roomRepository.save(room);
-        return true;
+    public Room saveRoom(Room room) {
+        return roomRepository.save(room);
     }
 
     public Room getRoomById(UUID roomId){

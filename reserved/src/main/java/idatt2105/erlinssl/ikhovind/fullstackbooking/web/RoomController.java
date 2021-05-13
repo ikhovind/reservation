@@ -39,7 +39,7 @@ public class RoomController {
         try{
             Room room = roomService.getRoomById(roomId);
             response.put("result", true);
-            response.put("room", room.toJson().toMap());
+            response.put("room", room.toJson());
             log.info("found single room");
             return ResponseEntity.ok().body(response.toMap());
         } catch (EntityNotFoundException e){
@@ -61,9 +61,9 @@ public class RoomController {
             String roomName = map.get("roomName");
             if(roomName != null && !roomName.isBlank()) {
                 Room newRoom = new Room(map.get("roomName"));
-                roomService.saveRoom(newRoom);
+                newRoom = roomService.saveRoom(newRoom);
                 response.put("result", true);
-                response.put("room", newRoom.toJson().toMap());
+                response.put("room", newRoom.toJson());
                 log.info("single room saved successfully");
                 return ResponseEntity.status(201).body(response.toMap());
             }
