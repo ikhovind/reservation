@@ -1,4 +1,4 @@
-package idatt2105.erlinssl.ikhovind.reserved.model;
+package idatt2105.erlinssl.ikhovind.fullstackbooking.model;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;

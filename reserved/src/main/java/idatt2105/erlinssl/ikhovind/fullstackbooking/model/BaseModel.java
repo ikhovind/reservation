@@ -1,7 +1,6 @@
-package idatt2105.erlinssl.ikhovind.reserved.model;
+package idatt2105.erlinssl.ikhovind.fullstackbooking.model;
 
 import com.fasterxml.uuid.Generators;
-
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -25,7 +24,6 @@ import java.util.UUID;
 public class BaseModel {
     @Id
     private UUID uid = Generators.timeBasedGenerator().generate();
-
     @CreatedDate
     @Column(name = "created_date")
     private Timestamp createdDate;

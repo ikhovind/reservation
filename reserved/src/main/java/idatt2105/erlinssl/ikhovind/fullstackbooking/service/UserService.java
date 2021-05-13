@@ -1,11 +1,10 @@
-package idatt2105.erlinssl.ikhovind.reserved.service;
+package idatt2105.erlinssl.ikhovind.fullstackbooking.service;
 
-import idatt2105.erlinssl.ikhovind.reserved.model.User;
-import idatt2105.erlinssl.ikhovind.reserved.repository.UserRepository;
+import idatt2105.erlinssl.ikhovind.fullstackbooking.model.User;
+import idatt2105.erlinssl.ikhovind.fullstackbooking.repo.UserRepository;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -13,8 +12,6 @@ import org.springframework.stereotype.Service;
 @AllArgsConstructor
 public class UserService {
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
 
     @Autowired
     private UserRepository userRepository;
@@ -25,9 +22,8 @@ public class UserService {
             throw new IllegalArgumentException(
                     "There is an account with that email adress:" + newUser.getEmail());
         }
-        newUser.setPassword(passwordEncoder.encode(newUser.getPassword()));
         //return repository.save(user);
-        return userRepository.saveUser(newUser);
+        return userRepository.save(newUser);
     }
 
     private boolean emailExist(String email){
