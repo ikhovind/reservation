@@ -45,7 +45,7 @@ jobs:
         with:
           switches: -avzr --delete
           path: ./
-          remote_path: /home/app
+          remote_path: /home/app/app
           remote_host: 13.51.58.86
           remote_user: app
           remote_key: ${{ secrets.SSH_PRIVATE_KEY }}        
