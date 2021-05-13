@@ -58,7 +58,7 @@ jobs:
           echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
           ls -a
           pwd
-          ssh -i "~/.ssh/id_rsa" 13.51.58.86 systemctl --user restart app
+          ssh -i "~/.ssh/id_rsa" app@13.51.58.86 systemctl --user restart app
         env:
           SSH_PRIVATE_KEY: ${{secrets.SSH_PRIVATE_KEY}}
           SSH_KNOWN_HOSTS: ${{secrets.SSH_KNOWN_HOSTS}}
