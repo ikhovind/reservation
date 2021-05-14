@@ -4,12 +4,9 @@ import idatt2105.erlinssl.ikhovind.fullstackbooking.model.User;
 import idatt2105.erlinssl.ikhovind.fullstackbooking.util.Utilities;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.junit.Before;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.internal.matchers.GreaterOrEqual;
-import org.mockito.internal.matchers.GreaterThan;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -23,10 +20,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Objects;
-import java.util.TimeZone;
 import java.util.UUID;
 
 @SpringBootTest
@@ -76,7 +71,11 @@ public class UserControllerTest {
         mockMvc.perform(get("/users/"+user1Json.get("id")))
                 .andExpect(status().isOk())
         .andExpect(jsonPath("$.user.firstName", is(user1Json.getString("firstName"))));
+    }
 
+    @Test
+    void failGetSingleUserTest() throws Exception {
+        // Negative test, getting a non-existent user
         mockMvc.perform(get("/users/"+user3Json.get("id")))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.result", is(false)))
@@ -85,6 +84,7 @@ public class UserControllerTest {
 
     @Test
     void failCreateUserTest() throws Exception {
+        // Attempting to register a user with an email that already exists
         mockMvc.perform(post("/users").contentType(MediaType.APPLICATION_JSON)
                 .content(user1Json.toString()))
                 .andExpect(status().isBadRequest())
@@ -94,10 +94,13 @@ public class UserControllerTest {
 
     @Test
     void failDeleteUserTest() throws Exception {
+        // Negative test, attempts to delete a non-existent user
         mockMvc.perform(delete("/users/" + user3Json.get("id")).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.error", is("that user does not exist")));
     }
+
+    // TODO Put tests
 
     private void postUser(JSONObject u) throws Exception {
         MvcResult result = mockMvc.perform(post("/users")
