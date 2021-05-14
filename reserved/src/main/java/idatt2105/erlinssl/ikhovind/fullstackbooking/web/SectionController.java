@@ -26,25 +26,7 @@ public class SectionController {
     private SectionService sectionService;
     @Autowired
     private RoomService roomService;
-    @GetMapping
-    public ResponseEntity getAllSectionsFromRoom(@PathVariable UUID roomId){
-        log.info("getting all sections from room");
-        JSONObject response = new JSONObject();
-        response.put("result", false);
-        try{
-            //todo return error when room does not exist?
-            JSONArray sectionArray = new JSONArray();
-            sectionService.getAllSectionsFromRoom(roomId).forEach(s-> sectionArray.put(s.toJson()));
-            response.put("result", true);
-            response.put("sections", sectionArray.toList());
-            log.info("sections found succesfully");
-            return ResponseEntity.ok().body(response.toMap());
-        } catch (Exception e) {
-            log.error("error happened when getting sections", e);
-            response.put("error", "of type " + e.getClass().getName());
-            return ResponseEntity.badRequest().body(response.toMap());
-        }
-    }
+
     @PostMapping
     public ResponseEntity addSectionToRoom(@PathVariable UUID roomId, @RequestBody Map<String, Object> map) {
         log.info("adding section to room");
@@ -69,7 +51,7 @@ public class SectionController {
         } catch (IllegalArgumentException e) {
             log.error("invalid section name values", e);
             response.put("error", "invalid section name values");
-            return ResponseEntity.status(404).body(response.toMap());
+            return ResponseEntity.status(400).body(response.toMap());
         } catch (EntityNotFoundException e) {
             log.error("room could not be found", e);
             response.put("error", "room could not be found");
@@ -94,6 +76,9 @@ public class SectionController {
             response.put("result", true);
             //todo error when section is not found?
             return ResponseEntity.ok().body(response.toMap());
+        } catch (IllegalArgumentException e) {
+            log.error("room and section not connected", e);
+          response.put("error", "section does not belong to room");
         } catch(EntityNotFoundException e) {
             log.error("could not find entity", e);
             response.put("error", "could not find room");

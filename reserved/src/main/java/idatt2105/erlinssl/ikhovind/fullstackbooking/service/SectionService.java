@@ -29,9 +29,12 @@ public class SectionService {
     }
     public void deleteSection(UUID roomId, UUID sectionId) {
         Room room = roomRepository.getOne(roomId);
-        room.removeSectionById(sectionId);
-        roomRepository.save(room);
-        sectionRepository.deleteById(sectionId);
+        if(room.removeSectionById(sectionId)) {
+            roomRepository.save(room);
+            sectionRepository.deleteById(sectionId);
+            return;
+        }
+        throw new IllegalArgumentException("room and section not connected");
     }
 
     public void editSection(Section section) {
