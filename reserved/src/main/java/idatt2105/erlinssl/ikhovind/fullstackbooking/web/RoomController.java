@@ -7,6 +7,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -38,9 +39,9 @@ public class RoomController {
         response.put("result", false);
         try{
             Room room = roomService.getRoomById(roomId);
-            response.put("result", true);
             response.put("room", room.toJson());
             log.info("found single room");
+            response.put("result", true);
             return ResponseEntity.ok().body(response.toMap());
         } catch (EntityNotFoundException e){
             log.error("room could not be found");
@@ -102,8 +103,10 @@ public class RoomController {
             log.error("room name is not unique");
             response.put("error", "room name must be unique");
             return ResponseEntity.badRequest().body(response.toMap());
-        }
-        catch (Exception e) {
+        } catch (EntityNotFoundException e) {
+          response.put("error", "room cannot be found");
+            return ResponseEntity.status(404).body(response.toMap());
+        } catch (Exception e) {
             log.error("unknown error", e);
             response.put("error", "of type " + e.getClass().getName());
             return ResponseEntity.badRequest().body(response.toMap());
@@ -120,9 +123,11 @@ public class RoomController {
             response.put("result", true);
             log.info("deletion successful");
             return ResponseEntity.ok().body(response.toMap());
+        } catch (EmptyResultDataAccessException e){
+            response.put("error", "cannot find room to delete");
+            return ResponseEntity.status(404).body(response.toMap());
         } catch (Exception e){
             log.error("unknown error", e);
-            response.put("result", false);
             response.put("error", "of type " + e.getClass().toGenericString());
             return ResponseEntity.status(404).body(response.toMap());
         }
