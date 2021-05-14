@@ -27,9 +27,18 @@ public class RoomController {
 
     @GetMapping
     public ResponseEntity getAllRooms() {
+        JSONObject response = new JSONObject();
         JSONArray rooms = new JSONArray();
-        roomService.getAllRooms().forEach(rooms::put);
-        return ResponseEntity.ok().body(rooms.toList());
+        try {
+            roomService.getAllRooms().forEach(rooms::put);
+            response.put("result", true);
+            response.put("rooms", rooms);
+            return ResponseEntity.ok().body(response.toMap());
+        } catch (Exception e) {
+            response.put("result", false);
+            response.put("error", "of type " + e.getClass().getName());
+            return ResponseEntity.badRequest().body(response.toMap());
+        }
     }
 
     @GetMapping(value = "/{roomId}")
