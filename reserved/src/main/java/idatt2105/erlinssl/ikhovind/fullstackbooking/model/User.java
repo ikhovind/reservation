@@ -29,7 +29,8 @@ public class User extends BaseModel {
     private Timestamp valid_until;
     private int userType;
 
-    public User(String firstName, String lastName, String phone, String email, String password, Timestamp valid_until, int userType) {
+    public User(String firstName, String lastName, String phone,
+                String email, String password, Timestamp valid_until, int userType) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.phone = phone;

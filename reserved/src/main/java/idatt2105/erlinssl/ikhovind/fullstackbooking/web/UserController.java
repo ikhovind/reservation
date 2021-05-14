@@ -2,11 +2,11 @@ package idatt2105.erlinssl.ikhovind.fullstackbooking.web;
 
 import idatt2105.erlinssl.ikhovind.fullstackbooking.model.User;
 import idatt2105.erlinssl.ikhovind.fullstackbooking.service.UserService;
-import idatt2105.erlinssl.ikhovind.fullstackbooking.util.Utilities;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -18,7 +18,6 @@ import java.sql.Timestamp;
 import java.text.ParseException;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.TemporalAccessor;
 import java.util.*;
 
 @Slf4j
@@ -120,6 +119,32 @@ public class UserController {
             jsonBody.put("result", false);
             jsonBody.put("error", "unexpected error");
 
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(jsonBody.toMap());
+        }
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity deleteUser(@PathVariable("id") UUID userId) {
+        JSONObject jsonBody = new JSONObject();
+        try {
+            userService.deleteUser(userId);
+
+            jsonBody.put("result", true);
+            return ResponseEntity
+                    .ok()
+                    .body(jsonBody.toMap());
+        } catch(EmptyResultDataAccessException e) {
+            jsonBody.put("result", false);
+            jsonBody.put("error", "that user does not exist");
+            return ResponseEntity
+                    .badRequest()
+                    .body(jsonBody.toMap());
+        }catch (Exception e) {
+            log.error("An unexpected error was caught", e);
+            jsonBody.put("result", false);
+            jsonBody.put("error", "unexpected error");
             return ResponseEntity
                     .status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(jsonBody.toMap());

@@ -55,6 +55,10 @@ public class UserService {
         return userRepository.findByFirstNameLikeAndLastNameLike(firstName + "%", lastName + "%");
     }
 
+    public void deleteUser(UUID id) {
+        userRepository.deleteById(id);
+    }
+
     private boolean emailExist(String email) {
         return userRepository.existsByEmail(email);
     }
