@@ -131,7 +131,7 @@ public class UserController {
             jsonBody.put("result", false);
             jsonBody.put("error", "that user does not exist");
             return ResponseEntity
-                    .badRequest()
+                    .status(HttpStatus.NOT_FOUND)
                     .body(jsonBody.toMap());
         }catch (Exception e) {
             log.error("An unexpected error was caught", e);
