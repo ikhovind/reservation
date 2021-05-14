@@ -21,7 +21,6 @@ import java.util.UUID;
 @SuperBuilder
 public class BaseModel {
     @Id
-    @GeneratedValue
     @Type(type = "org.hibernate.type.UUIDCharType")
     private UUID id = Generators.randomBasedGenerator().generate();
     @CreatedDate
