@@ -3,6 +3,7 @@ package idatt2105.erlinssl.ikhovind.fullstackbooking.model;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import javax.persistence.Column;
@@ -41,6 +42,14 @@ public class User extends BaseModel {
         this.userType = userType;
     }
 
+    public void addReservation(Reservation reservation) {
+        this.reservations.add(reservation);
+    }
+
+    public void removeReservation(Reservation reservation) {
+        this.reservations.remove(reservation);
+    }
+
     public JSONObject toJson() {
         JSONObject res = new JSONObject();
         res.put("id", getId());
@@ -49,7 +58,12 @@ public class User extends BaseModel {
         res.put("phone", phone);
         res.put("email", email);
         //res.put("password",password);
-        res.put("reservations", reservations);
+        JSONArray reservationJson = new JSONArray();
+        for (Reservation r :
+                this.reservations) {
+            reservationJson.put(r.toJson());
+        }
+        res.put("reservations", reservationJson);
         res.put("validUntil", validUntil);
         res.put("userType", userType);
 

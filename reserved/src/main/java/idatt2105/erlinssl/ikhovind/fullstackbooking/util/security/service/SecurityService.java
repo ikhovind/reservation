@@ -66,7 +66,7 @@ public class SecurityService {
         return claims.getSubject();
     }
 
-    String[] getUserPartsByToken(String token) {
+    public String[] getUserPartsByToken(String token) {
         String subject = getSubject(token);
         if(subject == null){
             return null;

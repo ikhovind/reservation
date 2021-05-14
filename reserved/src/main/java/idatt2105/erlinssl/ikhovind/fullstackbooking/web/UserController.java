@@ -69,12 +69,12 @@ public class UserController {
         JSONObject jsonBody = new JSONObject();
         try {
             User user = userService.getSingleUser(userId);
-
-            jsonBody.put("result", true);
             jsonBody.put("user", user.toJson());
+            jsonBody.put("result", true);
             return ResponseEntity
                     .ok()
                     .body(jsonBody.toMap());
+
         } catch (EntityNotFoundException e) {
             jsonBody.put("result", false);
             jsonBody.put("error", "user not found");
@@ -99,7 +99,7 @@ public class UserController {
                     users.put(u.toJson());
                 }
             }
-            jsonBody.put("users", users.toList());
+            jsonBody.put("users", users);
 
             return ResponseEntity
                     .ok()
@@ -121,16 +121,17 @@ public class UserController {
         jsonBody.put("result", false);
         try {
             userService.deleteUser(userId);
-
             jsonBody.put("result", true);
             return ResponseEntity
                     .ok()
                     .body(jsonBody.toMap());
+
         } catch (EmptyResultDataAccessException e) {
             jsonBody.put("error", "that user does not exist");
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
                     .body(jsonBody.toMap());
+
         } catch (Exception e) {
             log.error("An unexpected error was caught", e);
             jsonBody.put("error", "unexpected error");
@@ -149,8 +150,8 @@ public class UserController {
             User user = userService.getSingleUser(userId);
             editUser(user, map, false);
             user = userService.updateUser(user);
-            jsonBody.put("result", true);
             jsonBody.put("user", user);
+            jsonBody.put("result", true);
             return ResponseEntity
                     .ok()
                     .body(jsonBody.toMap());

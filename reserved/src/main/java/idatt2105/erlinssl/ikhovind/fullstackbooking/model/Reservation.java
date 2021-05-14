@@ -3,6 +3,7 @@ package idatt2105.erlinssl.ikhovind.fullstackbooking.model;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.json.JSONObject;
 
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -18,13 +19,33 @@ public class Reservation extends BaseModel {
     private Room room;
     @ManyToOne(optional = true, fetch = FetchType.LAZY)
     private Section section;
-    private Timestamp time_from;
-    private Timestamp time_to;
+    private Timestamp timeFrom;
+    private Timestamp timeTo;
+    @ManyToOne
+    private User user;
 
-    public Reservation(Room room, Section section, Timestamp time_from, Timestamp time_to) {
+    public Reservation(Room room, Section section,
+                       Timestamp timeFrom, Timestamp timeTo) {
         this.room = room;
         this.section = section;
-        this.time_from = time_from;
-        this.time_to = time_to;
+        this.timeFrom = timeFrom;
+        this.timeTo = timeTo;
+    }
+
+    public JSONObject toJson() {
+        JSONObject res = new JSONObject();
+        res.put("reservationId", getId());
+        res.put("room", getRoom().getId());
+        String sId = (this.section != null) ? this.section.getId().toString() : null;
+        res.put("section", sId);
+        res.put("timeFrom", timeFrom);
+        res.put("timeTo", timeTo);
+        return res;
+    }
+
+    public JSONObject toAdminJson() {
+        JSONObject res = toJson();
+        res.put("userId", user.getId());
+        return res;
     }
 }

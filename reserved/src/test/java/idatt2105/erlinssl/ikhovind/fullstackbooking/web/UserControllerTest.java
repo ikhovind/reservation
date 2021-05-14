@@ -63,7 +63,7 @@ public class UserControllerTest {
     void getAllUsersTest() throws Exception {
         MvcResult result = mockMvc.perform(get("/users"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.*.*", hasSize(greaterThan(2))))
+                .andExpect(jsonPath("$.*.*", hasSize(greaterThan(1))))
                 .andReturn();
 
         JSONObject usersJson = new JSONObject(result.getResponse().getContentAsString());
