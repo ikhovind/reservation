@@ -2,6 +2,7 @@ package idatt2105.erlinssl.ikhovind.fullstackbooking.web;
 
 import idatt2105.erlinssl.ikhovind.fullstackbooking.model.User;
 import idatt2105.erlinssl.ikhovind.fullstackbooking.service.UserService;
+import idatt2105.erlinssl.ikhovind.fullstackbooking.util.Utilities;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -28,16 +29,6 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-    @PostMapping(value = "/test")
-    public ResponseEntity test() {
-        User user = new User("1", "2", "1234", "email2", "4", new Timestamp(new Date().getTime()), 0);
-        System.out.println(user.getPassword());
-        System.out.println("matches? " + userService.verifyPassword(user, "4"));
-        userService.registerNewUserAccount(user);
-        return ResponseEntity
-                .ok().body("hei");
-    }
-
     @PostMapping(value = "", consumes = "application/json", produces = "application/json")
     public ResponseEntity createUser(@RequestBody Map<String, Object> map) {
         JSONObject jsonBody = new JSONObject();
@@ -60,6 +51,7 @@ public class UserController {
                     .badRequest()
                     .body(jsonBody.toMap());
         } catch (Exception e) {
+            log.error("An unexpected error occurred", e);
             jsonBody.put("result", false);
             jsonBody.put("error", "unexpected error");
 
@@ -158,10 +150,7 @@ public class UserController {
         newUser.setPhone(map.get("phone").toString());
         newUser.setEmail(map.get("email").toString());
         newUser.setPassword(map.get("password").toString());
-        log.info("Received timestamp:[" + map.get("validUntil").toString() + "]");
-        Timestamp time = new Timestamp(Date.from(Instant.from(
-                DateTimeFormatter.ISO_INSTANT.parse(map.get("validUntil").toString()))).getTime());
-        newUser.setValid_until(time);
+        newUser.setValidUntil(Utilities.toTimestamp(map.get("validUntil").toString()));
         newUser.setUserType(Integer.parseInt(map.get("userType").toString()));
         return newUser;
     }

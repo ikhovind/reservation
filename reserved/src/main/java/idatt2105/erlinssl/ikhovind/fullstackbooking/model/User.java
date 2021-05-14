@@ -26,17 +26,17 @@ public class User extends BaseModel {
     private String password;
     @OneToMany(fetch = FetchType.EAGER)
     private List<Reservation> reservations;
-    private Timestamp valid_until;
+    private Timestamp validUntil;
     private int userType;
 
     public User(String firstName, String lastName, String phone,
-                String email, String password, Timestamp valid_until, int userType) {
+                String email, String password, Timestamp validUntil, int userType) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.phone = phone;
         this.email = email;
         this.password = password;
-        this.valid_until = valid_until;
+        this.validUntil = validUntil;
         this.reservations = new ArrayList<>();
         this.userType = userType;
     }
@@ -50,8 +50,8 @@ public class User extends BaseModel {
         res.put("email", email);
         //res.put("password",password);
         res.put("reservations", reservations);
-        res.put("valid_until", valid_until);
-        res.put("admin", userType);
+        res.put("validUntil", validUntil);
+        res.put("userType", userType);
 
         return res;
     }
