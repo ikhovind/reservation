@@ -29,6 +29,11 @@ public class RoomService {
         roomRepository.deleteById(roomId);
     }
 
+    public boolean roomContainsSection(UUID roomId, UUID sectionId) {
+        //check if any of the given sections in the room match the given section id
+        return roomRepository.getOne(roomId).getSection().stream().anyMatch(s->s.getId().equals(sectionId));
+    }
+
     public boolean editRoom(Room room){
         if(roomRepository.existsById(room.getId())) {
             roomRepository.save(room);

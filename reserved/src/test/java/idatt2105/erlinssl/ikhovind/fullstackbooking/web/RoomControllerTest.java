@@ -135,7 +135,9 @@ class RoomControllerTest {
 
     private void postRoom(Room room) throws Exception {
         String response = mockMvc.perform(post("/rooms").contentType(MediaType.APPLICATION_JSON)
-        .content(room.toJson().toString()))
+        .content("{\n" +
+                "    \"roomName\":\"" + room.getRoomName() + "\"\n" +
+                "}"))
                 .andExpect(status().isCreated()).andExpect(
                         MockMvcResultMatchers.jsonPath("$.result").value(true))
                 .andReturn().getResponse().getContentAsString();
