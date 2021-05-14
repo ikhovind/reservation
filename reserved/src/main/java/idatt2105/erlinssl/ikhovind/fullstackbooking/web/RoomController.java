@@ -30,7 +30,9 @@ public class RoomController {
         JSONObject response = new JSONObject();
         JSONArray rooms = new JSONArray();
         try {
-            roomService.getAllRooms().forEach(rooms::put);
+            for (Room r : roomService.getAllRooms()) {
+                rooms.put(r.toJson());
+            }
             response.put("result", true);
             response.put("rooms", rooms);
             return ResponseEntity.ok().body(response.toMap());

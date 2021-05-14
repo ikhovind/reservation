@@ -26,13 +26,6 @@ public class Section extends BaseModel {
         this.sectionName = sectionName.trim();
         this.sectionDesc = sectionDesc.trim();
     }
-    public JSONObject toJson(){
-        JSONObject json = new JSONObject();
-        json.put("sectionId", getId());
-        json.put("sectionName", sectionName);
-        json.put("sectionDesc", sectionDesc);
-        return json;
-    }
 
     public void setSectionName(String sectionName) {
         if(sectionName == null || sectionName.isBlank()) {
@@ -57,5 +50,13 @@ public class Section extends BaseModel {
             return section.sectionName.equalsIgnoreCase(this.sectionName) || section.getId().equals(this.getId());
         }
         return false;
+    }
+
+    public JSONObject toJson(){
+        JSONObject json = new JSONObject();
+        json.put("sectionId", getId());
+        json.put("sectionName", sectionName);
+        json.put("sectionDesc", sectionDesc);
+        return json;
     }
 }

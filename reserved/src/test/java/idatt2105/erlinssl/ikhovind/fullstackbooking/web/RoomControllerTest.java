@@ -59,7 +59,7 @@ class RoomControllerTest {
         mockMvc.perform(get("/rooms").contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.rooms.*",hasSize(2)))
-                .andExpect(jsonPath("$.rooms.[*].id", containsInAnyOrder(room1.getId().toString(), room2.getId().toString())));
+                .andExpect(jsonPath("$.rooms.[*].roomId", containsInAnyOrder(room1.getId().toString(), room2.getId().toString())));
     }
 
     @Test

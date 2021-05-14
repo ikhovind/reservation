@@ -4,12 +4,14 @@ import idatt2105.erlinssl.ikhovind.fullstackbooking.service.SectionService;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -25,6 +27,7 @@ public class Room extends BaseModel {
 
     public Room(String roomName) {
         this.roomName = roomName;
+        this.section = new ArrayList<>();
     }
 
     public boolean addSection(Section s) {
@@ -54,7 +57,12 @@ public class Room extends BaseModel {
         JSONObject room = new JSONObject();
         room.put("roomId", getId());
         room.put("roomName", roomName);
-        room.put("sections", section);
+        JSONArray sections = new JSONArray();
+        for (Section s :
+                this.section) {
+            sections.put(s.toJson());
+        }
+        room.put("sections", sections);
         return room;
     }
 }
