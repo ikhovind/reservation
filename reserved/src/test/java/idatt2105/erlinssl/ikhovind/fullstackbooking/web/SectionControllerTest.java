@@ -37,6 +37,7 @@ class SectionControllerTest {
 
     private Section section1 = new Section("section1 name", "section1 desc");
     private Section section2 = new Section("section2 name", "section2 desc");
+    private Section section3 = new Section("section3 name", "section3 desc");
     private Section section1clone = new Section("section1 name", "section1 desc");
     @BeforeEach
     void setUp() throws Exception {
@@ -56,7 +57,7 @@ class SectionControllerTest {
         mockMvc.perform(get("/rooms/" + room1.getId()).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.room.sections.[*]",hasSize(1)))
-                .andExpect(jsonPath("$.room.sections[*].id",containsInAnyOrder(section1.getId().toString())));
+                .andExpect(jsonPath("$.room.sections[*].sectionId",containsInAnyOrder(section1.getId().toString())));
         //test å legg til seksjon med samme navn som tildligere seksjon
 
         mockMvc.perform(post("/rooms/" + room1.getId() + "/sections").contentType(MediaType.APPLICATION_JSON)
@@ -88,7 +89,7 @@ class SectionControllerTest {
         mockMvc.perform(get("/rooms/" + room2.getId()).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.room.sections.[*]",hasSize(1)))
-                .andExpect(jsonPath("$.room.sections[*].id",containsInAnyOrder(section1clone.getId().toString())));
+                .andExpect(jsonPath("$.room.sections[*].sectionId",containsInAnyOrder(section1clone.getId().toString())));
 
     }
 
@@ -124,13 +125,70 @@ class SectionControllerTest {
     }
 
     @Test
-    void editSection() {
+    void editSection() throws Exception {
         //test å redigere seksjon
+        postSection(room1, section1);
+        mockMvc.perform(put("/rooms/" + room1.getId() + "/sections/" + section1.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(getBody(section2.getSectionName(), section2.getSectionDesc())))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.room.sections.[*]",hasSize(1)))
+                .andExpect(jsonPath("$.room.sections[*].sectionId",containsInAnyOrder(section1.getId().toString())))
+                .andExpect(jsonPath("$.room.sections[*].sectionDesc",containsInAnyOrder(section2.getSectionDesc())))
+                .andExpect(jsonPath("$.room.sections[*].sectionName",containsInAnyOrder(section2.getSectionName())));
+        mockMvc.perform(get("/rooms/" + room1.getId()).contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.room.sections.[*]",hasSize(1)))
+                .andExpect(jsonPath("$.room.sections[*].sectionId",containsInAnyOrder(section1.getId().toString())));
         //test å redigere seksjon fra feil rom
-        //test å redigere til tommne verdier
+
+        mockMvc.perform(put("/rooms/" + room2.getId() + "/sections/" + section1.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(getBody(section2.getSectionName(), section2.getSectionDesc())))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.result", is(false)))
+                .andExpect(jsonPath("$.error",is("room does not contain section")));
+        //test å redigere til tomme verdier
+        mockMvc.perform(put("/rooms/" + room1.getId() + "/sections/" + section1.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(getBody("", "")))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.result", is(false)))
+                .andExpect(jsonPath("$.error",is("one or more illegal parameters")));
         //test å redigere til null-verdier
+        mockMvc.perform(put("/rooms/" + room1.getId() + "/sections/" + section1.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(
+                        "{\n" +
+                                "    \"sectionName\":" + null + ",\n" +
+                                "    \"sectionDesc\":" + null + "\n" +
+                                "}"
+                        ))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.result", is(false)))
+                .andExpect(jsonPath("$.error",is("one or more parameters is null")));
         //test å redigere ugyldig seksjon til gyldig rom
+        mockMvc.perform(put("/rooms/" + room1.getId() + "/sections/" + section2.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(getBody("", "")))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.result", is(false)))
+                .andExpect(jsonPath("$.error",is("room does not contain section")));
         //test å redigere gyldig seksjon fra ugyldig rom
+        mockMvc.perform(put("/rooms/" + room3.getId() + "/sections/" + section1.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(getBody("", "")))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.result", is(false)))
+                .andExpect(jsonPath("$.error",is("could not find room")));
+        //test å redigere til ikke-unikt seksjonnavn
+        postSection(room1, section3);
+        mockMvc.perform(put("/rooms/" + room1.getId() + "/sections/" + section3.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(getBody(section2.getSectionName(), section2.getSectionDesc())))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.result", is(false)))
+                .andExpect(jsonPath("$.error",is("the given section name is not unique")));
     }
 
     private void postRoom(Room room) throws Exception {
@@ -156,7 +214,7 @@ class SectionControllerTest {
                 .andReturn().getResponse().getContentAsString();
         JSONArray sectionArray = new JSONObject(response).getJSONObject("room").getJSONArray("sections");
         JSONObject responseJson = sectionArray.getJSONObject(sectionArray.length() - 1);
-        String uuid = responseJson.getString("id");
+        String uuid = responseJson.getString("sectionId");
         section.setId(UUID.fromString(uuid));
     }
 

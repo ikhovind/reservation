@@ -1,5 +1,6 @@
 package idatt2105.erlinssl.ikhovind.fullstackbooking.web;
 
+import idatt2105.erlinssl.ikhovind.fullstackbooking.Exceptions.NotUniqueSectionNameException;
 import idatt2105.erlinssl.ikhovind.fullstackbooking.model.Room;
 import idatt2105.erlinssl.ikhovind.fullstackbooking.model.Section;
 import idatt2105.erlinssl.ikhovind.fullstackbooking.service.RoomService;
@@ -106,13 +107,18 @@ public class SectionController {
             if (roomService.roomContainsSection(roomId, sectionId)) {
                 section.setSectionDesc(map.get("sectionDesc").toString());
                 section.setSectionName(map.get("sectionName").toString());
-                sectionService.editSection(section);
+                Section editedSection = sectionService.editSection(roomId, section);
+                Room roomWithSection = roomService.getRoomFromSection(editedSection);
                 response.put("result", true);
+                response.put("room", roomWithSection.toJson());
                 log.info("edit success");
                 return ResponseEntity.ok().body(response.toMap());
             }
             log.info("given room does not contain section");
             response.put("error", "room does not contain section");
+        } catch (NotUniqueSectionNameException e) {
+          log.error("cannot edit section as given section name already exists");
+          response.put("error", "the given section name is not unique");
         } catch (NullPointerException e) {
             log.error("one or more parameters is null");
             response.put("error", "one or more parameters is null");
@@ -122,6 +128,7 @@ public class SectionController {
         } catch (EntityNotFoundException e) {
             log.error("could not find room");
             response.put("error", "could not find room");
+            return ResponseEntity.status(404).body(response.toMap());
         } catch (Exception e) {
             log.error("error when editing section", e);
             response.put("error", "of type " + e.getClass().getName());

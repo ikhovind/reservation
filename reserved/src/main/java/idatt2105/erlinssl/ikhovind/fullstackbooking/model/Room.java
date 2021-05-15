@@ -22,7 +22,7 @@ import java.util.UUID;
 public class Room extends BaseModel {
     @Column(unique = true)
     private String roomName;
-    @OneToMany(fetch = FetchType.EAGER)
+    @OneToMany(fetch = FetchType.EAGER, orphanRemoval = true)
     private List<Section> section;
 
     public Room(String roomName) {

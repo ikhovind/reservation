@@ -1,5 +1,6 @@
 package idatt2105.erlinssl.ikhovind.fullstackbooking.service;
 
+import idatt2105.erlinssl.ikhovind.fullstackbooking.Exceptions.NotUniqueSectionNameException;
 import idatt2105.erlinssl.ikhovind.fullstackbooking.model.Room;
 import idatt2105.erlinssl.ikhovind.fullstackbooking.model.Section;
 import idatt2105.erlinssl.ikhovind.fullstackbooking.repo.RoomRepository;
@@ -37,9 +38,15 @@ public class SectionService {
         throw new IllegalArgumentException("room and section not connected");
     }
 
-    public void editSection(Section section) {
+    public Section editSection(UUID roomId, Section section) {
         if(sectionRepository.existsById(section.getId())) {
-            sectionRepository.save(section);
+            if (roomRepository.getOne(roomId).getSection().stream().anyMatch(
+                    s->s.getSectionName().equals(section.getSectionName())
+                    && !s.getId().equals(section.getId()))) {
+                throw new NotUniqueSectionNameException("this rooms already contains a section with that name");
+            }
+            return sectionRepository.save(section);
         }
+        return null;
     }
 }

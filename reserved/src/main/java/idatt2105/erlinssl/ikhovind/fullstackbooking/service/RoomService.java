@@ -1,6 +1,7 @@
 package idatt2105.erlinssl.ikhovind.fullstackbooking.service;
 
 import idatt2105.erlinssl.ikhovind.fullstackbooking.model.Room;
+import idatt2105.erlinssl.ikhovind.fullstackbooking.model.Section;
 import idatt2105.erlinssl.ikhovind.fullstackbooking.model.User;
 import idatt2105.erlinssl.ikhovind.fullstackbooking.repo.RoomRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +35,9 @@ public class RoomService {
         return roomRepository.getOne(roomId).getSection().stream().anyMatch(s->s.getId().equals(sectionId));
     }
 
+    public Room getRoomFromSection(Section section) {
+        return roomRepository.findFirstBySectionContains(section);
+    }
     public boolean editRoom(Room room){
         if(roomRepository.existsById(room.getId())) {
             roomRepository.save(room);
