@@ -22,7 +22,7 @@ public class RoomService {
         return roomRepository.save(room);
     }
 
-    public Room getRoomById(UUID roomId){
+    public Room getRoomById(UUID roomId) {
         return roomRepository.getOne(roomId);
     }
 
@@ -32,14 +32,15 @@ public class RoomService {
 
     public boolean roomContainsSection(UUID roomId, UUID sectionId) {
         //check if any of the given sections in the room match the given section id
-        return roomRepository.getOne(roomId).getSection().stream().anyMatch(s->s.getId().equals(sectionId));
+        return roomRepository.getOne(roomId).getSection().stream().anyMatch(s -> s.getId().equals(sectionId));
     }
 
     public Room getRoomFromSection(Section section) {
         return roomRepository.findFirstBySectionContains(section);
     }
-    public boolean editRoom(Room room){
-        if(roomRepository.existsById(room.getId())) {
+
+    public boolean editRoom(Room room) {
+        if (roomRepository.existsById(room.getId())) {
             roomRepository.save(room);
         }
         return false;

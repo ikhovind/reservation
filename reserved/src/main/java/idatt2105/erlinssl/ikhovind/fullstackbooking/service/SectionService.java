@@ -17,6 +17,7 @@ public class SectionService {
     private SectionRepository sectionRepository;
     @Autowired
     private RoomRepository roomRepository;
+
     public Iterable<Section> getAllSectionsFromRoom(UUID roomId) {
         return sectionRepository.getSectionByRoomId(roomId);
     }
@@ -28,9 +29,10 @@ public class SectionService {
     public Section getSection(UUID sectionId) {
         return sectionRepository.getOne(sectionId);
     }
+
     public void deleteSection(UUID roomId, UUID sectionId) {
         Room room = roomRepository.getOne(roomId);
-        if(room.removeSectionById(sectionId)) {
+        if (room.removeSectionById(sectionId)) {
             roomRepository.save(room);
             sectionRepository.deleteById(sectionId);
             return;
@@ -39,10 +41,10 @@ public class SectionService {
     }
 
     public Section editSection(UUID roomId, Section section) {
-        if(sectionRepository.existsById(section.getId())) {
+        if (sectionRepository.existsById(section.getId())) {
             if (roomRepository.getOne(roomId).getSection().stream().anyMatch(
-                    s->s.getSectionName().equals(section.getSectionName())
-                    && !s.getId().equals(section.getId()))) {
+                    s -> s.getSectionName().equals(section.getSectionName())
+                            && !s.getId().equals(section.getId()))) {
                 throw new NotUniqueSectionNameException("this rooms already contains a section with that name");
             }
             return sectionRepository.save(section);

@@ -1,19 +1,15 @@
 package idatt2105.erlinssl.ikhovind.fullstackbooking.web;
 
 import idatt2105.erlinssl.ikhovind.fullstackbooking.Exceptions.PermissionDeniedException;
+import idatt2105.erlinssl.ikhovind.fullstackbooking.Exceptions.TimestampParsingException;
 import idatt2105.erlinssl.ikhovind.fullstackbooking.model.User;
 import idatt2105.erlinssl.ikhovind.fullstackbooking.service.UserService;
-import idatt2105.erlinssl.ikhovind.fullstackbooking.util.Constants;
 import idatt2105.erlinssl.ikhovind.fullstackbooking.util.Utilities;
-import idatt2105.erlinssl.ikhovind.fullstackbooking.util.security.AdminTokenRequired;
-import idatt2105.erlinssl.ikhovind.fullstackbooking.util.security.service.SecurityService;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.coyote.Response;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.dao.PermissionDeniedDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -21,11 +17,9 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.persistence.EntityNotFoundException;
 import java.net.URI;
-import java.sql.Timestamp;
 import java.text.ParseException;
-import java.time.Instant;
-import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.Map;
+import java.util.UUID;
 
 @Slf4j
 @CrossOrigin(origins = "*")
@@ -45,7 +39,7 @@ public class UserController {
             newUser = mapToUser(map);
             newUser = userService.registerNewUserAccount(newUser);
 
-        } catch (ParseException e) {
+        } catch (ParseException | TimestampParsingException e) {
             jsonBody.put("error", "could not parse timestamp");
             return ResponseEntity
                     .badRequest()
@@ -160,7 +154,7 @@ public class UserController {
         jsonBody.put("result", false);
         try {
             User user = userService.getSingleUser(userId);
-            if(Utilities.isAdmin(token)){
+            if (Utilities.isAdmin(token)) {
                 editUser(user, map, true);
             } else {
                 Utilities.uidMatch(token, userId);
@@ -173,7 +167,7 @@ public class UserController {
                     .ok()
                     .body(jsonBody.toMap());
 
-        } catch(PermissionDeniedException e) {
+        } catch (PermissionDeniedException e) {
             jsonBody.put("error", "that is not your user");
             return ResponseEntity
                     .status(HttpStatus.FORBIDDEN)
@@ -195,23 +189,23 @@ public class UserController {
     }
 
     private void editUser(User u, Map<String, Object> map, boolean admin) {
-        if(map.containsKey("firstName") && !map.get("firstName").toString().isBlank()){
+        if (map.containsKey("firstName") && !map.get("firstName").toString().isBlank()) {
             u.setFirstName(map.get("firstName").toString());
         }
-        if(map.containsKey("lastName") && !map.get("phone").toString().isBlank()){
+        if (map.containsKey("lastName") && !map.get("phone").toString().isBlank()) {
             u.setLastName(map.get("lastName").toString());
         }
-        if(map.containsKey("phone") && !map.get("phone").toString().isBlank()){
+        if (map.containsKey("phone") && !map.get("phone").toString().isBlank()) {
             u.setPhone(map.get("phone").toString());
         }
-        if(map.containsKey("newPassword") && !map.get("newPassword").toString().isBlank()){
+        if (map.containsKey("newPassword") && !map.get("newPassword").toString().isBlank()) {
             u.setPassword(map.get("newPassword").toString());
         }
-        if(admin) {
-            if(map.containsKey("validUntil") && !map.get("validUntil").toString().isBlank()){
+        if (admin) {
+            if (map.containsKey("validUntil") && !map.get("validUntil").toString().isBlank()) {
                 u.setValidUntil(Utilities.toTimestamp(map.get("validUntil").toString()));
             }
-            if(map.containsKey("userType") && !map.get("userType").toString().isBlank()){
+            if (map.containsKey("userType") && !map.get("userType").toString().isBlank()) {
                 u.setUserType(Integer.parseInt(map.get("userType").toString()));
             }
         }

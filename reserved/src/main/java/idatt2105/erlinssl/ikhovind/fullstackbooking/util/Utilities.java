@@ -4,15 +4,13 @@ import idatt2105.erlinssl.ikhovind.fullstackbooking.Exceptions.PermissionDeniedE
 import idatt2105.erlinssl.ikhovind.fullstackbooking.Exceptions.TimestampParsingException;
 import idatt2105.erlinssl.ikhovind.fullstackbooking.util.security.service.SecurityService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.Calendar;
-import java.util.Date;
 import java.sql.Timestamp;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.TimeZone;
 import java.util.UUID;
 
@@ -27,16 +25,17 @@ public class Utilities {
             Calendar roundedDate = Calendar.getInstance();
             roundedDate.setTime(initialDate);
             int mod = roundedDate.get(Calendar.MINUTE) % 15;
-            roundedDate.add(Calendar.MINUTE, mod < 8 ? -mod : (15-mod));
+            roundedDate.add(Calendar.MINUTE, mod < 8 ? -mod : (15 - mod));
             roundedDate.set(Calendar.SECOND, 0);
             roundedDate.set(Calendar.MILLISECOND, 0);
             return new Timestamp(roundedDate.getTime().getTime());
         } catch (Exception e) {
+            log.error("Timestamp could not be parsed", e);
             throw new TimestampParsingException();
         }
     }
 
-    public static String timestampToString(Timestamp timestamp){
+    public static String timestampToString(Timestamp timestamp) {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
         sdf.setTimeZone(TimeZone.getTimeZone("CET"));
         return sdf.format(timestamp);

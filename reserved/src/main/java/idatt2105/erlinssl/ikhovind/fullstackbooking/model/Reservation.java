@@ -38,7 +38,7 @@ public class Reservation extends BaseModel {
         res.put("room", new JSONObject()
                 .put("roomId", this.room.getId())
                 .put("roomName", this.room.getRoomName()));
-        res.put("section", (this.section==null ? null : this.section.toJson()));
+        res.put("section", (this.section == null ? null : this.section.toJson()));
         res.put("timeFrom", timeFrom);
         res.put("timeTo", timeTo);
         return res;

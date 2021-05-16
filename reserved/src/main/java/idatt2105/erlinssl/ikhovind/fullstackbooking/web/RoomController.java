@@ -44,26 +44,27 @@ public class RoomController {
     }
 
     @GetMapping(value = "/{roomId}")
-    public ResponseEntity getSingleRoom(@PathVariable UUID roomId){
+    public ResponseEntity getSingleRoom(@PathVariable UUID roomId) {
         log.info("getting single room");
         JSONObject response = new JSONObject();
         response.put("result", false);
-        try{
+        try {
             Room room = roomService.getRoomById(roomId);
             response.put("room", room.toJson());
             log.info("found single room");
             response.put("result", true);
             return ResponseEntity.ok().body(response.toMap());
-        } catch (EntityNotFoundException e){
+        } catch (EntityNotFoundException e) {
             log.error("room could not be found");
-          response.put("error", "room could not be found");
-          return ResponseEntity.badRequest().body(response.toMap());
+            response.put("error", "room could not be found");
+            return ResponseEntity.badRequest().body(response.toMap());
         } catch (Exception e) {
             log.error("unknown error", e);
             response.put("error", "of type " + e.getClass().toGenericString());
             return ResponseEntity.badRequest().body(response.toMap());
         }
     }
+
     @PostMapping
     public ResponseEntity saveSingleRoom(@RequestBody HashMap<String, String> map) {
         log.info("saving single room");
@@ -71,7 +72,7 @@ public class RoomController {
         response.put("result", false);
         try {
             String roomName = map.get("roomName");
-            if(roomName != null && !roomName.isBlank()) {
+            if (roomName != null && !roomName.isBlank()) {
                 Room newRoom = new Room(map.get("roomName"));
                 newRoom = roomService.saveRoom(newRoom);
                 response.put("result", true);
@@ -81,12 +82,11 @@ public class RoomController {
             }
             response.put("error", "roomname is null or blank");
             return ResponseEntity.badRequest().body(response.toMap());
-        } catch (DataIntegrityViolationException e){
+        } catch (DataIntegrityViolationException e) {
             log.error("room name was not unique");
             response.put("error", "room name must be unique");
             return ResponseEntity.badRequest().body(response.toMap());
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             log.error("unknown error", e);
             response.put("error", "of type " + e.getClass().toGenericString());
             return ResponseEntity.badRequest().body(response.toMap());
@@ -94,14 +94,14 @@ public class RoomController {
     }
 
     @PutMapping(value = "/{roomId}")
-    public ResponseEntity editRoom(@PathVariable UUID roomId, @RequestBody HashMap<String, String> map){
+    public ResponseEntity editRoom(@PathVariable UUID roomId, @RequestBody HashMap<String, String> map) {
         log.info("editing room");
         JSONObject response = new JSONObject();
         response.put("result", false);
-        try{
+        try {
             Room room = roomService.getRoomById(roomId);
             room.setRoomName(map.get("roomName"));
-            if(map.get("roomName") != null && !map.get("roomName").isBlank()) {
+            if (map.get("roomName") != null && !map.get("roomName").isBlank()) {
                 roomService.saveRoom(room);
                 response.put("result", true);
                 response.put("room", room.toJson());
@@ -115,7 +115,7 @@ public class RoomController {
             response.put("error", "room name must be unique");
             return ResponseEntity.badRequest().body(response.toMap());
         } catch (EntityNotFoundException e) {
-          response.put("error", "room cannot be found");
+            response.put("error", "room cannot be found");
             return ResponseEntity.status(404).body(response.toMap());
         } catch (Exception e) {
             log.error("unknown error", e);
@@ -129,15 +129,15 @@ public class RoomController {
         log.info("deleting room");
         JSONObject response = new JSONObject();
         response.put("result", false);
-        try{
+        try {
             roomService.deleteRoomById(roomId);
             response.put("result", true);
             log.info("deletion successful");
             return ResponseEntity.ok().body(response.toMap());
-        } catch (EmptyResultDataAccessException e){
+        } catch (EmptyResultDataAccessException e) {
             response.put("error", "cannot find room to delete");
             return ResponseEntity.status(404).body(response.toMap());
-        } catch (Exception e){
+        } catch (Exception e) {
             log.error("unknown error", e);
             response.put("error", "of type " + e.getClass().toGenericString());
             return ResponseEntity.status(404).body(response.toMap());

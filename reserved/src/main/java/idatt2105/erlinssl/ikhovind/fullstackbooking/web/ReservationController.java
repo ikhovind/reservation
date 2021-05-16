@@ -9,9 +9,7 @@ import idatt2105.erlinssl.ikhovind.fullstackbooking.service.ReservationService;
 import idatt2105.erlinssl.ikhovind.fullstackbooking.service.RoomService;
 import idatt2105.erlinssl.ikhovind.fullstackbooking.service.SectionService;
 import idatt2105.erlinssl.ikhovind.fullstackbooking.service.UserService;
-import idatt2105.erlinssl.ikhovind.fullstackbooking.util.Constants;
 import idatt2105.erlinssl.ikhovind.fullstackbooking.util.Utilities;
-import idatt2105.erlinssl.ikhovind.fullstackbooking.util.security.AdminTokenRequired;
 import idatt2105.erlinssl.ikhovind.fullstackbooking.util.security.service.SecurityService;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONArray;
@@ -25,7 +23,6 @@ import org.springframework.web.bind.annotation.*;
 import javax.persistence.EntityNotFoundException;
 import java.net.URI;
 import java.sql.Timestamp;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -63,7 +60,7 @@ public class ReservationController {
                     UUID.fromString(securityService.getUserPartsByToken(token)[0]));
             Timestamp timeFrom = Utilities.toTimestamp(map.get("timeFrom"));
             Timestamp timeTo = Utilities.toTimestamp(map.get("timeTo"));
-            if(!roomReservationNoOverlap(timeFrom, timeTo, room)){
+            if (!roomReservationNoOverlap(timeFrom, timeTo, room)) {
                 jsonBody.put("error", "there are already reservations during that timeframe");
                 return ResponseEntity
                         .status(HttpStatus.FORBIDDEN)
@@ -104,7 +101,7 @@ public class ReservationController {
             Timestamp timeFrom = Utilities.toTimestamp(map.get("timeFrom"));
             Timestamp timeTo = Utilities.toTimestamp(map.get("timeTo"));
 
-            if(!sectionReservationNoOverlap(timeFrom, timeTo, room, section)){
+            if (!sectionReservationNoOverlap(timeFrom, timeTo, room, section)) {
                 jsonBody.put("error", "there are already reservations during that timeframe");
                 return ResponseEntity
                         .status(HttpStatus.FORBIDDEN)
@@ -142,7 +139,7 @@ public class ReservationController {
             JSONArray reservations = new JSONArray();
             Timestamp timeFrom = Utilities.toTimestamp(map.get("timeFrom"));
             Timestamp timeTo = Utilities.toTimestamp(map.get("timeTo"));
-            if(sectionId != null) {
+            if (sectionId != null) {
                 log.warn("Inside section");
                 Section section = sectionService.getSection(sectionId);
                 for (Reservation r :
@@ -181,7 +178,7 @@ public class ReservationController {
 
     @GetMapping("/test/{rId}")
     public ResponseEntity getReservationsBetweenTestRoom(@PathVariable("rId") UUID roomId,
-                                                     @RequestBody Map<String, String> map) {
+                                                         @RequestBody Map<String, String> map) {
         JSONObject jsonBody = new JSONObject();
         jsonBody.put("result", false);
         try {
@@ -224,7 +221,7 @@ public class ReservationController {
         try {
             JSONArray reservations = new JSONArray();
             boolean admin = Utilities.isAdmin(token);
-            if(admin) {
+            if (admin) {
                 for (Reservation r : reservationService.getAllReservations()) {
                     reservations.put(r.toAdminJson());
                 }
@@ -257,7 +254,7 @@ public class ReservationController {
         try {
             Room room = roomService.getRoomById(roomId);
             JSONArray reservations = new JSONArray();
-            if(Utilities.isAdmin(token)) {
+            if (Utilities.isAdmin(token)) {
                 for (Reservation r : reservationService.getRoomReservations(room)) {
                     reservations.put(r.toAdminJson());
                 }
@@ -399,7 +396,7 @@ public class ReservationController {
 
     private boolean roomReservationNoOverlap(Timestamp timeFrom, Timestamp timeTo, Room room) {
         List<Reservation> roomReservations = reservationService.getRoomAndSectionReservationsBetween(timeFrom, timeTo, room);
-        return roomReservations.size()==0;
+        return roomReservations.size() == 0;
     }
 
     private boolean sectionReservationNoOverlap(Timestamp timeFrom, Timestamp timeTo, Room room, Section section) {

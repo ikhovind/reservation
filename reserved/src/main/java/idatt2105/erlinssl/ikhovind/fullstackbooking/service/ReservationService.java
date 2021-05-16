@@ -50,7 +50,7 @@ public class ReservationService {
     public List<Reservation> getRoomAndSectionReservationsBetween(Timestamp timeFrom, Timestamp timeTo, Room room) {
         Timestamp timeFrom2 = borderTimeFrom(timeFrom);
         Timestamp timeTo2 = borderTimeTo(timeTo);
-        log.info("time_from ["+timeFrom+"] and ["+timeTo2+"] | time_to ["+timeFrom2+"] and ["+timeTo+"]");
+        log.info("time_from [" + timeFrom + "] and [" + timeTo2 + "] | time_to [" + timeFrom2 + "] and [" + timeTo + "]");
         return reservationRepository.findRoomSectionReservationsBetween(room, timeFrom, timeTo2, timeFrom2, timeTo);
     }
 
@@ -70,10 +70,10 @@ public class ReservationService {
     private static final int POOF = 1;
 
     private Timestamp borderTimeFrom(Timestamp time) {
-        return new Timestamp(time.getTime()+POOF);
+        return new Timestamp(time.getTime() + POOF);
     }
 
     private Timestamp borderTimeTo(Timestamp time) {
-        return new Timestamp(time.getTime()-POOF);
+        return new Timestamp(time.getTime() - POOF);
     }
 }

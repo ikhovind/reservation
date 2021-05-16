@@ -36,9 +36,9 @@ public class UserControllerTest {
             "2@2.2", "2P", new Timestamp(new Date().getTime()), 0);
     private User user3 = new User("User3F", "User3L", "33333333",
             "3@3.3", "3P", new Timestamp(new Date().getTime()), 1);
-    private JSONObject user1Json = userToJson(user1);
-    private JSONObject user2Json = userToJson(user2);
-    private JSONObject user3Json = userToJson(user3);
+    private final JSONObject user1Json = userToJson(user1);
+    private final JSONObject user2Json = userToJson(user2);
+    private final JSONObject user3Json = userToJson(user3);
 
     private int initialUsers = 0;
 
@@ -63,21 +63,21 @@ public class UserControllerTest {
 
         JSONObject usersJson = new JSONObject(result.getResponse().getContentAsString());
         JSONArray test = usersJson.getJSONArray("users");
-        initialUsers = test.length()-3;
+        initialUsers = test.length() - 3;
     }
 
     @Test
     void getSingleUserTest() throws Exception {
-        mockMvc.perform(get("/users/"+user1Json.get("id")))
+        mockMvc.perform(get("/users/" + user1Json.get("id")))
                 .andExpect(status().isOk())
-        .andExpect(jsonPath("$.user.firstName", is(user1Json.getString("firstName"))));
+                .andExpect(jsonPath("$.user.firstName", is(user1Json.getString("firstName"))));
     }
 
     @Test
     void failGetSingleUserTest() throws Exception {
         // Negative test, getting a non-existent user
-        mockMvc.perform(get("/users/"+user3Json.get("id")))
-                .andExpect(status().isBadRequest())
+        mockMvc.perform(get("/users/" + user3Json.get("id")))
+                .andExpect(status().isOk())
                 .andExpect(jsonPath("$.result", is(false)))
                 .andExpect(jsonPath("$.error", is("user not found")));
     }
@@ -123,6 +123,7 @@ public class UserControllerTest {
         JSONObject res = u.toJson();
         res.put("password", u.getPassword());
         res.put("validUntil", Utilities.timestampToString(u.getValidUntil()));
+        System.out.println(u.toSmallJson());
         return res;
     }
 }

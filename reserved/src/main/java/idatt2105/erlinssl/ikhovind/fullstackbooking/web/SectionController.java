@@ -6,7 +6,6 @@ import idatt2105.erlinssl.ikhovind.fullstackbooking.model.Section;
 import idatt2105.erlinssl.ikhovind.fullstackbooking.service.RoomService;
 import idatt2105.erlinssl.ikhovind.fullstackbooking.service.SectionService;
 import lombok.extern.slf4j.Slf4j;
-import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -33,7 +32,7 @@ public class SectionController {
         log.info("adding section to room");
         JSONObject response = new JSONObject();
         response.put("result", false);
-        try{
+        try {
             Section section = new Section(map.get("sectionName").toString(), map.get("sectionDesc").toString());
 
             Room room = roomService.getRoomById(roomId);
@@ -43,7 +42,7 @@ public class SectionController {
                 room.addSection(savedSection);
                 Room editedRoom = roomService.saveRoom(room);
 
-                response.put("result",true);
+                response.put("result", true);
                 response.put("room", editedRoom.toJson());
                 return ResponseEntity.status(201).body(response.toMap());
             }
@@ -59,8 +58,7 @@ public class SectionController {
         } catch (NullPointerException e) {
             log.error("one or more values were null");
             response.put("error", "one or more required values were null");
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             log.error("cannot add section to room", e);
             response.put("error", "of type " + e.getClass().getName());
         }
@@ -79,8 +77,8 @@ public class SectionController {
             return ResponseEntity.ok().body(response.toMap());
         } catch (IllegalArgumentException e) {
             log.error("room and section not connected", e);
-          response.put("error", "section does not belong to room");
-        } catch(EntityNotFoundException e) {
+            response.put("error", "section does not belong to room");
+        } catch (EntityNotFoundException e) {
             log.error("could not find entity", e);
             response.put("error", "could not find room");
             return ResponseEntity.status(404).body(response.toMap());
@@ -117,14 +115,14 @@ public class SectionController {
             log.info("given room does not contain section");
             response.put("error", "room does not contain section");
         } catch (NotUniqueSectionNameException e) {
-          log.error("cannot edit section as given section name already exists");
-          response.put("error", "the given section name is not unique");
+            log.error("cannot edit section as given section name already exists");
+            response.put("error", "the given section name is not unique");
         } catch (NullPointerException e) {
             log.error("one or more parameters is null");
             response.put("error", "one or more parameters is null");
         } catch (IllegalArgumentException e) {
-          log.error("invalid parameters", e);
-          response.put("error", "one or more illegal parameters");
+            log.error("invalid parameters", e);
+            response.put("error", "one or more illegal parameters");
         } catch (EntityNotFoundException e) {
             log.error("could not find room");
             response.put("error", "could not find room");

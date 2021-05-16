@@ -1,6 +1,5 @@
 package idatt2105.erlinssl.ikhovind.fullstackbooking.model;
 
-import idatt2105.erlinssl.ikhovind.fullstackbooking.service.SectionService;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -31,7 +30,7 @@ public class Room extends BaseModel {
     }
 
     public boolean addSection(Section s) {
-        if(!section.contains(s)) {
+        if (!section.contains(s)) {
             section.add(s);
             return true;
         }
