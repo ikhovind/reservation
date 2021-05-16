@@ -55,7 +55,6 @@ public class ReservationController {
     public ResponseEntity reserveRoom(@PathVariable("id") UUID roomId,
                                       @RequestHeader("token") String token,
                                       @RequestBody Map<String, String> map) {
-        // TODO Check if any sections are already reserved during the given time
         JSONObject jsonBody = new JSONObject();
         jsonBody.put("result", false);
         try {
@@ -71,9 +70,7 @@ public class ReservationController {
                         .body(jsonBody.toMap());
 
             }
-            Reservation reservation = new Reservation(room, null,
-                    timeFrom,
-                    timeTo);
+            Reservation reservation = new Reservation(room, null, timeFrom, timeTo);
             return addReservationToUser(jsonBody, user, reservation);
 
         } catch (EntityNotFoundException e) {
@@ -96,7 +93,6 @@ public class ReservationController {
                                          @PathVariable("sId") UUID sectionId,
                                          @RequestHeader("token") String token,
                                          @RequestBody Map<String, String> map) {
-        // TODO Check if the room is already reserved during the given time
         JSONObject jsonBody = new JSONObject();
         jsonBody.put("result", false);
         try {
@@ -104,9 +100,19 @@ public class ReservationController {
             Section section = sectionService.getSection(sectionId);
             User user = userService.getSingleUser(
                     UUID.fromString(securityService.getUserPartsByToken(token)[0]));
-            Reservation reservation = new Reservation(room, section,
-                    Utilities.toTimestamp(map.get("timeFrom")),
-                    Utilities.toTimestamp(map.get("timeTo")));
+
+            Timestamp timeFrom = Utilities.toTimestamp(map.get("timeFrom"));
+            Timestamp timeTo = Utilities.toTimestamp(map.get("timeTo"));
+
+            if(!sectionReservationNoOverlap(timeFrom, timeTo, room, section)){
+                jsonBody.put("error", "there are already reservations during that timeframe");
+                return ResponseEntity
+                        .status(HttpStatus.FORBIDDEN)
+                        .body(jsonBody.toMap());
+
+            }
+
+            Reservation reservation = new Reservation(room, section, timeFrom, timeTo);
             return addReservationToUser(jsonBody, user, reservation);
 
         } catch (EntityNotFoundException e) {
@@ -396,7 +402,7 @@ public class ReservationController {
         return roomReservations.size()==0;
     }
 
-    private boolean sectionReservationNoOverlap(Timestamp timeFrom, Timestamp timeTo, Section section, Room room) {
+    private boolean sectionReservationNoOverlap(Timestamp timeFrom, Timestamp timeTo, Room room, Section section) {
         if (reservationService.getRoomReservationsBetween(timeFrom, timeTo, room).size() == 0) {
             return reservationService.getSectionReservationsBetween(timeFrom, timeTo, section).size() == 0;
         } else {

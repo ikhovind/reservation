@@ -34,7 +34,7 @@ public class ReservationService {
     public List<Reservation> getRoomReservationsBetween(Timestamp timeFrom, Timestamp timeTo, Room room) {
         Timestamp timeFrom2 = borderTimeFrom(timeFrom);
         Timestamp timeTo2 = borderTimeTo(timeTo);
-        return reservationRepository.findRoomReservationsBetween(room, timeFrom2, timeTo, timeFrom, timeTo2);
+        return reservationRepository.findRoomReservationsBetween(room, timeFrom, timeTo2, timeFrom2, timeTo);
     }
 
     public Iterable<Reservation> getSectionReservations(Section section) {
@@ -44,7 +44,7 @@ public class ReservationService {
     public List<Reservation> getSectionReservationsBetween(Timestamp timeFrom, Timestamp timeTo, Section section) {
         Timestamp timeFrom2 = borderTimeFrom(timeFrom);
         Timestamp timeTo2 = borderTimeTo(timeTo);
-        return reservationRepository.findSectionReservationsBetween(section, timeFrom2, timeTo, timeFrom, timeTo2);
+        return reservationRepository.findSectionReservationsBetween(section, timeFrom, timeTo2, timeFrom2, timeTo);
     }
 
     public List<Reservation> getRoomAndSectionReservationsBetween(Timestamp timeFrom, Timestamp timeTo, Room room) {
