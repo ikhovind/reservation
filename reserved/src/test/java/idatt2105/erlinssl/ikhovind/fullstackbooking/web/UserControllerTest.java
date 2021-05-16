@@ -77,7 +77,7 @@ public class UserControllerTest {
     void failGetSingleUserTest() throws Exception {
         // Negative test, getting a non-existent user
         mockMvc.perform(get("/users/" + user3Json.get("id")))
-                .andExpect(status().isOk())
+                .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.result", is(false)))
                 .andExpect(jsonPath("$.error", is("user not found")));
     }
