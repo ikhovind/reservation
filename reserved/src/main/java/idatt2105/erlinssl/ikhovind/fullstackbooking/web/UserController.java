@@ -1,13 +1,19 @@
 package idatt2105.erlinssl.ikhovind.fullstackbooking.web;
 
+import idatt2105.erlinssl.ikhovind.fullstackbooking.Exceptions.PermissionDeniedException;
 import idatt2105.erlinssl.ikhovind.fullstackbooking.model.User;
 import idatt2105.erlinssl.ikhovind.fullstackbooking.service.UserService;
+import idatt2105.erlinssl.ikhovind.fullstackbooking.util.Constants;
 import idatt2105.erlinssl.ikhovind.fullstackbooking.util.Utilities;
+import idatt2105.erlinssl.ikhovind.fullstackbooking.util.security.AdminTokenRequired;
+import idatt2105.erlinssl.ikhovind.fullstackbooking.util.security.service.SecurityService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.coyote.Response;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.dao.PermissionDeniedDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -29,6 +35,7 @@ public class UserController {
     @Autowired
     private UserService userService;
 
+    //@AdminTokenRequired
     @PostMapping(value = "", consumes = "application/json", produces = "application/json")
     public ResponseEntity createUser(@RequestBody Map<String, Object> map) {
         JSONObject jsonBody = new JSONObject();
@@ -64,6 +71,7 @@ public class UserController {
                 .body(jsonBody.toMap());
     }
 
+    //@AdminTokenRequired
     @GetMapping(value = "/{id}")
     public ResponseEntity getUser(@PathVariable("id") UUID userId) {
         JSONObject jsonBody = new JSONObject();
@@ -84,6 +92,7 @@ public class UserController {
         }
     }
 
+    //@AdminTokenRequired
     @GetMapping(value = "", produces = "application/json")
     public ResponseEntity getAllUsers(@RequestParam(value = "firstName", required = false, defaultValue = "") String firstName,
                                       @RequestParam(value = "lastName", required = false, defaultValue = "") String lastName) {
@@ -115,6 +124,7 @@ public class UserController {
         }
     }
 
+    //@AdminTokenRequired
     @DeleteMapping("/{id}")
     public ResponseEntity deleteUser(@PathVariable("id") UUID userId) {
         JSONObject jsonBody = new JSONObject();
@@ -141,19 +151,32 @@ public class UserController {
         }
     }
 
+    //@UserTokenRequired
     @PutMapping("/{id}")
     public ResponseEntity editUser(@PathVariable("id") UUID userId,
-                                   @RequestBody Map<String, Object> map) {
+                                   @RequestBody Map<String, Object> map,
+                                   @RequestHeader("token") String token) {
         JSONObject jsonBody = new JSONObject();
         jsonBody.put("result", false);
         try {
             User user = userService.getSingleUser(userId);
-            editUser(user, map, false);
+            if(Utilities.isAdmin(token)){
+                editUser(user, map, true);
+            } else {
+                Utilities.uidMatch(token, userId);
+                editUser(user, map, false);
+            }
             user = userService.updateUser(user);
             jsonBody.put("user", user);
             jsonBody.put("result", true);
             return ResponseEntity
                     .ok()
+                    .body(jsonBody.toMap());
+
+        } catch(PermissionDeniedException e) {
+            jsonBody.put("error", "that is not your user");
+            return ResponseEntity
+                    .status(HttpStatus.UNAUTHORIZED)
                     .body(jsonBody.toMap());
 
         } catch (EntityNotFoundException e) {
@@ -171,7 +194,7 @@ public class UserController {
         }
     }
 
-    private User editUser(User u, Map<String, Object> map, boolean admin) {
+    private void editUser(User u, Map<String, Object> map, boolean admin) {
         if(map.containsKey("firstName") && !map.get("firstName").toString().isBlank()){
             u.setFirstName(map.get("firstName").toString());
         }
@@ -192,7 +215,6 @@ public class UserController {
                 u.setUserType(Integer.parseInt(map.get("userType").toString()));
             }
         }
-        return u;
     }
 
     private User mapToUser(Map<String, Object> map) throws ParseException {

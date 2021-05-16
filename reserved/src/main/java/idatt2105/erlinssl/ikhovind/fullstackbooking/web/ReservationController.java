@@ -1,5 +1,6 @@
 package idatt2105.erlinssl.ikhovind.fullstackbooking.web;
 
+import idatt2105.erlinssl.ikhovind.fullstackbooking.Exceptions.TimestampParsingException;
 import idatt2105.erlinssl.ikhovind.fullstackbooking.model.Reservation;
 import idatt2105.erlinssl.ikhovind.fullstackbooking.model.Room;
 import idatt2105.erlinssl.ikhovind.fullstackbooking.model.Section;
@@ -8,6 +9,7 @@ import idatt2105.erlinssl.ikhovind.fullstackbooking.service.ReservationService;
 import idatt2105.erlinssl.ikhovind.fullstackbooking.service.RoomService;
 import idatt2105.erlinssl.ikhovind.fullstackbooking.service.SectionService;
 import idatt2105.erlinssl.ikhovind.fullstackbooking.service.UserService;
+import idatt2105.erlinssl.ikhovind.fullstackbooking.util.Constants;
 import idatt2105.erlinssl.ikhovind.fullstackbooking.util.Utilities;
 import idatt2105.erlinssl.ikhovind.fullstackbooking.util.security.AdminTokenRequired;
 import idatt2105.erlinssl.ikhovind.fullstackbooking.util.security.service.SecurityService;
@@ -22,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.persistence.EntityNotFoundException;
 import java.net.URI;
+import java.sql.Timestamp;
 import java.util.Map;
 import java.util.UUID;
 
@@ -110,19 +113,38 @@ public class ReservationController {
         }
     }
 
-    @GetMapping("")
-    public ResponseEntity getAllReservations() {
+    @GetMapping("/test/{rId}/sections/{sId}")
+    public ResponseEntity getReservationsBetweenTest(@PathVariable("rId") UUID roomId,
+                                                     @PathVariable(value = "sId",
+                                                             required = false) UUID sectionId,
+                                                     @RequestBody Map<String, String> map) {
         JSONObject jsonBody = new JSONObject();
         jsonBody.put("result", false);
         try {
+            Room room = roomService.getRoomById(roomId);
             JSONArray reservations = new JSONArray();
-            for (Reservation r : reservationService.getAllReservations()) {
-                reservations.put(r.toJson());
+            Timestamp timeFrom = Utilities.toTimestamp(map.get("timeFrom"));
+            Timestamp timeTo = Utilities.toTimestamp(map.get("timeTo"));
+            if(sectionId != null) {
+                log.warn("Inside section");
+                Section section = sectionService.getSection(sectionId);
+                for (Reservation r :
+                        reservationService.getSectionReservationsBetween(timeFrom, timeTo, section)) {
+                    reservations.put(r.toAdminJson());
+                }
+            } else {
+                log.warn("Inside room");
+                for (Reservation r :
+                        reservationService.getRoomReservationsBetween(timeFrom, timeTo, room)) {
+                    reservations.put(r.toAdminJson());
+                }
             }
             jsonBody.put("reservations", reservations);
-            jsonBody.put("result", true);
+
+        } catch (EntityNotFoundException e) {
+            jsonBody.put("error", "an invalid id was passed");
             return ResponseEntity
-                    .ok()
+                    .badRequest()
                     .body(jsonBody.toMap());
 
         } catch (Exception e) {
@@ -131,7 +153,85 @@ public class ReservationController {
             return ResponseEntity
                     .status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(jsonBody.toMap());
+
         }
+
+        jsonBody.put("result", true);
+        return ResponseEntity
+                .ok()
+                .body(jsonBody.toMap());
+    }
+
+    @GetMapping("/test/{rId}")
+    public ResponseEntity getReservationsBetweenTestRoom(@PathVariable("rId") UUID roomId,
+                                                     @PathVariable(value = "sId",
+                                                             required = false) UUID sectionId,
+                                                     @RequestBody Map<String, String> map) {
+        JSONObject jsonBody = new JSONObject();
+        jsonBody.put("result", false);
+        try {
+            Room room = roomService.getRoomById(roomId);
+            JSONArray reservations = new JSONArray();
+            Timestamp timeFrom = Utilities.toTimestamp(map.get("timeFrom"));
+            Timestamp timeTo = Utilities.toTimestamp(map.get("timeTo"));
+            log.warn("Inside room");
+            for (Reservation r :
+                    reservationService.getRoomReservationsBetween(timeFrom, timeTo, room)) {
+                reservations.put(r.toAdminJson());
+            }
+            jsonBody.put("reservations", reservations);
+
+        } catch (EntityNotFoundException e) {
+            jsonBody.put("error", "an invalid id was passed");
+            return ResponseEntity
+                    .badRequest()
+                    .body(jsonBody.toMap());
+
+        } catch (Exception e) {
+            log.error("An unexpected error occurred", e);
+            jsonBody.put("error", "unexpected error");
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(jsonBody.toMap());
+
+        }
+
+        jsonBody.put("result", true);
+        return ResponseEntity
+                .ok()
+                .body(jsonBody.toMap());
+    }
+
+    @GetMapping("")
+    public ResponseEntity getAllReservations(@RequestHeader("token") String token) {
+        JSONObject jsonBody = new JSONObject();
+        jsonBody.put("result", false);
+        try {
+            JSONArray reservations = new JSONArray();
+            boolean admin = Utilities.isAdmin(token);
+            if(admin) {
+                for (Reservation r : reservationService.getAllReservations()) {
+                    reservations.put(r.toAdminJson());
+                }
+            } else {
+                for (Reservation r : reservationService.getAllReservations()) {
+                    reservations.put(r.toJson());
+                }
+            }
+            jsonBody.put("reservations", reservations);
+
+        } catch (Exception e) {
+            log.error("An unexpected error occurred", e);
+            jsonBody.put("error", "unexpected error");
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(jsonBody.toMap());
+        }
+
+        jsonBody.put("result", true);
+        return ResponseEntity
+                .ok()
+                .body(jsonBody.toMap());
     }
 
     @GetMapping("/rooms/{id}")
@@ -142,15 +242,16 @@ public class ReservationController {
         try {
             Room room = roomService.getRoomById(roomId);
             JSONArray reservations = new JSONArray();
-            for (Reservation r : reservationService.getRoomReservations(room)) {
-                reservations.put(r.toJson());
+            if(Utilities.isAdmin(token)) {
+                for (Reservation r : reservationService.getRoomReservations(room)) {
+                    reservations.put(r.toAdminJson());
+                }
+            } else {
+                for (Reservation r : reservationService.getRoomReservations(room)) {
+                    reservations.put(r.toJson());
+                }
             }
             jsonBody.put("reservations", reservations);
-            jsonBody.put("result", true);
-            return ResponseEntity
-                    .ok()
-                    .body(jsonBody.toMap());
-
         } catch (EntityNotFoundException e) {
             jsonBody.put("error", "that room does not exist");
             return ResponseEntity
@@ -158,6 +259,10 @@ public class ReservationController {
                     .body(jsonBody.toMap());
         }
 
+        jsonBody.put("result", true);
+        return ResponseEntity
+                .ok()
+                .body(jsonBody.toMap());
     }
 
     @GetMapping("/rooms/{rId}/sections/{sId}")
@@ -170,14 +275,16 @@ public class ReservationController {
             Room room = roomService.getRoomById(roomId);
             Section section = sectionService.getSection(sectionId);
             JSONArray reservations = new JSONArray();
-            for (Reservation r : reservationService.getSectionReservations(section)) {
-                reservations.put(r.toJson());
+            if (Utilities.isAdmin(token)) {
+                for (Reservation r : reservationService.getSectionReservations(section)) {
+                    reservations.put(r.toAdminJson());
+                }
+            } else {
+                for (Reservation r : reservationService.getSectionReservations(section)) {
+                    reservations.put(r.toJson());
+                }
             }
             jsonBody.put("reservations", reservations);
-            jsonBody.put("result", true);
-            return ResponseEntity
-                    .ok()
-                    .body(jsonBody.toMap());
 
         } catch (EntityNotFoundException e) {
             jsonBody.put("error", "that room does not exist");
@@ -186,6 +293,10 @@ public class ReservationController {
                     .body(jsonBody.toMap());
         }
 
+        jsonBody.put("result", true);
+        return ResponseEntity
+                .ok()
+                .body(jsonBody.toMap());
     }
 
     //@AdminTokenRequired
@@ -199,10 +310,6 @@ public class ReservationController {
             user.removeReservation(res);
             reservationService.deleteReservationById(id);
             userService.updateUser(user);
-            jsonBody.put("result", true);
-            return ResponseEntity
-                    .ok()
-                    .body(jsonBody.toMap());
 
         } catch (EntityNotFoundException e) {
             jsonBody.put("error", "that reservation does not exist");
@@ -217,8 +324,12 @@ public class ReservationController {
                     .status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(jsonBody.toMap());
         }
-    }
 
+        jsonBody.put("result", true);
+        return ResponseEntity
+                .ok()
+                .body(jsonBody.toMap());
+    }
 
     //@AdminTokenRequired
     @PutMapping("/{id}")
@@ -232,9 +343,11 @@ public class ReservationController {
             reservation.setTimeTo(Utilities.toTimestamp(map.get("timeTo")));
             reservationService.saveReservation(reservation);
             jsonBody.put("reservation", reservation.toJson());
-            jsonBody.put("result", true);
+
+        } catch (TimestampParsingException e) {
+            jsonBody.put("error", "an invalid timestamp was passed");
             return ResponseEntity
-                    .ok()
+                    .badRequest()
                     .body(jsonBody.toMap());
 
         } catch (EntityNotFoundException e) {
@@ -249,10 +362,15 @@ public class ReservationController {
                     .status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(jsonBody.toMap());
         }
+
+        jsonBody.put("result", true);
+        return ResponseEntity
+                .ok()
+                .body(jsonBody.toMap());
     }
 
     private ResponseEntity addReservationToUser(JSONObject jsonBody, User user,
-                                                Reservation reservation) throws Exception {
+                                                Reservation reservation) {
         reservation.setUser(user);
         reservation = reservationService.saveReservation(reservation);
         user.addReservation(reservation);

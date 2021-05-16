@@ -35,9 +35,10 @@ public class Reservation extends BaseModel {
     public JSONObject toJson() {
         JSONObject res = new JSONObject();
         res.put("reservationId", getId());
-        res.put("room", getRoom().getId());
-        String sId = (this.section != null) ? this.section.getId().toString() : null;
-        res.put("section", sId);
+        res.put("room", new JSONObject()
+                .put("roomId", this.room.getId())
+                .put("roomName", this.room.getRoomName()));
+        res.put("section", (this.section==null ? null : this.section.toJson()));
         res.put("timeFrom", timeFrom);
         res.put("timeTo", timeTo);
         return res;
@@ -45,7 +46,7 @@ public class Reservation extends BaseModel {
 
     public JSONObject toAdminJson() {
         JSONObject res = toJson();
-        res.put("userId", user.getId());
+        res.put("user", user.toSmallJson());
         return res;
     }
 }

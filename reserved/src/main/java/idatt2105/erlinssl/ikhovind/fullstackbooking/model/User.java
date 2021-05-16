@@ -6,10 +6,7 @@ import lombok.Setter;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.OneToMany;
+import javax.persistence.*;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,7 +22,9 @@ public class User extends BaseModel {
     @Column(unique = true)
     private String email;
     private String password;
-    @OneToMany(fetch = FetchType.EAGER)
+    @OneToMany(fetch = FetchType.EAGER,
+            cascade = CascadeType.ALL,
+            orphanRemoval = true)
     private List<Reservation> reservations;
     private Timestamp validUntil;
     private int userType;
@@ -50,7 +49,7 @@ public class User extends BaseModel {
         this.reservations.remove(reservation);
     }
 
-    public JSONObject toJson() {
+    public JSONObject toSmallJson() {
         JSONObject res = new JSONObject();
         res.put("id", getId());
         res.put("firstName", firstName);
@@ -59,13 +58,20 @@ public class User extends BaseModel {
         res.put("email", email);
         //res.put("password",password);
         JSONArray reservationJson = new JSONArray();
+        res.put("validUntil", validUntil);
+        res.put("userType", userType);
+
+        return res;
+    }
+
+    public JSONObject toJson() {
+        JSONObject res = toSmallJson();
+        JSONArray reservationJson = new JSONArray();
         for (Reservation r :
                 this.reservations) {
             reservationJson.put(r.toJson());
         }
         res.put("reservations", reservationJson);
-        res.put("validUntil", validUntil);
-        res.put("userType", userType);
 
         return res;
     }
