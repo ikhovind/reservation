@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityNotFoundException;
-import java.sql.Array;
 import java.sql.Timestamp;
 import java.util.*;
 
@@ -32,24 +31,27 @@ public class ReservationService {
         return reservationRepository.findByRoom(room);
     }
 
-    public Iterable<Reservation> getRoomReservationsBetween(Timestamp timeFrom, Timestamp timeTo, Room room) {
-        timeFrom.setTime(timeFrom.getTime()+1);
-        timeTo.setTime(timeTo.getTime()-1);
-        return reservationRepository.findRoomReservationsBetween(room, timeFrom, timeTo, timeFrom, timeTo);
+    public List<Reservation> getRoomReservationsBetween(Timestamp timeFrom, Timestamp timeTo, Room room) {
+        Timestamp timeFrom2 = borderTimeFrom(timeFrom);
+        Timestamp timeTo2 = borderTimeTo(timeTo);
+        return reservationRepository.findRoomReservationsBetween(room, timeFrom2, timeTo, timeFrom, timeTo2);
     }
 
     public Iterable<Reservation> getSectionReservations(Section section) {
         return reservationRepository.findBySection(section);
     }
 
-    public Iterable<Reservation> getSectionReservationsBetween(Timestamp timeFrom, Timestamp timeTo, Section section) {
-        timeFrom.setTime(timeFrom.getTime()+1);
-        timeTo.setTime(timeTo.getTime()-1);
-        return reservationRepository.findSectionReservationsBetween(section, timeFrom, timeTo, timeFrom, timeTo);
-        /*Collection<Reservation> reservationsBetween = reservationRepository.findByTimeFromBetweenOrTimeToBetween(timeFrom, timeTo, timeFrom, timeTo2);
-        return reservationRepository.findByIdInAndSectionIs(reservationsBetween,section);
-        return reservationRepository.findByTimeFromBetweenOrTimeToBetweenAndSectionIs(timeFrom, timeTo, timeFrom, timeTo2, section);
-        return reservationRepository.findByTimeFromBetweenOrTimeToBetweenAndSectionIsNotNullAndSectionIs(timeFrom, timeTo, timeFrom, timeTo2, section);*/
+    public List<Reservation> getSectionReservationsBetween(Timestamp timeFrom, Timestamp timeTo, Section section) {
+        Timestamp timeFrom2 = borderTimeFrom(timeFrom);
+        Timestamp timeTo2 = borderTimeTo(timeTo);
+        return reservationRepository.findSectionReservationsBetween(section, timeFrom2, timeTo, timeFrom, timeTo2);
+    }
+
+    public List<Reservation> getRoomAndSectionReservationsBetween(Timestamp timeFrom, Timestamp timeTo, Room room) {
+        Timestamp timeFrom2 = borderTimeFrom(timeFrom);
+        Timestamp timeTo2 = borderTimeTo(timeTo);
+        log.info("time_from ["+timeFrom+"] and ["+timeTo2+"] | time_to ["+timeFrom2+"] and ["+timeTo+"]");
+        return reservationRepository.findRoomSectionReservationsBetween(room, timeFrom, timeTo2, timeFrom2, timeTo);
     }
 
     public Reservation getReservationById(UUID id) {
@@ -61,11 +63,17 @@ public class ReservationService {
         return reservationRepository.save(reservation);
     }
 
-    public void deleteReservation(Reservation res) {
-        reservationRepository.delete(res);
-    }
-
     public void deleteReservationById(UUID id) {
         reservationRepository.deleteById(id);
+    }
+
+    private static final int POOF = 1;
+
+    private Timestamp borderTimeFrom(Timestamp time) {
+        return new Timestamp(time.getTime()+POOF);
+    }
+
+    private Timestamp borderTimeTo(Timestamp time) {
+        return new Timestamp(time.getTime()-POOF);
     }
 }

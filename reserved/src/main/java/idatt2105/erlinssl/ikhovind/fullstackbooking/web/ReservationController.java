@@ -25,6 +25,8 @@ import org.springframework.web.bind.annotation.*;
 import javax.persistence.EntityNotFoundException;
 import java.net.URI;
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -60,9 +62,18 @@ public class ReservationController {
             Room room = roomService.getRoomById(roomId);
             User user = userService.getSingleUser(
                     UUID.fromString(securityService.getUserPartsByToken(token)[0]));
+            Timestamp timeFrom = Utilities.toTimestamp(map.get("timeFrom"));
+            Timestamp timeTo = Utilities.toTimestamp(map.get("timeTo"));
+            if(!roomReservationNoOverlap(timeFrom, timeTo, room)){
+                jsonBody.put("error", "there are already reservations during that timeframe");
+                return ResponseEntity
+                        .status(HttpStatus.FORBIDDEN)
+                        .body(jsonBody.toMap());
+
+            }
             Reservation reservation = new Reservation(room, null,
-                    Utilities.toTimestamp(map.get("timeFrom")),
-                    Utilities.toTimestamp(map.get("timeTo")));
+                    timeFrom,
+                    timeTo);
             return addReservationToUser(jsonBody, user, reservation);
 
         } catch (EntityNotFoundException e) {
@@ -164,8 +175,6 @@ public class ReservationController {
 
     @GetMapping("/test/{rId}")
     public ResponseEntity getReservationsBetweenTestRoom(@PathVariable("rId") UUID roomId,
-                                                     @PathVariable(value = "sId",
-                                                             required = false) UUID sectionId,
                                                      @RequestBody Map<String, String> map) {
         JSONObject jsonBody = new JSONObject();
         jsonBody.put("result", false);
@@ -380,5 +389,18 @@ public class ReservationController {
         return ResponseEntity
                 .created(URI.create("/reservations/" + reservation.getId().toString()))
                 .body(jsonBody.toMap());
+    }
+
+    private boolean roomReservationNoOverlap(Timestamp timeFrom, Timestamp timeTo, Room room) {
+        List<Reservation> roomReservations = reservationService.getRoomAndSectionReservationsBetween(timeFrom, timeTo, room);
+        return roomReservations.size()==0;
+    }
+
+    private boolean sectionReservationNoOverlap(Timestamp timeFrom, Timestamp timeTo, Section section, Room room) {
+        if (reservationService.getRoomReservationsBetween(timeFrom, timeTo, room).size() == 0) {
+            return reservationService.getSectionReservationsBetween(timeFrom, timeTo, section).size() == 0;
+        } else {
+            return false;
+        }
     }
 }

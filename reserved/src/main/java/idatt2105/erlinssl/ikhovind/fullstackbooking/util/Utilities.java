@@ -6,7 +6,8 @@ import idatt2105.erlinssl.ikhovind.fullstackbooking.util.security.service.Securi
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.sql.Date;
+import java.util.Calendar;
+import java.util.Date;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -21,11 +22,15 @@ public class Utilities {
 
     public static Timestamp toTimestamp(String string) {
         try {
-            Timestamp time = new Timestamp(
-                    Date.from(Instant.from(
-                            DateTimeFormatter.ISO_INSTANT.parse(string)))
-                            .getTime());
-            return time;
+            Date initialDate = Date.from(Instant.from(
+                    DateTimeFormatter.ISO_INSTANT.parse(string)));
+            Calendar roundedDate = Calendar.getInstance();
+            roundedDate.setTime(initialDate);
+            int mod = roundedDate.get(Calendar.MINUTE) % 15;
+            roundedDate.add(Calendar.MINUTE, mod < 8 ? -mod : (15-mod));
+            roundedDate.set(Calendar.SECOND, 0);
+            roundedDate.set(Calendar.MILLISECOND, 0);
+            return new Timestamp(roundedDate.getTime().getTime());
         } catch (Exception e) {
             throw new TimestampParsingException();
         }

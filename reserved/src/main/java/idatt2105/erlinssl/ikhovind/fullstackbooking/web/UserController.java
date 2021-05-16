@@ -176,7 +176,7 @@ public class UserController {
         } catch(PermissionDeniedException e) {
             jsonBody.put("error", "that is not your user");
             return ResponseEntity
-                    .status(HttpStatus.UNAUTHORIZED)
+                    .status(HttpStatus.FORBIDDEN)
                     .body(jsonBody.toMap());
 
         } catch (EntityNotFoundException e) {
