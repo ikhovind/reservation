@@ -61,7 +61,7 @@ public class ReservationController {
                     UUID.fromString(securityService.getUserPartsByToken(token)[0]));
             Timestamp timeFrom = Utilities.stringToTimestamp(map.get("timeFrom"));
             Timestamp timeTo = Utilities.stringToTimestamp(map.get("timeTo"));
-            if (!roomReservationNoOverlap(timeFrom, timeTo, room)) {
+            if (!roomReservationNoOverlap(timeFrom, timeTo, room, null)) {
                 jsonBody.put("error", "there are already reservations during that timeframe");
                 return ResponseEntity
                         .status(HttpStatus.FORBIDDEN)
@@ -97,7 +97,7 @@ public class ReservationController {
             Room room = roomService.getRoomById(roomId);
             System.out.println(room);   //TODO Find out why this prevents NullPointer. Possibly cache-related?
             Section section = sectionService.getSection(sectionId);
-            if(!room.getSection().contains(section)) {
+            if (!room.getSection().contains(section)) {
                 jsonBody.put("error", "missing section-room relation");
                 return ResponseEntity
                         .status(HttpStatus.FORBIDDEN)
@@ -110,7 +110,7 @@ public class ReservationController {
             Timestamp timeFrom = Utilities.stringToTimestamp(map.get("timeFrom"));
             Timestamp timeTo = Utilities.stringToTimestamp(map.get("timeTo"));
 
-            if (!sectionReservationNoOverlap(timeFrom, timeTo, room, section)) {
+            if (!sectionReservationNoOverlap(timeFrom, timeTo, room, section, null)) {
                 jsonBody.put("error", "there are already reservations during that timeframe");
                 return ResponseEntity
                         .status(HttpStatus.FORBIDDEN)
@@ -356,7 +356,7 @@ public class ReservationController {
                 .body(jsonBody.toMap());
     }
 
-    //@AdminTokenRequired
+    @AdminTokenRequired
     @PutMapping("/{id}")
     public ResponseEntity rebookReservation(@PathVariable("id") UUID id,
                                             @RequestBody Map<String, String> map) {
@@ -364,8 +364,27 @@ public class ReservationController {
         jsonBody.put("result", false);
         try {
             Reservation reservation = reservationService.getReservationById(id);
-            reservation.setTimeFrom(Utilities.stringToTimestamp(map.get("timeFrom")));
-            reservation.setTimeTo(Utilities.stringToTimestamp(map.get("timeTo")));
+
+            Timestamp timeFrom = Utilities.stringToTimestamp(map.get("timeFrom"));
+            Timestamp timeTo = Utilities.stringToTimestamp(map.get("timeTo"));
+
+            boolean noOverlap;
+            if (reservation.getSection() == null) {
+                noOverlap = roomReservationNoOverlap(timeFrom, timeTo,
+                        reservation.getRoom(), reservation);
+            } else {
+                noOverlap = sectionReservationNoOverlap(timeFrom, timeTo,
+                        reservation.getRoom(), reservation.getSection(), reservation);
+            }
+            if(!noOverlap) {
+                jsonBody.put("error", "there are already reservations during that timeframe");
+                return ResponseEntity
+                        .status(HttpStatus.FORBIDDEN)
+                        .body(jsonBody.toMap());
+            }
+
+            reservation.setTimeFrom(timeFrom);
+            reservation.setTimeTo(timeTo);
             reservationService.saveReservation(reservation);
             jsonBody.put("reservation", reservation.toJson());
 
@@ -407,16 +426,33 @@ public class ReservationController {
                 .body(jsonBody.toMap());
     }
 
-    private boolean roomReservationNoOverlap(Timestamp timeFrom, Timestamp timeTo, Room room) {
+    private boolean roomReservationNoOverlap(Timestamp timeFrom, Timestamp timeTo, Room room, Reservation self) {
         List<Reservation> roomReservations = reservationService.getRoomAndSectionReservationsBetween(timeFrom, timeTo, room);
-        return roomReservations.size() == 0;
+        if (roomReservations.size() == 0) {
+            System.out.println("No overlaps found");
+            return true;
+        } else if (roomReservations.size() == 1) {
+            System.out.println("Single overlap found, it is " + roomReservations.get(0).equals(self));
+            for (Reservation r :
+                    roomReservations) {
+                System.out.println(r.toJson().toString());
+            }
+            return roomReservations.get(0).equals(self);
+        }
+        log.error("THIS SECTION SHOULD NOT BE REACHED, THERE SEEMS TO BE AN OVERLAP IN THE SYSTEM, SIZE WAS " + roomReservations.size());
+        return false;
     }
 
-    private boolean sectionReservationNoOverlap(Timestamp timeFrom, Timestamp timeTo, Room room, Section section) {
+    private boolean sectionReservationNoOverlap(Timestamp timeFrom, Timestamp timeTo, Room room, Section section, Reservation self) {
         if (reservationService.getRoomReservationsBetween(timeFrom, timeTo, room).size() == 0) {
-            return reservationService.getSectionReservationsBetween(timeFrom, timeTo, section).size() == 0;
-        } else {
-            return false;
+            List<Reservation> sectionReservations = reservationService.getSectionReservationsBetween(timeFrom, timeTo, section);
+            if (sectionReservations.size() == 0) {
+                return true;
+            } else if (sectionReservations.size() == 1) {
+                return sectionReservations.get(0).equals(self);
+            }
+            log.error("THIS SECTION SHOULD NOT BE REACHED, THERE SEEMS TO BE AN OVERLAP IN THE SYSTEM, SIZE WAS " + sectionReservations.size());
         }
+        return false;
     }
 }

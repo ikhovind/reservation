@@ -9,6 +9,7 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.ManyToOne;
 import java.sql.Timestamp;
+import java.util.Objects;
 
 @Entity
 @Getter
@@ -48,5 +49,13 @@ public class Reservation extends BaseModel {
         JSONObject res = toJson();
         res.put("user", user.toSmallJson());
         return res;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Reservation that = (Reservation) o;
+        return super.equals(o) && room.equals(that.room) && Objects.equals(section, that.section) && timeFrom.equals(that.timeFrom) && timeTo.equals(that.timeTo) && user.equals(that.user);
     }
 }
