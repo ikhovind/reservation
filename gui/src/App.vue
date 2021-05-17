@@ -1,16 +1,17 @@
 <template>
   <div id="app">
-    <UserInfo></UserInfo>
+    <Header></Header>
+    <router-view></router-view>
   </div>
 </template>
 
 <script>
 
-import UserInfo from "@/components/UserInfoPage/UserInfo";
+import Header from "@/components/Common/Header";
 export default {
   name: 'App',
   components: {
-    UserInfo
+    Header,
   },
   methods: {
   }

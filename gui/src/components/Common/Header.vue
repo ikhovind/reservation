@@ -1,17 +1,23 @@
 <template>
   <div class="topnav">
-    <a href="nrk.no">Reserver rom</a>
-    <a href="nrk.no">Mine reservasjoner</a>
-    <a href="nrk.no">Romoversikt</a>
-    <a id="userLink" href="vg.no" >
-      <img id="userLogo" src="../../assets/userico.png" alt="Min side">
-    </a>
+    <router-link to="/">Reserver rom</router-link>
+    <router-link to="reservations">Mine reservasjoner</router-link>
+    <router-link to="rooms">Romoversikt</router-link>
+    <router-link to="users" v-if="this.admin">Brukere</router-link>
+    <router-link to="userInfo">
+     <img id="userLogo" src="../../assets/userico.png" alt="Min side">
+    </router-link>
   </div>
 </template>
 
 <script>
 export default {
-  name: "Header"
+  name: "Header",
+  data() {
+    return {
+      admin: true,
+    }
+  }
 }
 </script>
 
