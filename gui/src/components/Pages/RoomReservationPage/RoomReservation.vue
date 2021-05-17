@@ -1,5 +1,6 @@
 <template>
   <div>
+    <Header></Header>
     <div class="reserveDiv">
       <h3>Reserver rom</h3>
       <form class="selectRoom">
@@ -22,14 +23,18 @@
         </div>
       </form>
       <button>reserver</button>
-      <img src="../../assets/plus.png" alt="add new section">
+      <img src="../../../assets/plus.png" alt="add new section" @click="$refs.editSectionModal.displayInput(true)">
     </div>
+    <EditSectionModal ref="editSectionModal"></EditSectionModal>
   </div>
 </template>
 
 <script>
+import EditSectionModal from "@/components/Pages/Common/EditSectionModal";
+import Header from "@/components/Pages/Common/Header";
 export default {
   name: "RoomReservation",
+  components: {Header, EditSectionModal},
 }
 </script>
 

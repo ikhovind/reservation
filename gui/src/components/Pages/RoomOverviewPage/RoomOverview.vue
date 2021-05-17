@@ -1,5 +1,6 @@
 <template>
   <div>
+    <Header></Header>
     <h2>Romoversikt</h2>
     <label for="selectRoom">Velg rom</label>
     <select id="selectRoom">
@@ -63,8 +64,10 @@
 </template>
 
 <script>
+import Header from "@/components/Pages/Common/Header";
 export default {
-  name: "RoomOverview"
+  name: "RoomOverview",
+  components: {Header}
 }
 </script>
 

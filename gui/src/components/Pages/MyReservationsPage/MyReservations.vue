@@ -1,5 +1,6 @@
 <template>
 <div>
+  <Header></Header>
   <label for="datePicker">Velg dag</label>
   <input id="datePicker" type="date">
   <label for="sortReservations">sorter reservasjonene dine</label>
@@ -34,8 +35,10 @@
 </template>
 
 <script>
+import Header from "@/components/Pages/Common/Header";
 export default {
-  name: "MyReservations"
+  name: "MyReservations",
+  components: {Header}
 }
 </script>
 

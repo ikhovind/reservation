@@ -5,7 +5,7 @@
     <router-link to="rooms">Romoversikt</router-link>
     <router-link to="users" v-if="this.admin">Brukere</router-link>
     <router-link to="userInfo">
-     <img id="userLogo" src="../../assets/userico.png" alt="Min side">
+     <img id="userLogo" src="../../../assets/userico.png" alt="Min side">
     </router-link>
   </div>
 </template>
