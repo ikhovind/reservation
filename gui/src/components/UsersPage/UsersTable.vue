@@ -24,7 +24,7 @@
         <th>Ingebrigt</th>
       </tr>
     </table>
-    <button>Edit user</button>
+    <button @click="$emit('editUser')">Rediger bruker</button>
   </div>
 </template>
 

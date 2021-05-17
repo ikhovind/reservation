@@ -1,6 +1,5 @@
 <template>
   <div>
-    <Header></Header>
     <div class="reserveDiv">
       <h3>Reserver rom</h3>
       <form class="selectRoom">
@@ -29,10 +28,8 @@
 </template>
 
 <script>
-import Header from "@/components/Common/Header";
 export default {
   name: "RoomReservation",
-  components: {Header}
 }
 </script>
 
