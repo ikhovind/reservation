@@ -28,8 +28,7 @@ public class SectionService {
     }
 
     public Section getSection(UUID sectionId) {
-        return sectionRepository.findById(sectionId)
-                .orElseThrow(EntityNotFoundException::new);
+        return sectionRepository.getOne(sectionId);
     }
 
     public void deleteSection(UUID roomId, UUID sectionId) {

@@ -1,5 +1,6 @@
 package idatt2105.erlinssl.ikhovind.fullstackbooking.web;
 
+import idatt2105.erlinssl.ikhovind.fullstackbooking.Exceptions.IllegalTimeframeException;
 import idatt2105.erlinssl.ikhovind.fullstackbooking.Exceptions.TimestampParsingException;
 import idatt2105.erlinssl.ikhovind.fullstackbooking.model.Reservation;
 import idatt2105.erlinssl.ikhovind.fullstackbooking.model.Room;
@@ -77,6 +78,12 @@ public class ReservationController {
                     .status(HttpStatus.NOT_FOUND)
                     .body(jsonBody.toMap());
 
+        } catch(IllegalTimeframeException e) {
+            jsonBody.put("error", e.getMessage());
+            return ResponseEntity
+                    .badRequest()
+                    .body(jsonBody.toMap());
+
         } catch (Exception e) {
             log.error("An unexpected error occurred", e);
             jsonBody.put("error", "unexpected error");
@@ -121,7 +128,13 @@ public class ReservationController {
             Reservation reservation = new Reservation(room, section, timeFrom, timeTo);
             return addReservationToUser(jsonBody, user, reservation);
 
-        } catch (EntityNotFoundException e) {
+        } catch(IllegalTimeframeException e) {
+            jsonBody.put("error", e.getMessage());
+            return ResponseEntity
+                    .badRequest()
+                    .body(jsonBody.toMap());
+
+        }  catch (EntityNotFoundException e) {
             jsonBody.put("error", "an invalid id was passed");
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
@@ -400,6 +413,12 @@ public class ReservationController {
                     .status(HttpStatus.NOT_FOUND)
                     .body(jsonBody.toMap());
 
+        } catch(IllegalTimeframeException e) {
+            jsonBody.put("error", e.getMessage());
+            return ResponseEntity
+                    .badRequest()
+                    .body(jsonBody.toMap());
+
         } catch (Exception e) {
             jsonBody.put("error", "unexpected error");
             return ResponseEntity
@@ -414,7 +433,7 @@ public class ReservationController {
     }
 
     private ResponseEntity addReservationToUser(JSONObject jsonBody, User user,
-                                                Reservation reservation) {
+                                                Reservation reservation) throws IllegalTimeframeException{
         reservation.setUser(user);
         reservation = reservationService.saveReservation(reservation);
         user.addReservation(reservation);

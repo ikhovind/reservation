@@ -1,9 +1,11 @@
 package idatt2105.erlinssl.ikhovind.fullstackbooking.service;
 
+import idatt2105.erlinssl.ikhovind.fullstackbooking.Exceptions.IllegalTimeframeException;
 import idatt2105.erlinssl.ikhovind.fullstackbooking.model.Reservation;
 import idatt2105.erlinssl.ikhovind.fullstackbooking.model.Room;
 import idatt2105.erlinssl.ikhovind.fullstackbooking.model.Section;
 import idatt2105.erlinssl.ikhovind.fullstackbooking.repo.ReservationRepository;
+import idatt2105.erlinssl.ikhovind.fullstackbooking.util.Constants;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -59,7 +61,8 @@ public class ReservationService {
                 .orElseThrow(EntityNotFoundException::new);
     }
 
-    public Reservation saveReservation(Reservation reservation) {
+    public Reservation saveReservation(Reservation reservation) throws IllegalTimeframeException {
+        validateTimeframe(reservation.getTimeFrom(), reservation.getTimeTo());
         return reservationRepository.save(reservation);
     }
 
@@ -68,6 +71,26 @@ public class ReservationService {
     }
 
     private static final int POOF = 1;
+
+    private void validateTimeframe(Timestamp timeFrom, Timestamp timeTo) {
+        System.out.println("Validating timeframe between " + timeFrom + " and " + timeTo);
+        long timeUntil = timeFrom.getTime() - new Date().getTime();
+        System.out.println("Time until is " + timeUntil);
+        if (timeUntil < 0) {
+            throw new IllegalTimeframeException("we do not possess a time machine");
+        }
+        if (timeUntil > Constants.MAX_TIME_UNTIL_RES) {
+            throw new IllegalTimeframeException("you cannot reserve that far ahead");
+        }
+        long length = timeTo.getTime() - timeFrom.getTime();
+        System.out.println("Length is " + length);
+        if (length < Constants.MIN_RESERVATION_MILLIS) {
+            throw new IllegalTimeframeException("the given timeframe is too short");
+        }
+        if (length > Constants.MAX_RESERVATION_MILLIS) {
+            throw new IllegalTimeframeException("the given timeframe is too long");
+        }
+    }
 
     private Timestamp borderTimeFrom(Timestamp time) {
         return new Timestamp(time.getTime() + POOF);
