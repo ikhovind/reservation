@@ -1,17 +1,14 @@
 <template>
   <div id="app">
-    <Header></Header>
-    <router-view></router-view>
+    <router-view v-on:login="$router.push('reserve')" ref="routertest"></router-view>
   </div>
 </template>
 
 <script>
 
-import Header from "@/components/Common/Header";
 export default {
   name: 'App',
   components: {
-    Header,
   },
   methods: {
   }

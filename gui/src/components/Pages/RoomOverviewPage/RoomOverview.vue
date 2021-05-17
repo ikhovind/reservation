@@ -1,6 +1,9 @@
 <template>
   <div>
+    <Header></Header>
     <h2>Romoversikt</h2>
+    <EditRoomModal ref="editRoomModal" v-on:createdRoom="test()"></EditRoomModal>
+    <button @click="$refs.editRoomModal.displayInput(true)">Legg til nytt rom</button>
     <label for="selectRoom">Velg rom</label>
     <select id="selectRoom">
       <option>Rom 1</option>
@@ -63,8 +66,16 @@
 </template>
 
 <script>
+import Header from "@/components/Pages/Common/Header";
+import EditRoomModal from "@/components/Pages/Common/EditRoomModal";
 export default {
-  name: "RoomOverview"
+  name: "RoomOverview",
+  components: {EditRoomModal, Header},
+  methods: {
+    test() {
+      console.log("woho");
+    }
+  }
 }
 </script>
 

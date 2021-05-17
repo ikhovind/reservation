@@ -1,11 +1,11 @@
 <template>
   <div class="topnav">
-    <router-link to="/">Reserver rom</router-link>
+    <router-link to="reserve">Reserver rom</router-link>
     <router-link to="reservations">Mine reservasjoner</router-link>
     <router-link to="rooms">Romoversikt</router-link>
     <router-link to="users" v-if="this.admin">Brukere</router-link>
     <router-link to="userInfo">
-     <img id="userLogo" src="../../assets/userico.png" alt="Min side">
+     <img id="userLogo" src="../../../assets/userico.png" alt="Min side">
     </router-link>
   </div>
 </template>

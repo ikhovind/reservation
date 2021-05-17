@@ -1,7 +1,8 @@
 <template>
   <div>
+    <Header></Header>
     <h2>Min info</h2>
-    <img src="../../assets/edit.png" alt="Rediger bruker" @click="$refs.editUserModal.displayInput(false)">
+    <img src="../../../assets/edit.png" alt="Rediger bruker" @click="$refs.editUserModal.displayInput(false)">
     <label for="firstName">Fornavn</label>
     <input type="text" id="firstName" disabled>
     <label for="surname" >Etternavn</label>
@@ -17,10 +18,11 @@
 </template>
 
 <script>
-import EditUserModal from "@/components/Common/EditUserModal";
+import EditUserModal from "@/components/Pages/Common/EditUserModal";
+import Header from "@/components/Pages/Common/Header";
 export default {
   name: "UserInfo",
-  components: {EditUserModal}
+  components: {Header, EditUserModal}
 }
 </script>
 
