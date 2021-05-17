@@ -6,7 +6,7 @@
 
           <div class="modal-header">
             <slot name="header">
-              <h1 v-if="this.newSection">Ny</h1>
+              <h1 v-if="this.newRoom">Nytt</h1>
               <h1 v-else>Rediger</h1>
               <h1>seksjon</h1>
             </slot>
@@ -14,18 +14,16 @@
 
           <div class="modal-body">
             <slot name="body">
-              <form id="newSectionForm">
-                <label for="sectionName">Navn på seksjon</label>
-                <input name="sectionName" id="sectionName" type="text">
-                <label for="sectionName">Valgfri beskrivelse av seksjon</label>
-                <input name="sectionDesc" id="sectionDesc" type="text">
+              <form id="newRoomForm">
+                <label for="roomName">romnavn</label>
+                <input type="text" id="roomName" name="roomName">
               </form>
             </slot>
           </div>
 
           <div class="modal-footer">
             <slot name="footer">
-              <button class="modal-default-button" @click="submitSection($event)">Lagre seksjon</button>
+              <button class="modal-default-button" v-on:click="submitRoom($event)">Lagre rom</button>
               <button class="modal-default-button" @click="closeModal()">Avbryt</button>
             </slot>
           </div>
@@ -37,37 +35,40 @@
 
 <script>
 export default {
-  name: "EditSectionModal",
+  name: "EditRoomModal",
   data() {
     return {
       showModal: false,
-      newSection: true,
+      newRoom: true,
     }
   },
   methods: {
     closeModal() {
       this.showModal = false;
     },
-    async submitSection(e) {
+    displayInput(newRoom) {
+      this.newRoom = newRoom;
+      this.showModal = true;
+    },
+    async submitRoom(e) {
       e.preventDefault()
-      const addSectionOptions = {
+      const requestOptions = {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({
-          sectionName: document.getElementById("sectionName").value,
-          sectionDesc: document.getElementById("sectionDesc").value,
+          roomName: document.getElementById("roomName").value,
         })
       };
 
-      let sectionId = 5;
-      await fetch("https://localhost:8443/rooms/" + sectionId + "/sections", addSectionOptions)
+      await fetch("https://localhost:8443/rooms", requestOptions)
           .then((response) => response.json())
           //Then with the data from the response in JSON...
           .then(data => {
-            if (data.result) {
-              this.$emit('createdSection');
+            if(data.result) {
+              this.$emit('createdRoom');
               this.closeModal();
-            } else {
+            }
+            else {
               console.log(data.error);
             }
           })
@@ -75,10 +76,6 @@ export default {
           .catch((error) => {
             error.toString();
           });
-    },
-    displayInput(newSection) {
-      this.newSection = newSection;
-      this.showModal = true;
     }
   },
 

@@ -1,6 +1,6 @@
 <template>
   <div class="topnav">
-    <router-link to="/">Reserver rom</router-link>
+    <router-link to="reserve">Reserver rom</router-link>
     <router-link to="reservations">Mine reservasjoner</router-link>
     <router-link to="rooms">Romoversikt</router-link>
     <router-link to="users" v-if="this.admin">Brukere</router-link>
