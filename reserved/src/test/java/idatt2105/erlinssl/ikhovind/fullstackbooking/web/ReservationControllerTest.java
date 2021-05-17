@@ -49,10 +49,10 @@ public class ReservationControllerTest {
     private static final Section section1 = new Section("Section 1", "Super cool section");
     private static final Section section2 = new Section("Section 2", "Not so cool section");
 
-    String timestamp1 = "2021-06-12T16:03:42.493+00:00"; //  16:00:00
-    String timestamp2 = "2021-06-12T16:23:11.123+00:00"; //  16:30:00
-    String timestamp3 = "2021-06-12T16:59:30.224+00:00"; //  17:00:00
-    String timestamp4 = "2021-06-12T17:32:00.000+00:00"; //  17:30:00
+    String timestamp1 = "2021-06-12T16:03:42.493Z"; //  16:00:00
+    String timestamp2 = "2021-06-12T16:23:11.123Z"; //  16:30:00
+    String timestamp3 = "2021-06-12T16:59:30.224Z"; //  17:00:00
+    String timestamp4 = "2021-06-12T17:32:00.000Z"; //  17:30:00
 
     private static JSONObject reservation1;
     private static JSONObject reservation2;
