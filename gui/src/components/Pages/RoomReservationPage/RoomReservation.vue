@@ -22,7 +22,7 @@
           <button class="timeButton">08:30</button>
         </div>
       </form>
-      <button>reserver</button>
+      <button @click="submitReservation()">reserver</button>
       <img src="../../../assets/plus.png" alt="add new section" @click="$refs.editSectionModal.displayInput(true)">
     </div>
     <EditSectionModal ref="editSectionModal"></EditSectionModal>
@@ -63,14 +63,15 @@ export default {
     return {
      rooms: [],
       sections: [[]],
-      selectedSections: []
+      selectedSections: [],
+      selectedRoomId: "";
     }
   },
   methods: {
     changeRoomSelection() {
       const ef = document.getElementById("rooms");
       this.selectedSections = this.sections[ef.selectedIndex];
-    }
+    },
   }
 }
 </script>
