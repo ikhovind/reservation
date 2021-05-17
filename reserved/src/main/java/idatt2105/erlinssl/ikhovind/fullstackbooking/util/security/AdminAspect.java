@@ -12,12 +12,15 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.xml.bind.DatatypeConverter;
+import java.util.Map;
 
 @Slf4j
 @Aspect
@@ -27,8 +30,9 @@ public class AdminAspect {
     private SecurityService securityService;
 
     @Around("@annotation(adminTokenRequired)")
-    public void adminTokenRequiredWithAnnotation(ProceedingJoinPoint pjp, AdminTokenRequired adminTokenRequired) throws Throwable {
-        JSONObject json = new JSONObject();
+    public Object adminTokenRequiredWithAnnotation(ProceedingJoinPoint pjp, AdminTokenRequired adminTokenRequired) throws Throwable {
+        JSONObject jsonBody = new JSONObject();
+        boolean passed = true;
         try {
             ServletRequestAttributes requestAttributes = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
             HttpServletRequest request = requestAttributes.getRequest();
@@ -53,16 +57,35 @@ public class AdminAspect {
                 throw new AdminPermissionMissingException("User not authorized");
             }
         } catch (IllegalArgumentException e) {
-            json.put("error", "invalid token");
+            jsonBody.put("error", "invalid token");
             log.error("An illegal argument was passed", e);
+            passed = false;
+
         } catch (ExpiredJwtException e) {
-            json.put("error", "expired token");
+            jsonBody.put("error", "expired token");
             log.error("An expired token was passed");
+            passed = false;
+
+        } catch (AdminPermissionMissingException e) {
+            jsonBody.put("error", e.getMessage());
+            jsonBody.put("result", false);
+            return ResponseEntity
+                    .status(HttpStatus.UNAUTHORIZED)
+                    .body(jsonBody.toMap());
+
         } catch (Exception e) {
-            json.put("error", "unexpected error");
+            jsonBody.put("error", "unexpected error");
             log.error("An unexpected error occurred", e);
+            passed = false;
+
+        }
+        if(!passed) {
+            jsonBody.put("result", false);
+            return ResponseEntity
+                    .badRequest()
+                    .body(jsonBody.toMap());
         }
 
-        pjp.proceed();
+        return pjp.proceed();
     }
 }

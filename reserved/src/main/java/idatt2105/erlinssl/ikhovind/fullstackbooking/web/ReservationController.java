@@ -10,6 +10,7 @@ import idatt2105.erlinssl.ikhovind.fullstackbooking.service.RoomService;
 import idatt2105.erlinssl.ikhovind.fullstackbooking.service.SectionService;
 import idatt2105.erlinssl.ikhovind.fullstackbooking.service.UserService;
 import idatt2105.erlinssl.ikhovind.fullstackbooking.util.Utilities;
+import idatt2105.erlinssl.ikhovind.fullstackbooking.util.security.AdminTokenRequired;
 import idatt2105.erlinssl.ikhovind.fullstackbooking.util.security.service.SecurityService;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONArray;
@@ -58,8 +59,8 @@ public class ReservationController {
             Room room = roomService.getRoomById(roomId);
             User user = userService.getSingleUser(
                     UUID.fromString(securityService.getUserPartsByToken(token)[0]));
-            Timestamp timeFrom = Utilities.toTimestamp(map.get("timeFrom"));
-            Timestamp timeTo = Utilities.toTimestamp(map.get("timeTo"));
+            Timestamp timeFrom = Utilities.stringToTimestamp(map.get("timeFrom"));
+            Timestamp timeTo = Utilities.stringToTimestamp(map.get("timeTo"));
             if (!roomReservationNoOverlap(timeFrom, timeTo, room)) {
                 jsonBody.put("error", "there are already reservations during that timeframe");
                 return ResponseEntity
@@ -94,12 +95,20 @@ public class ReservationController {
         jsonBody.put("result", false);
         try {
             Room room = roomService.getRoomById(roomId);
+            System.out.println(room);   //TODO Find out why this prevents NullPointer. Possibly cache-related?
             Section section = sectionService.getSection(sectionId);
+            if(!room.getSection().contains(section)) {
+                jsonBody.put("error", "missing section-room relation");
+                return ResponseEntity
+                        .status(HttpStatus.FORBIDDEN)
+                        .body(jsonBody.toMap());
+
+            }
             User user = userService.getSingleUser(
                     UUID.fromString(securityService.getUserPartsByToken(token)[0]));
 
-            Timestamp timeFrom = Utilities.toTimestamp(map.get("timeFrom"));
-            Timestamp timeTo = Utilities.toTimestamp(map.get("timeTo"));
+            Timestamp timeFrom = Utilities.stringToTimestamp(map.get("timeFrom"));
+            Timestamp timeTo = Utilities.stringToTimestamp(map.get("timeTo"));
 
             if (!sectionReservationNoOverlap(timeFrom, timeTo, room, section)) {
                 jsonBody.put("error", "there are already reservations during that timeframe");
@@ -137,8 +146,8 @@ public class ReservationController {
         try {
             Room room = roomService.getRoomById(roomId);
             JSONArray reservations = new JSONArray();
-            Timestamp timeFrom = Utilities.toTimestamp(map.get("timeFrom"));
-            Timestamp timeTo = Utilities.toTimestamp(map.get("timeTo"));
+            Timestamp timeFrom = Utilities.stringToTimestamp(map.get("timeFrom"));
+            Timestamp timeTo = Utilities.stringToTimestamp(map.get("timeTo"));
             if (sectionId != null) {
                 log.warn("Inside section");
                 Section section = sectionService.getSection(sectionId);
@@ -184,8 +193,8 @@ public class ReservationController {
         try {
             Room room = roomService.getRoomById(roomId);
             JSONArray reservations = new JSONArray();
-            Timestamp timeFrom = Utilities.toTimestamp(map.get("timeFrom"));
-            Timestamp timeTo = Utilities.toTimestamp(map.get("timeTo"));
+            Timestamp timeFrom = Utilities.stringToTimestamp(map.get("timeFrom"));
+            Timestamp timeTo = Utilities.stringToTimestamp(map.get("timeTo"));
             log.warn("Inside room");
             for (Reservation r :
                     reservationService.getRoomReservationsBetween(timeFrom, timeTo, room)) {
@@ -214,6 +223,7 @@ public class ReservationController {
                 .body(jsonBody.toMap());
     }
 
+    @AdminTokenRequired
     @GetMapping("")
     public ResponseEntity getAllReservations(@RequestHeader("token") String token) {
         JSONObject jsonBody = new JSONObject();
@@ -246,6 +256,7 @@ public class ReservationController {
                 .body(jsonBody.toMap());
     }
 
+    @AdminTokenRequired
     @GetMapping("/rooms/{id}")
     public ResponseEntity getRoomReservations(@PathVariable("id") UUID roomId,
                                               @RequestHeader("token") String token) {
@@ -277,6 +288,7 @@ public class ReservationController {
                 .body(jsonBody.toMap());
     }
 
+    @AdminTokenRequired
     @GetMapping("/rooms/{rId}/sections/{sId}")
     public ResponseEntity getSectionReservations(@PathVariable("rId") UUID roomId,
                                                  @PathVariable("sId") UUID sectionId,
@@ -285,6 +297,7 @@ public class ReservationController {
         jsonBody.put("result", false);
         try {
             Room room = roomService.getRoomById(roomId);
+            System.out.println(room);
             Section section = sectionService.getSection(sectionId);
             JSONArray reservations = new JSONArray();
             if (Utilities.isAdmin(token)) {
@@ -299,7 +312,7 @@ public class ReservationController {
             jsonBody.put("reservations", reservations);
 
         } catch (EntityNotFoundException e) {
-            jsonBody.put("error", "that room does not exist");
+            jsonBody.put("error", "an invalid id was passed");
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
                     .body(jsonBody.toMap());
@@ -311,7 +324,7 @@ public class ReservationController {
                 .body(jsonBody.toMap());
     }
 
-    //@AdminTokenRequired
+    @AdminTokenRequired
     @DeleteMapping("/{id}")
     public ResponseEntity deleteReservation(@PathVariable("id") UUID id) {
         JSONObject jsonBody = new JSONObject();
@@ -351,8 +364,8 @@ public class ReservationController {
         jsonBody.put("result", false);
         try {
             Reservation reservation = reservationService.getReservationById(id);
-            reservation.setTimeFrom(Utilities.toTimestamp(map.get("timeFrom")));
-            reservation.setTimeTo(Utilities.toTimestamp(map.get("timeTo")));
+            reservation.setTimeFrom(Utilities.stringToTimestamp(map.get("timeFrom")));
+            reservation.setTimeTo(Utilities.stringToTimestamp(map.get("timeTo")));
             reservationService.saveReservation(reservation);
             jsonBody.put("reservation", reservation.toJson());
 

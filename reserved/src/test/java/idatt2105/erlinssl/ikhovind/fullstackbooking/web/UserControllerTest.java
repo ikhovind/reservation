@@ -1,6 +1,7 @@
 package idatt2105.erlinssl.ikhovind.fullstackbooking.web;
 
 import idatt2105.erlinssl.ikhovind.fullstackbooking.model.User;
+import idatt2105.erlinssl.ikhovind.fullstackbooking.util.Constants;
 import idatt2105.erlinssl.ikhovind.fullstackbooking.util.Utilities;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -30,11 +31,11 @@ public class UserControllerTest {
     private MockMvc mockMvc;
 
     private User user1 = new User("User1F", "User1L", "11111111",
-            "1@1.1", "1P", new Timestamp(new Date().getTime()), 0);
+            "1@1.1", "1P", new Timestamp(new Date().getTime()), Constants.USER_TYPE);
     private User user2 = new User("User2F", "User2L", "22222222",
-            "2@2.2", "2P", new Timestamp(new Date().getTime()), 0);
+            "2@2.2", "2P", new Timestamp(new Date().getTime()), Constants.USER_TYPE);
     private User user3 = new User("User3F", "User3L", "33333333",
-            "3@3.3", "3P", new Timestamp(new Date().getTime()), 1);
+            "3@3.3", "3P", new Timestamp(new Date().getTime()), Constants.ADMIN_TYPE);
     private final JSONObject user1Json = userToJson(user1);
     private final JSONObject user2Json = userToJson(user2);
     private final JSONObject user3Json = userToJson(user3);
@@ -155,6 +156,7 @@ public class UserControllerTest {
 
     private void deleteUser(JSONObject u) throws Exception {
         mockMvc.perform(delete("/users/" + u.get("id"))
+                .header("token", testingToken)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
     }

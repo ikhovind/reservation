@@ -8,6 +8,7 @@ import idatt2105.erlinssl.ikhovind.fullstackbooking.repo.SectionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.persistence.EntityNotFoundException;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -27,7 +28,8 @@ public class SectionService {
     }
 
     public Section getSection(UUID sectionId) {
-        return sectionRepository.getOne(sectionId);
+        return sectionRepository.findById(sectionId)
+                .orElseThrow(EntityNotFoundException::new);
     }
 
     public void deleteSection(UUID roomId, UUID sectionId) {
