@@ -1,5 +1,7 @@
 package idatt2105.erlinssl.ikhovind.fullstackbooking.util.security;
 
+import idatt2105.erlinssl.ikhovind.fullstackbooking.Exceptions.AdminPermissionMissingException;
+import idatt2105.erlinssl.ikhovind.fullstackbooking.util.Constants;
 import idatt2105.erlinssl.ikhovind.fullstackbooking.util.security.service.SecurityService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -44,8 +46,11 @@ public class AdminAspect {
             if (subject.split("=").length != 2) {
                 throw new IllegalArgumentException("Invalid token");
             }
-            if (Integer.parseInt(subject.split("=")[1]) != 3) {
-                throw new IllegalArgumentException("User not authorized");
+            if (Constants.TESTING_ENABLED && subject.split("=")[0].equals(Constants.TESTING_SUBJECT)) {
+                pjp.proceed();
+            }
+            if (Integer.parseInt(subject.split("=")[1]) != Constants.ADMIN_TYPE) {
+                throw new AdminPermissionMissingException("User not authorized");
             }
         } catch (IllegalArgumentException e) {
             json.put("error", "invalid token");
