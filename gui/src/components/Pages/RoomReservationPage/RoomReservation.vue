@@ -6,7 +6,6 @@
       <form class="selectRoom">
         <label for="rooms">Velg et rom</label>
         <select id="rooms" @change="changeRoomSelection()">
-          <option disabled value="">Vennligst velg et rom</option>
           <option v-for="(room,i) in rooms" :key="i" :value="room" >{{room.roomName}}</option>
         </select>
         <label for="sections">Velg en seksjon</label>
@@ -19,12 +18,13 @@
         <div v-if="this.selectedTime !== ''" class="buttonList">
           <button v-for="index in 72" :key="index"
                   @click="setTime(index)"
-          v-bind:class="isBetween(index) ? 'blue' : 'timeButton'">
+          :class="[isReserved(index) ? 'red' : isBetween(index) ? 'blue' : 'timeButton']"
+          :disabled="isDisabled(index)">
             {{ Math.floor(index / 4 + 6) }}:{{ padMinutes(((index % 4) * 15))}}</button>
         </div>
       </form>
       <button @click="submitReservation()">reserver</button>
-      <img v-if="this.selectedRoomId !== ''" src="../../../assets/plus.png" alt="add new section"
+      <img src="../../../assets/plus.png" alt="add new section"
            @click="$refs.editSectionModal.displayInput(true, selectedRoomId)">
     </div>
     <EditSectionModal ref="editSectionModal" v-on:createdSection="loadRoomsAndSections()"></EditSectionModal>
@@ -56,7 +56,7 @@ export default {
     changeRoomSelection() {
       const ef = document.getElementById("rooms");
       this.selectedSections = this.sections[ef.selectedIndex];
-      this.selectedRoomId = this.rooms[ef.selectedIndex - 1].roomId;
+      this.selectedRoomId = this.rooms[ef.selectedIndex].roomId;
       this.setReservedTimes();
     },
     async setReservedTimes() {
@@ -75,7 +75,6 @@ export default {
                 this.reservedTimes[reservation].push(new Date(data.reservations[reservation].timeFrom));
                 this.reservedTimes[reservation].push(new Date(data.reservations[reservation].timeTo));
               }
-              console.log(this.reservedTimes);
             } else {
               console.log(data.error);
             }
@@ -120,7 +119,32 @@ export default {
     selectDate() {
       this.selectedTime = document.getElementById("datePicker").value;
     },
-
+    isDisabled(n) {
+      n = (new Date(this.selectedTime + " " + Math.floor(n / 4 + 6) + ":" + this.padMinutes(((n % 4) * 15)) + ":00"));
+      for (let i in this.reservedTimes){
+        if (this.startTime != null) {
+          if(this.startTime.getTime() <= this.reservedTimes[i][0].getTime()){
+            return n.getTime() > this.reservedTimes[i][0].getTime();
+          }
+          if(this.startTime.getTime() >= this.reservedTimes[i][1].getTime()){
+            return n.getTime() < this.reservedTimes[i][1].getTime();
+          }
+        }
+        else {
+          return n.getTime() > this.reservedTimes[i][0] && n.getTime() < this.reservedTimes[i][1];
+        }
+      }
+      return false;
+    },
+    isReserved(n) {
+      n = (new Date(this.selectedTime + " " + Math.floor(n / 4 + 6) + ":" + this.padMinutes(((n % 4) * 15)) + ":00"));
+      for (let arr in this.reservedTimes) {
+        if(n.getTime() > this.reservedTimes[arr][0].getTime() && n.getTime() < this.reservedTimes[arr][1].getTime()) {
+          return true;
+        }
+      }
+      return false
+    },
     isBetween(n) {
       n = (new Date(this.selectedTime + " " + Math.floor(n / 4 + 6) + ":" + this.padMinutes(((n % 4) * 15)) + ":00"));
       if (this.endTime === null || this.startTime === null) {
@@ -133,15 +157,9 @@ export default {
       }
     },
     async loadRoomsAndSections() {
-      let selectedIndex;
-      let ef = document.getElementById("rooms");
-      if (ef != null) {
-        selectedIndex = ef.selectedIndex;
-
-      }
       //we're reloading these so ned to empty them first
       this.rooms = [];
-      this.sections = [[]];
+      this.sections = [];
       this.selectedSections = [];
       this.selectedRoomId = "";
 
@@ -157,9 +175,11 @@ export default {
             if (data.result) {
               for (let room in data.rooms){
                 this.rooms.push(data.rooms[room]);
-                this.sections.push(data.rooms[room].sections)
+                this.sections.push(new Array());
+                for (let i in data.rooms[room].sections){
+                  this.sections[room].push(data.rooms[room].sections[i]);
+                }
               }
-
             } else {
               console.log(data.error);
             }
@@ -168,10 +188,7 @@ export default {
           .catch((error) => {
             error.toString();
           });
-      // set the selection as the same room as before the reload
-      if (ef != null) {
-        ef.selectedIndex = selectedIndex;
-      }
+      this.changeRoomSelection();
     }
   }
 }
