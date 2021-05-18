@@ -40,6 +40,7 @@ export default {
   name: "EditSectionModal",
   data() {
     return {
+      selectedRoom: "",
       showModal: false,
       newSection: true,
     }
@@ -59,8 +60,7 @@ export default {
         })
       };
 
-      let sectionId = 5;
-      await fetch("https://localhost:8443/rooms/" + sectionId + "/sections", addSectionOptions)
+      await fetch("https://localhost:8443/rooms/" + this.selectedRoom + "/sections", addSectionOptions)
           .then((response) => response.json())
           //Then with the data from the response in JSON...
           .then(data => {
@@ -76,7 +76,8 @@ export default {
             error.toString();
           });
     },
-    displayInput(newSection) {
+    displayInput(newSection, selectedRoom) {
+      this.selectedRoom = selectedRoom;
       this.newSection = newSection;
       this.showModal = true;
     }
