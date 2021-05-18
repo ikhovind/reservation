@@ -347,7 +347,7 @@ public class ReservationController {
             User user = res.getUser();
             user.removeReservation(res);
             reservationService.deleteReservationById(id);
-            userService.updateUser(user);
+            userService.updateUser(user, false);
 
         } catch (EntityNotFoundException e) {
             jsonBody.put("error", "that reservation does not exist");
@@ -437,7 +437,7 @@ public class ReservationController {
         reservation.setUser(user);
         reservation = reservationService.saveReservation(reservation);
         user.addReservation(reservation);
-        userService.updateUser(user);
+        userService.updateUser(user, false);
         jsonBody.put("reservation", reservation.toJson());
         jsonBody.put("result", true);
         return ResponseEntity

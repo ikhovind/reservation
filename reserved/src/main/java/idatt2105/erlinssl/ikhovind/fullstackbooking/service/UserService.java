@@ -55,7 +55,12 @@ public class UserService {
         return userRepository.findByFirstNameLikeAndLastNameLike(firstName + "%", lastName + "%");
     }
 
-    public User updateUser(User u) {
+    public User updateUser(User u, boolean newPass) {
+        System.out.println("password changed: " + newPass);
+        if(newPass){
+            System.out.println("new is " + u.getPassword());
+            u.setPassword(encoder.encode(u.getPassword()));
+        }
         return userRepository.save(u);
     }
 

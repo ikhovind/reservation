@@ -154,14 +154,15 @@ public class UserController {
         JSONObject jsonBody = new JSONObject();
         jsonBody.put("result", false);
         try {
+            boolean newPass;
             User user = userService.getSingleUser(userId);
             if (Utilities.isAdmin(token)) {
-                editUser(user, map, true);
+                newPass = editUser(user, map, true);
             } else {
                 Utilities.uidMatch(token, userId);
-                editUser(user, map, false);
+                newPass = editUser(user, map, false);
             }
-            user = userService.updateUser(user);
+            user = userService.updateUser(user, newPass);
             jsonBody.put("user", user);
             jsonBody.put("result", true);
             return ResponseEntity
@@ -189,7 +190,8 @@ public class UserController {
         }
     }
 
-    private void editUser(User u, Map<String, Object> map, boolean admin) {
+    private boolean editUser(User u, Map<String, Object> map, boolean admin) {
+        boolean passwordChanged = false;
         if (map.containsKey("firstName") && !map.get("firstName").toString().isBlank()) {
             u.setFirstName(map.get("firstName").toString());
         }
@@ -201,6 +203,7 @@ public class UserController {
         }
         if (map.containsKey("newPassword") && !map.get("newPassword").toString().isBlank()) {
             u.setPassword(map.get("newPassword").toString());
+            passwordChanged = true;
         }
         if (admin) {
             if (map.containsKey("validUntil") && !map.get("validUntil").toString().isBlank()) {
@@ -210,6 +213,7 @@ public class UserController {
                 u.setUserType(Integer.parseInt(map.get("userType").toString()));
             }
         }
+        return passwordChanged;
     }
 
     private User mapToUser(Map<String, Object> map) throws ParseException {
