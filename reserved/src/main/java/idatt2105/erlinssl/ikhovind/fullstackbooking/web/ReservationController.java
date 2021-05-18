@@ -12,6 +12,7 @@ import idatt2105.erlinssl.ikhovind.fullstackbooking.service.SectionService;
 import idatt2105.erlinssl.ikhovind.fullstackbooking.service.UserService;
 import idatt2105.erlinssl.ikhovind.fullstackbooking.util.Utilities;
 import idatt2105.erlinssl.ikhovind.fullstackbooking.util.security.AdminTokenRequired;
+import idatt2105.erlinssl.ikhovind.fullstackbooking.util.security.UserTokenRequired;
 import idatt2105.erlinssl.ikhovind.fullstackbooking.util.security.service.SecurityService;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONArray;
