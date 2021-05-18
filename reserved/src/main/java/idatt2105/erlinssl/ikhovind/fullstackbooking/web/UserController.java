@@ -196,7 +196,7 @@ public class UserController {
         if (map.containsKey("firstName") && !map.get("firstName").toString().isBlank()) {
             u.setFirstName(map.get("firstName").toString());
         }
-        if (map.containsKey("lastName") && !map.get("phone").toString().isBlank()) {
+        if (map.containsKey("lastName") && !map.get("lastName").toString().isBlank()) {
             u.setLastName(map.get("lastName").toString());
         }
         if (map.containsKey("phone") && !map.get("phone").toString().isBlank()) {

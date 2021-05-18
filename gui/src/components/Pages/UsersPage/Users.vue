@@ -1,8 +1,8 @@
 <template>
   <div>
     <Header></Header>
-    <button @click="$refs.editUserModal.displayInput(true)">Ny bruker</button>
-    <UsersTable v-on:editUser="onClickChild"></UsersTable>
+    <button @click="emitNewUser">Ny bruker</button>
+    <UsersTable v-on:editUser="editUserEmitted"></UsersTable>
     <EditUserModal ref="editUserModal"></EditUserModal>
   </div>
 </template>
@@ -12,6 +12,7 @@
 import UsersTable from "@/components/Pages/UsersPage/UsersTable";
 import EditUserModal from "@/components/Pages/Common/EditUserModal";
 import Header from "@/components/Pages/Common/Header";
+
 export default {
   name: "Users",
   components: {
@@ -19,8 +20,14 @@ export default {
     EditUserModal,
     UsersTable
   }, methods: {
-    onClickChild(value) {
+    editUserEmitted(value) {
       this.$refs.editUserModal.displayInput(value)
+    },
+    emitNewUser() {
+      this.$refs.editUserModal.displayInput({
+        newUser: true,
+        userType: localStorage.getItem("userType")
+      })
     }
   }
 }

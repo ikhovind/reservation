@@ -76,13 +76,15 @@ export default {
       console.log(this.users)
     },
     parseDate(date) {
-      return new Date(Date.parse(date)).toLocaleString();
+      return new Date(Date.parse(date)).toLocaleDateString();
     },
-    emit_event: function() {
-      if(this.selected.length !== 0){
-        let id = this.selected[0].id
-        console.log(id)
-        this.$emit('editUser', {newUser:false, admin:true, uid:id})
+    emit_event: function () {
+      if (this.selected.length !== 0) {
+        this.$emit('editUser', {
+          newUser: false,
+          userType: localStorage.getItem("userType"),
+          uid: this.selected[0].id
+        })
       } else {
         alert("Velg en bruker")
       }
