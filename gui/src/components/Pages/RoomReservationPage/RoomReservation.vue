@@ -43,9 +43,9 @@ export default {
   data () {
     return {
       rooms: [],
-      sections: [[]],
+      sections: [],
       availableSections: [],
-      reservedTimes: [[]],
+      reservedTimes: [],
       selectedRoomId: "",
       startTime: null,
       endTime: null,
@@ -73,6 +73,7 @@ export default {
           .then(data => {
             if (data.result) {
               for (let reservation in data.reservations) {
+                console.log(reservation);
                 this.reservedTimes.push(new Array());
                 this.reservedTimes[reservation].push(new Date(data.reservations[reservation].timeFrom));
                 this.reservedTimes[reservation].push(new Date(data.reservations[reservation].timeTo));
@@ -158,8 +159,50 @@ export default {
         return (n.getTime() >= this.startTime.getTime() && n <= this.endTime.getTime());
       }
     },
-    selectSection() {
-      this.selectedSectionId = this.availableSections[document.getElementById("sections").selectedIndex].sectionId;
+    async selectSection() {
+      try {
+        this.selectedSectionId = this.availableSections[document.getElementById("sections").selectedIndex -1].sectionId;
+      } catch (e) {
+        this.selectedSectionId = "";
+      }
+      const addSectionOptions = {
+        method: 'GET',
+        headers: {'Content-Type': 'application/json',
+          'token': localStorage.getItem("token")}
+      };
+      this.reservedTimes = [];
+      let url= "/reservations/rooms/" + this.selectedRoomId;
+
+      await fetch("https://localhost:8443" + url, addSectionOptions)
+          .then((response) => response.json())
+          //Then with the data from the response in JSON...
+          .then(data => {
+            if (data.result) {
+              let counter = 0;
+              for (let reservation in data.reservations) {
+                if (data.reservations[reservation].section != null) {
+                  if (this.selectedSectionId === "" || data.reservations[reservation].section.sectionId === this.selectedSectionId) {
+                    this.reservedTimes.push([]);
+                    this.reservedTimes[counter].push(new Date(data.reservations[reservation].timeFrom));
+                    this.reservedTimes[counter].push(new Date(data.reservations[reservation].timeTo));
+                    counter++;
+                  }
+                }
+                else {
+                  this.reservedTimes.push([]);
+                  this.reservedTimes[counter].push(new Date(data.reservations[reservation].timeFrom));
+                  this.reservedTimes[counter].push(new Date(data.reservations[reservation].timeTo));
+                  counter++;
+                }
+              }
+            } else {
+              console.log(data.error);
+            }
+          })
+          //Then with the error genereted...
+          .catch((error) => {
+            error.toString();
+          });
     },
     async submitReservation() {
       const requestOptions = {
@@ -177,7 +220,7 @@ export default {
         url = "/reservations/rooms/" + this.selectedRoomId;
       }
       else {
-        url = "/reservations/rooms/" + this.selectedRoomId + "/sections/" + this.availableSections[sectionIndex].sectionId;
+        url = "/reservations/rooms/" + this.selectedRoomId + "/sections/" + this.availableSections[sectionIndex - 1].sectionId;
       }
       await fetch("https://localhost:8443" + url, requestOptions)
           .then((response) => response.json())
@@ -194,7 +237,6 @@ export default {
           .catch((error) => {
             error.toString();
           });
-
     },
     async loadRoomsAndSections() {
       //we're reloading these so ned to empty them first
