@@ -52,9 +52,17 @@ public class Utilities {
     }
 
     public static boolean withinBusinessHours(long timeFrom, long timeTo) {
-        if((timeFrom)%(1000L * 60L * 60L * 24L) < Constants.OPENING_HOUR) {
+        int timeFromHour = (int) ((timeFrom%(1000L * 60L * 60L * 24L))/(1000L * 60L * 60L));
+        int timeToHour = (int) ((timeTo % (1000L * 60L * 60L * 24L))/(1000L * 60L * 60L));
+
+        if(timeFromHour < Constants.OPENING_HOUR || timeFromHour > Constants.CLOSING_HOUR) {
+            System.out.println("Bad timeFrom " + timeFromHour);
             return false;
         }
-        return timeTo % (1000L * 60L * 60L * 24L) <= Constants.CLOSING_HOUR;
+        System.out.println("timeTo " + timeToHour);
+        if(timeToHour < Constants.OPENING_HOUR || timeToHour > Constants.CLOSING_HOUR) {
+            return timeToHour == 0;
+        }
+        return true;
     }
 }
