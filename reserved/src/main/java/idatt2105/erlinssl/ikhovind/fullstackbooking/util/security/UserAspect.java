@@ -28,8 +28,9 @@ public class UserAspect {
     private SecurityService securityService;
 
     @Around("@annotation(userTokenRequired)")
-    public void userTokenRequiredWithAnnotation(ProceedingJoinPoint pjp, UserTokenRequired userTokenRequired) throws Throwable {
-        JSONObject json = new JSONObject();
+    public Object userTokenRequiredWithAnnotation(ProceedingJoinPoint pjp, UserTokenRequired userTokenRequired) throws Throwable {
+        JSONObject jsonBody = new JSONObject();
+        boolean passed = true;
         try {
             ServletRequestAttributes requestAttributes = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
             HttpServletRequest request = requestAttributes.getRequest();
@@ -51,16 +52,26 @@ public class UserAspect {
                 pjp.proceed();
             }
         } catch (IllegalArgumentException e) {
-            json.put("error", "invalid token");
+            passed = false;
+            jsonBody.put("error", "invalid token");
             log.error("An illegal argument was passed", e);
         } catch (ExpiredJwtException e) {
-            json.put("error", "expired token");
+            passed = false;
+            jsonBody.put("error", "expired token");
             log.error("An expired token was passed");
         } catch (Exception e) {
-            json.put("error", "unexpected error");
+            passed = false;
+            jsonBody.put("error", "unexpected error");
             log.error("An unexpected error occurred", e);
         }
 
-        pjp.proceed();
+        if(!passed) {
+            jsonBody.put("result", false);
+            return ResponseEntity
+                    .badRequest()
+                    .body(jsonBody.toMap());
+        }
+
+        return pjp.proceed();
     }
 }
