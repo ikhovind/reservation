@@ -73,7 +73,6 @@ export default {
           .then(data => {
             if (data.result) {
               for (let reservation in data.reservations) {
-                console.log(reservation);
                 this.reservedTimes.push(new Array());
                 this.reservedTimes[reservation].push(new Date(data.reservations[reservation].timeFrom));
                 this.reservedTimes[reservation].push(new Date(data.reservations[reservation].timeTo));
