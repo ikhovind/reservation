@@ -1,6 +1,6 @@
 <template>
   <div class="loginDiv">
-  <h1> Login </h1>
+    <h1> Login </h1>
     <form>
       <div class="container">
         <p v-if="loginFailed">Login feilet, vennligst prøv igjen</p>
@@ -17,7 +17,7 @@
 <script>
 export default {
 
-  data () {
+  data() {
     return {
       loginFailed: false
     }
@@ -39,14 +39,13 @@ export default {
           .then((response) => response.json())
           //Then with the data from the response in JSON...
           .then(data => {
-              if(data.result) {
-                localStorage.setItem("userId", data.userid);
-                localStorage.setItem("token", data.token);
-                this.$emit('login');
-              }
-              else {
-                this.loginFailed = true;
-              }
+            if (data.result) {
+              localStorage.setItem("userId", data.userid);
+              localStorage.setItem("token", data.token);
+              this.$emit('login');
+            } else {
+              this.loginFailed = true;
+            }
           })
           //Then with the error genereted...
           .catch((error) => {
@@ -72,9 +71,11 @@ button {
   border: none;
   cursor: pointer;
 }
+
 form {
   border: 3px solid #f1f1f1;
 }
+
 input[type=text], input[type=password] {
   width: 100%;
   margin: 8px 0;
@@ -83,9 +84,11 @@ input[type=text], input[type=password] {
   border: 2px solid #93c47d;
   box-sizing: border-box;
 }
+
 button:hover {
   opacity: 0.7;
 }
+
 .loginDiv {
   width: 50%;
   margin: auto;
