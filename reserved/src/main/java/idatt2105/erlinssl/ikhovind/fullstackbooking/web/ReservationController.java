@@ -236,7 +236,7 @@ public class ReservationController {
                 .body(jsonBody.toMap());
     }
 
-    @AdminTokenRequired
+    @UserTokenRequired
     @GetMapping("")
     public ResponseEntity getAllReservations(@RequestHeader("token") String token) {
         JSONObject jsonBody = new JSONObject();
@@ -269,7 +269,7 @@ public class ReservationController {
                 .body(jsonBody.toMap());
     }
 
-    @AdminTokenRequired
+    @UserTokenRequired
     @GetMapping("/rooms/{id}")
     public ResponseEntity getRoomReservations(@PathVariable("id") UUID roomId,
                                               @RequestHeader("token") String token) {
@@ -301,7 +301,7 @@ public class ReservationController {
                 .body(jsonBody.toMap());
     }
 
-    @AdminTokenRequired
+    @UserTokenRequired
     @GetMapping("/rooms/{rId}/sections/{sId}")
     public ResponseEntity getSectionReservations(@PathVariable("rId") UUID roomId,
                                                  @PathVariable("sId") UUID sectionId,
