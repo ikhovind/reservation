@@ -6,6 +6,7 @@ import idatt2105.erlinssl.ikhovind.fullstackbooking.model.Room;
 import idatt2105.erlinssl.ikhovind.fullstackbooking.model.Section;
 import idatt2105.erlinssl.ikhovind.fullstackbooking.repo.ReservationRepository;
 import idatt2105.erlinssl.ikhovind.fullstackbooking.util.Constants;
+import idatt2105.erlinssl.ikhovind.fullstackbooking.util.Utilities;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -73,17 +74,19 @@ public class ReservationService {
     private static final int POOF = 1;
 
     private void validateTimeframe(Timestamp timeFrom, Timestamp timeTo) {
-        System.out.println("Validating timeframe between " + timeFrom + " and " + timeTo);
-        long timeUntil = timeFrom.getTime() - new Date().getTime();
-        System.out.println("Time until is " + timeUntil);
+        long timeFromMillis = timeFrom.getTime();
+        long timeToMillis = timeTo.getTime();
+        if(!Utilities.withinBusinessHours(timeFromMillis, timeToMillis)) {
+            throw new IllegalTimeframeException("the selected time is not within business hours");
+        }
+        long timeUntil = timeFromMillis - new Date().getTime();
         if (timeUntil < 0) {
             throw new IllegalTimeframeException("we do not possess a time machine");
         }
         if (timeUntil > Constants.MAX_TIME_UNTIL_RES) {
             throw new IllegalTimeframeException("you cannot reserve that far ahead");
         }
-        long length = timeTo.getTime() - timeFrom.getTime();
-        System.out.println("Length is " + length);
+        long length = timeToMillis - timeFromMillis;
         if (length < Constants.MIN_RESERVATION_MILLIS) {
             throw new IllegalTimeframeException("the given timeframe is too short");
         }

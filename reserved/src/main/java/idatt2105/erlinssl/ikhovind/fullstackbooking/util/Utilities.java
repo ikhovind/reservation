@@ -50,4 +50,11 @@ public class Utilities {
             throw new PermissionDeniedException();
         }
     }
+
+    public static boolean withinBusinessHours(long timeFrom, long timeTo) {
+        if((timeFrom)%(1000L * 60L * 60L * 24L) < Constants.OPENING_HOUR) {
+            return false;
+        }
+        return timeTo % (1000L * 60L * 60L * 24L) <= Constants.CLOSING_HOUR;
+    }
 }
