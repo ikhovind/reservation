@@ -74,6 +74,7 @@ public class ReservationController {
             return addReservationToUser(jsonBody, user, reservation);
 
         } catch (EntityNotFoundException e) {
+            log.error("entity not found", e);
             jsonBody.put("error", "an invalid id was passed");
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
