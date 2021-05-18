@@ -2,7 +2,7 @@
   <div>
     <Header></Header>
     <button @click="$refs.editUserModal.displayInput(true)">Ny bruker</button>
-    <UsersTable v-on:editUser="$refs.editUserModal.displayInput(false)"></UsersTable>
+    <UsersTable v-on:editUser="onClickChild"></UsersTable>
     <EditUserModal ref="editUserModal"></EditUserModal>
   </div>
 </template>
@@ -18,6 +18,10 @@ export default {
     Header,
     EditUserModal,
     UsersTable
+  }, methods: {
+    onClickChild(value) {
+      this.$refs.editUserModal.displayInput(value)
+    }
   }
 }
 </script>

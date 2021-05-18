@@ -56,12 +56,6 @@
 <script>
 export default {
   name: "EditUserModal",
-  data() {
-    return {
-      newUser: true,
-      showModal: false
-    }
-  },
   methods: {
     closeModal() {
       this.showModal = false;
@@ -70,19 +64,27 @@ export default {
     submitUser() {
       let elements = document.getElementById("newUserForm").elements
       let userObj = {}
-      for(var i = 0 ; i < elements.length ; i++){
+      for(let i = 0 ; i < elements.length ; i++){
         let item = elements.item(i);
         userObj[item.name] = item.value;
       }
       console.log(JSON.stringify(userObj));
     },
-    displayInput(newUser, admin) {
-      this.newUser = newUser;
+    displayInput(args) {
+      console.log(args.newUser)
+      console.log(args.admin)
+      console.log(args.uid)
+      this.newUser = args.newUser;
       this.showModal = true;
-      this.admin = admin;
+      this.admin = args.admin;
     }
   },
-
+  data() {
+    return {
+      newUser: true,
+      showModal: false
+    }
+  },
 }
 </script>
 

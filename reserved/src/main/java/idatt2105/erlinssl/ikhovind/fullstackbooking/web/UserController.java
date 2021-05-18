@@ -104,10 +104,11 @@ public class UserController {
                 }
             }
             jsonBody.put("users", users);
-
+            jsonBody.put("result", true);
             return ResponseEntity
                     .ok()
                     .body(jsonBody.toMap());
+
         } catch (Exception e) {
             log.error("An unexpected error was caught", e);
             jsonBody.put("result", false);
