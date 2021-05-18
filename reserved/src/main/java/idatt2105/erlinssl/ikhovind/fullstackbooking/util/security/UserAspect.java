@@ -1,5 +1,6 @@
 package idatt2105.erlinssl.ikhovind.fullstackbooking.util.security;
 
+import idatt2105.erlinssl.ikhovind.fullstackbooking.util.Constants;
 import idatt2105.erlinssl.ikhovind.fullstackbooking.util.security.service.SecurityService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -45,6 +46,9 @@ public class UserAspect {
             String subject = claims.getSubject();
             if (subject.split("=").length != 2) {
                 throw new IllegalArgumentException("Invalid token");
+            }
+            if (Constants.TESTING_ENABLED && subject.split("=")[0].equals(Constants.TESTING_SUBJECT)) {
+                pjp.proceed();
             }
         } catch (IllegalArgumentException e) {
             json.put("error", "invalid token");

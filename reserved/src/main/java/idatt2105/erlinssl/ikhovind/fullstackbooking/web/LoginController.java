@@ -8,12 +8,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
@@ -47,6 +45,20 @@ public class LoginController {
 
         return ResponseEntity
                 .ok()
+                .body(jsonBody.toMap());
+    }
+
+    @GetMapping(value = "/testing/only/endpoint/delete/me")
+    public ResponseEntity testTokenEndpoint() {
+        JSONObject jsonBody = new JSONObject();
+        if(Constants.TESTING_ENABLED){
+            jsonBody.put("token", securityService.createToken(Constants.TESTING_SUBJECT, Constants.TTL_MILLIS));
+            return ResponseEntity
+                    .ok(jsonBody.toMap());
+        }
+        jsonBody.put("error", "testing disabled");
+        return ResponseEntity
+                .status(HttpStatus.FORBIDDEN)
                 .body(jsonBody.toMap());
     }
 }

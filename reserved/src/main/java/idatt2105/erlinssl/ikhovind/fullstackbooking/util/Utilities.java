@@ -18,7 +18,7 @@ import java.util.UUID;
 public class Utilities {
     private static SecurityService securityService = new SecurityService();
 
-    public static Timestamp toTimestamp(String string) {
+    public static Timestamp stringToTimestamp(String string) {
         try {
             Date initialDate = Date.from(Instant.from(
                     DateTimeFormatter.ISO_INSTANT.parse(string)));

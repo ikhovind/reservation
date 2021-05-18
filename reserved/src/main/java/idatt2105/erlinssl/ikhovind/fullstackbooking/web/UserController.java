@@ -5,6 +5,7 @@ import idatt2105.erlinssl.ikhovind.fullstackbooking.Exceptions.TimestampParsingE
 import idatt2105.erlinssl.ikhovind.fullstackbooking.model.User;
 import idatt2105.erlinssl.ikhovind.fullstackbooking.service.UserService;
 import idatt2105.erlinssl.ikhovind.fullstackbooking.util.Utilities;
+import idatt2105.erlinssl.ikhovind.fullstackbooking.util.security.AdminTokenRequired;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -118,7 +119,7 @@ public class UserController {
         }
     }
 
-    //@AdminTokenRequired
+    @AdminTokenRequired
     @DeleteMapping("/{id}")
     public ResponseEntity deleteUser(@PathVariable("id") UUID userId) {
         JSONObject jsonBody = new JSONObject();
@@ -203,7 +204,7 @@ public class UserController {
         }
         if (admin) {
             if (map.containsKey("validUntil") && !map.get("validUntil").toString().isBlank()) {
-                u.setValidUntil(Utilities.toTimestamp(map.get("validUntil").toString()));
+                u.setValidUntil(Utilities.stringToTimestamp(map.get("validUntil").toString()));
             }
             if (map.containsKey("userType") && !map.get("userType").toString().isBlank()) {
                 u.setUserType(Integer.parseInt(map.get("userType").toString()));
@@ -218,7 +219,7 @@ public class UserController {
         newUser.setPhone(map.get("phone").toString());
         newUser.setEmail(map.get("email").toString());
         newUser.setPassword(map.get("password").toString());
-        newUser.setValidUntil(Utilities.toTimestamp(map.get("validUntil").toString()));
+        newUser.setValidUntil(Utilities.stringToTimestamp(map.get("validUntil").toString()));
         newUser.setUserType(Integer.parseInt(map.get("userType").toString()));
         return newUser;
     }

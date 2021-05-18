@@ -11,6 +11,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
+import java.util.Objects;
 import java.util.UUID;
 
 @Getter
@@ -26,4 +27,12 @@ public class BaseModel {
     @CreatedDate
     @Column(name = "created_date")
     private Timestamp createdDate;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof BaseModel)) return false;
+        BaseModel baseModel = (BaseModel) o;
+        return id.equals(baseModel.id);
+    }
 }

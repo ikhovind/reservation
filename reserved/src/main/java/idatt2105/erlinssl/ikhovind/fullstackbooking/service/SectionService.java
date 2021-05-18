@@ -8,6 +8,7 @@ import idatt2105.erlinssl.ikhovind.fullstackbooking.repo.SectionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.persistence.EntityNotFoundException;
 import java.util.UUID;
 import java.util.stream.Collectors;
 

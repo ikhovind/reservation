@@ -1,5 +1,6 @@
 package idatt2105.erlinssl.ikhovind.fullstackbooking.web;
 
+import idatt2105.erlinssl.ikhovind.fullstackbooking.Exceptions.IllegalTimeframeException;
 import idatt2105.erlinssl.ikhovind.fullstackbooking.Exceptions.TimestampParsingException;
 import idatt2105.erlinssl.ikhovind.fullstackbooking.model.Reservation;
 import idatt2105.erlinssl.ikhovind.fullstackbooking.model.Room;
@@ -10,6 +11,7 @@ import idatt2105.erlinssl.ikhovind.fullstackbooking.service.RoomService;
 import idatt2105.erlinssl.ikhovind.fullstackbooking.service.SectionService;
 import idatt2105.erlinssl.ikhovind.fullstackbooking.service.UserService;
 import idatt2105.erlinssl.ikhovind.fullstackbooking.util.Utilities;
+import idatt2105.erlinssl.ikhovind.fullstackbooking.util.security.AdminTokenRequired;
 import idatt2105.erlinssl.ikhovind.fullstackbooking.util.security.service.SecurityService;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONArray;
@@ -58,9 +60,9 @@ public class ReservationController {
             Room room = roomService.getRoomById(roomId);
             User user = userService.getSingleUser(
                     UUID.fromString(securityService.getUserPartsByToken(token)[0]));
-            Timestamp timeFrom = Utilities.toTimestamp(map.get("timeFrom"));
-            Timestamp timeTo = Utilities.toTimestamp(map.get("timeTo"));
-            if (!roomReservationNoOverlap(timeFrom, timeTo, room)) {
+            Timestamp timeFrom = Utilities.stringToTimestamp(map.get("timeFrom"));
+            Timestamp timeTo = Utilities.stringToTimestamp(map.get("timeTo"));
+            if (!roomReservationNoOverlap(timeFrom, timeTo, room, null)) {
                 jsonBody.put("error", "there are already reservations during that timeframe");
                 return ResponseEntity
                         .status(HttpStatus.FORBIDDEN)
@@ -74,6 +76,12 @@ public class ReservationController {
             jsonBody.put("error", "an invalid id was passed");
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
+                    .body(jsonBody.toMap());
+
+        } catch(IllegalTimeframeException e) {
+            jsonBody.put("error", e.getMessage());
+            return ResponseEntity
+                    .badRequest()
                     .body(jsonBody.toMap());
 
         } catch (Exception e) {
@@ -94,14 +102,22 @@ public class ReservationController {
         jsonBody.put("result", false);
         try {
             Room room = roomService.getRoomById(roomId);
+            System.out.println(room);   //TODO Find out why this prevents NullPointer. Possibly cache-related?
             Section section = sectionService.getSection(sectionId);
+            if (!room.getSection().contains(section)) {
+                jsonBody.put("error", "missing section-room relation");
+                return ResponseEntity
+                        .status(HttpStatus.FORBIDDEN)
+                        .body(jsonBody.toMap());
+
+            }
             User user = userService.getSingleUser(
                     UUID.fromString(securityService.getUserPartsByToken(token)[0]));
 
-            Timestamp timeFrom = Utilities.toTimestamp(map.get("timeFrom"));
-            Timestamp timeTo = Utilities.toTimestamp(map.get("timeTo"));
+            Timestamp timeFrom = Utilities.stringToTimestamp(map.get("timeFrom"));
+            Timestamp timeTo = Utilities.stringToTimestamp(map.get("timeTo"));
 
-            if (!sectionReservationNoOverlap(timeFrom, timeTo, room, section)) {
+            if (!sectionReservationNoOverlap(timeFrom, timeTo, room, section, null)) {
                 jsonBody.put("error", "there are already reservations during that timeframe");
                 return ResponseEntity
                         .status(HttpStatus.FORBIDDEN)
@@ -112,7 +128,13 @@ public class ReservationController {
             Reservation reservation = new Reservation(room, section, timeFrom, timeTo);
             return addReservationToUser(jsonBody, user, reservation);
 
-        } catch (EntityNotFoundException e) {
+        } catch(IllegalTimeframeException e) {
+            jsonBody.put("error", e.getMessage());
+            return ResponseEntity
+                    .badRequest()
+                    .body(jsonBody.toMap());
+
+        }  catch (EntityNotFoundException e) {
             jsonBody.put("error", "an invalid id was passed");
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
@@ -137,8 +159,8 @@ public class ReservationController {
         try {
             Room room = roomService.getRoomById(roomId);
             JSONArray reservations = new JSONArray();
-            Timestamp timeFrom = Utilities.toTimestamp(map.get("timeFrom"));
-            Timestamp timeTo = Utilities.toTimestamp(map.get("timeTo"));
+            Timestamp timeFrom = Utilities.stringToTimestamp(map.get("timeFrom"));
+            Timestamp timeTo = Utilities.stringToTimestamp(map.get("timeTo"));
             if (sectionId != null) {
                 log.warn("Inside section");
                 Section section = sectionService.getSection(sectionId);
@@ -184,8 +206,8 @@ public class ReservationController {
         try {
             Room room = roomService.getRoomById(roomId);
             JSONArray reservations = new JSONArray();
-            Timestamp timeFrom = Utilities.toTimestamp(map.get("timeFrom"));
-            Timestamp timeTo = Utilities.toTimestamp(map.get("timeTo"));
+            Timestamp timeFrom = Utilities.stringToTimestamp(map.get("timeFrom"));
+            Timestamp timeTo = Utilities.stringToTimestamp(map.get("timeTo"));
             log.warn("Inside room");
             for (Reservation r :
                     reservationService.getRoomReservationsBetween(timeFrom, timeTo, room)) {
@@ -214,6 +236,7 @@ public class ReservationController {
                 .body(jsonBody.toMap());
     }
 
+    @AdminTokenRequired
     @GetMapping("")
     public ResponseEntity getAllReservations(@RequestHeader("token") String token) {
         JSONObject jsonBody = new JSONObject();
@@ -246,6 +269,7 @@ public class ReservationController {
                 .body(jsonBody.toMap());
     }
 
+    @AdminTokenRequired
     @GetMapping("/rooms/{id}")
     public ResponseEntity getRoomReservations(@PathVariable("id") UUID roomId,
                                               @RequestHeader("token") String token) {
@@ -277,6 +301,7 @@ public class ReservationController {
                 .body(jsonBody.toMap());
     }
 
+    @AdminTokenRequired
     @GetMapping("/rooms/{rId}/sections/{sId}")
     public ResponseEntity getSectionReservations(@PathVariable("rId") UUID roomId,
                                                  @PathVariable("sId") UUID sectionId,
@@ -285,6 +310,7 @@ public class ReservationController {
         jsonBody.put("result", false);
         try {
             Room room = roomService.getRoomById(roomId);
+            System.out.println(room);
             Section section = sectionService.getSection(sectionId);
             JSONArray reservations = new JSONArray();
             if (Utilities.isAdmin(token)) {
@@ -299,7 +325,7 @@ public class ReservationController {
             jsonBody.put("reservations", reservations);
 
         } catch (EntityNotFoundException e) {
-            jsonBody.put("error", "that room does not exist");
+            jsonBody.put("error", "an invalid id was passed");
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
                     .body(jsonBody.toMap());
@@ -311,7 +337,7 @@ public class ReservationController {
                 .body(jsonBody.toMap());
     }
 
-    //@AdminTokenRequired
+    @AdminTokenRequired
     @DeleteMapping("/{id}")
     public ResponseEntity deleteReservation(@PathVariable("id") UUID id) {
         JSONObject jsonBody = new JSONObject();
@@ -343,7 +369,7 @@ public class ReservationController {
                 .body(jsonBody.toMap());
     }
 
-    //@AdminTokenRequired
+    @AdminTokenRequired
     @PutMapping("/{id}")
     public ResponseEntity rebookReservation(@PathVariable("id") UUID id,
                                             @RequestBody Map<String, String> map) {
@@ -351,8 +377,27 @@ public class ReservationController {
         jsonBody.put("result", false);
         try {
             Reservation reservation = reservationService.getReservationById(id);
-            reservation.setTimeFrom(Utilities.toTimestamp(map.get("timeFrom")));
-            reservation.setTimeTo(Utilities.toTimestamp(map.get("timeTo")));
+
+            Timestamp timeFrom = Utilities.stringToTimestamp(map.get("timeFrom"));
+            Timestamp timeTo = Utilities.stringToTimestamp(map.get("timeTo"));
+
+            boolean noOverlap;
+            if (reservation.getSection() == null) {
+                noOverlap = roomReservationNoOverlap(timeFrom, timeTo,
+                        reservation.getRoom(), reservation);
+            } else {
+                noOverlap = sectionReservationNoOverlap(timeFrom, timeTo,
+                        reservation.getRoom(), reservation.getSection(), reservation);
+            }
+            if(!noOverlap) {
+                jsonBody.put("error", "there are already reservations during that timeframe");
+                return ResponseEntity
+                        .status(HttpStatus.FORBIDDEN)
+                        .body(jsonBody.toMap());
+            }
+
+            reservation.setTimeFrom(timeFrom);
+            reservation.setTimeTo(timeTo);
             reservationService.saveReservation(reservation);
             jsonBody.put("reservation", reservation.toJson());
 
@@ -366,6 +411,12 @@ public class ReservationController {
             jsonBody.put("error", "that reservation does not exist");
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
+                    .body(jsonBody.toMap());
+
+        } catch(IllegalTimeframeException e) {
+            jsonBody.put("error", e.getMessage());
+            return ResponseEntity
+                    .badRequest()
                     .body(jsonBody.toMap());
 
         } catch (Exception e) {
@@ -382,7 +433,7 @@ public class ReservationController {
     }
 
     private ResponseEntity addReservationToUser(JSONObject jsonBody, User user,
-                                                Reservation reservation) {
+                                                Reservation reservation) throws IllegalTimeframeException{
         reservation.setUser(user);
         reservation = reservationService.saveReservation(reservation);
         user.addReservation(reservation);
@@ -394,16 +445,33 @@ public class ReservationController {
                 .body(jsonBody.toMap());
     }
 
-    private boolean roomReservationNoOverlap(Timestamp timeFrom, Timestamp timeTo, Room room) {
+    private boolean roomReservationNoOverlap(Timestamp timeFrom, Timestamp timeTo, Room room, Reservation self) {
         List<Reservation> roomReservations = reservationService.getRoomAndSectionReservationsBetween(timeFrom, timeTo, room);
-        return roomReservations.size() == 0;
+        if (roomReservations.size() == 0) {
+            System.out.println("No overlaps found");
+            return true;
+        } else if (roomReservations.size() == 1) {
+            System.out.println("Single overlap found, it is " + roomReservations.get(0).equals(self));
+            for (Reservation r :
+                    roomReservations) {
+                System.out.println(r.toJson().toString());
+            }
+            return roomReservations.get(0).equals(self);
+        }
+        log.error("THIS SECTION SHOULD NOT BE REACHED, THERE SEEMS TO BE AN OVERLAP IN THE SYSTEM, SIZE WAS " + roomReservations.size());
+        return false;
     }
 
-    private boolean sectionReservationNoOverlap(Timestamp timeFrom, Timestamp timeTo, Room room, Section section) {
+    private boolean sectionReservationNoOverlap(Timestamp timeFrom, Timestamp timeTo, Room room, Section section, Reservation self) {
         if (reservationService.getRoomReservationsBetween(timeFrom, timeTo, room).size() == 0) {
-            return reservationService.getSectionReservationsBetween(timeFrom, timeTo, section).size() == 0;
-        } else {
-            return false;
+            List<Reservation> sectionReservations = reservationService.getSectionReservationsBetween(timeFrom, timeTo, section);
+            if (sectionReservations.size() == 0) {
+                return true;
+            } else if (sectionReservations.size() == 1) {
+                return sectionReservations.get(0).equals(self);
+            }
+            log.error("THIS SECTION SHOULD NOT BE REACHED, THERE SEEMS TO BE AN OVERLAP IN THE SYSTEM, SIZE WAS " + sectionReservations.size());
         }
+        return false;
     }
 }
