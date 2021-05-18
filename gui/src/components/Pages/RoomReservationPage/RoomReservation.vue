@@ -23,9 +23,10 @@
         </div>
       </form>
       <button @click="submitReservation()">reserver</button>
-      <img src="../../../assets/plus.png" alt="add new section" @click="$refs.editSectionModal.displayInput(true)">
+      <img v-if="this.selectedRoomId !== ''" src="../../../assets/plus.png" alt="add new section"
+           @click="$refs.editSectionModal.displayInput(true, selectedRoomId)">
     </div>
-    <EditSectionModal ref="editSectionModal"></EditSectionModal>
+    <EditSectionModal ref="editSectionModal" v-on:createdSection="loadRoomsAndSections()"></EditSectionModal>
   </div>
 </template>
 
@@ -34,44 +35,70 @@ import EditSectionModal from "@/components/Pages/Common/EditSectionModal";
 import Header from "@/components/Pages/Common/Header";
 export default {
   async created() {
-    const addSectionOptions = {
-      method: 'GET',
-      headers: {'Content-Type': 'application/json'}
-    };
-
-    await fetch("https://localhost:8443/rooms", addSectionOptions)
-        .then((response) => response.json())
-        //Then with the data from the response in JSON...
-        .then(data => {
-          if (data.result) {
-            for (let room in data.rooms){
-              this.rooms.push(data.rooms[room]);
-              this.sections.push(data.rooms[room].sections)
-            }
-          } else {
-            console.log(data.error);
-          }
-        })
-        //Then with the error genereted...
-        .catch((error) => {
-          error.toString();
-        });
+    await this.loadRoomsAndSections();
   },
   name: "RoomReservation",
   components: {Header, EditSectionModal},
   data () {
     return {
-     rooms: [],
+      rooms: [],
       sections: [[]],
       selectedSections: [],
-      selectedRoomId: "";
+      selectedRoomId: ""
     }
   },
   methods: {
     changeRoomSelection() {
       const ef = document.getElementById("rooms");
       this.selectedSections = this.sections[ef.selectedIndex];
+      console.log(this.rooms);
+      console.log(ef.selectedIndex)
+      console.log(this.rooms[ef.selectedIndex - 1])
+      this.selectedRoomId = this.rooms[ef.selectedIndex - 1].roomId;
     },
+
+    async loadRoomsAndSections() {
+      let selectedIndex;
+      let ef = document.getElementById("rooms");
+      if (ef != null) {
+        selectedIndex = ef.selectedIndex;
+
+      }
+      //we're reloading these so ned to empty them first
+      this.rooms = [];
+      this.sections = [[]];
+      this.selectedSections = [];
+      this.selectedRoomId = "";
+
+      const addSectionOptions = {
+        method: 'GET',
+        headers: {'Content-Type': 'application/json'}
+      };
+
+      await fetch("https://localhost:8443/rooms", addSectionOptions)
+          .then((response) => response.json())
+          //Then with the data from the response in JSON...
+          .then(data => {
+            if (data.result) {
+              console.log(data);
+              for (let room in data.rooms){
+                this.rooms.push(data.rooms[room]);
+                this.sections.push(data.rooms[room].sections)
+              }
+
+            } else {
+              console.log(data.error);
+            }
+          })
+          //Then with the error genereted...
+          .catch((error) => {
+            error.toString();
+          });
+      // set the selection as the same room as before the reload
+      if (ef != null) {
+        ef.selectedIndex = selectedIndex;
+      }
+    }
   }
 }
 </script>
