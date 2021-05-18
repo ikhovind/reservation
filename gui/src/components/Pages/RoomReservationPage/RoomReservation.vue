@@ -9,9 +9,9 @@
           <option v-for="(room,i) in rooms" :key="i" :value="room" >{{room.roomName}}</option>
         </select>
         <label for="sections">Velg en seksjon</label>
-        <select id="sections">
+        <select @change="selectSection()" id="sections">
           <option value="">Hele rommet</option>
-          <option v-for="(section, i) in selectedSections" :key="i" :value="section" >{{section.sectionName}}</option>
+          <option v-for="(section, i) in availableSections" :key="i" :value="section" >{{section.sectionName}}</option>
         </select>
         <label for="datePicker">Velg en dato</label>
         <input @change="selectDate()" type="date" id="datePicker">
@@ -44,18 +44,19 @@ export default {
     return {
       rooms: [],
       sections: [[]],
-      selectedSections: [],
+      availableSections: [],
       reservedTimes: [[]],
       selectedRoomId: "",
       startTime: null,
       endTime: null,
-      selectedTime: ""
+      selectedTime: "",
+      selectedSectionId: ""
     }
   },
   methods: {
     changeRoomSelection() {
       const ef = document.getElementById("rooms");
-      this.selectedSections = this.sections[ef.selectedIndex];
+      this.availableSections = this.sections[ef.selectedIndex];
       this.selectedRoomId = this.rooms[ef.selectedIndex].roomId;
       this.setReservedTimes();
     },
@@ -65,13 +66,14 @@ export default {
         headers: {'Content-Type': 'application/json',
                   'token': localStorage.getItem("token")}
       };
-
+      this.reservedTimes = [];
       await fetch("https://localhost:8443/reservations/rooms/" + this.selectedRoomId, addSectionOptions)
           .then((response) => response.json())
           //Then with the data from the response in JSON...
           .then(data => {
             if (data.result) {
               for (let reservation in data.reservations) {
+                this.reservedTimes.push(new Array());
                 this.reservedTimes[reservation].push(new Date(data.reservations[reservation].timeFrom));
                 this.reservedTimes[reservation].push(new Date(data.reservations[reservation].timeTo));
               }
@@ -156,11 +158,49 @@ export default {
         return (n.getTime() >= this.startTime.getTime() && n <= this.endTime.getTime());
       }
     },
+    selectSection() {
+      this.selectedSectionId = this.availableSections[document.getElementById("sections").selectedIndex].sectionId;
+    },
+    async submitReservation() {
+      const requestOptions = {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json',
+        'token': localStorage.getItem("token")},
+        body: JSON.stringify({
+          timeFrom: this.startTime,
+          timeTo: this.endTime
+        })
+      };
+      let sectionIndex = document.getElementById("sections").selectedIndex;
+      let url;
+      if (sectionIndex == 0) {
+        url = "/reservations/rooms/" + this.selectedRoomId;
+      }
+      else {
+        url = "/reservations/rooms/" + this.selectedRoomId + "/sections/" + this.availableSections[sectionIndex].sectionId;
+      }
+      await fetch("https://localhost:8443" + url, requestOptions)
+          .then((response) => response.json())
+          //Then with the data from the response in JSON...
+          .then(data => {
+            if (data.result) {
+              this.$emit('created reservation');
+              this.closeModal();
+            } else {
+              console.log(data.error);
+            }
+          })
+          //Then with the error genereted...
+          .catch((error) => {
+            error.toString();
+          });
+
+    },
     async loadRoomsAndSections() {
       //we're reloading these so ned to empty them first
       this.rooms = [];
       this.sections = [];
-      this.selectedSections = [];
+      this.availableSections = [];
       this.selectedRoomId = "";
 
       const getRoomsOptions = {
