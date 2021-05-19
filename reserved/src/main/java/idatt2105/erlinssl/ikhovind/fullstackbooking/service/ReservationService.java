@@ -76,7 +76,7 @@ public class ReservationService {
     private void validateTimeframe(Timestamp timeFrom, Timestamp timeTo) {
         long timeFromMillis = timeFrom.getTime();
         long timeToMillis = timeTo.getTime();
-        if(!Utilities.withinBusinessHours(timeFromMillis, timeToMillis)) {
+        if (!Utilities.withinBusinessHours(timeFromMillis, timeToMillis)) {
             throw new IllegalTimeframeException("the selected time is not within business hours");
         }
         long timeUntil = timeFromMillis - new Date().getTime();
