@@ -87,7 +87,6 @@ export default {
           table.rows.item(tableKey).style.color = 'black';
         }
         row.style.color = 'blue';
-        this.selectedIndex = row.rowIndex - 1;
       });
       cell0.innerText = reservation.room.roomName;
       if("section" in reservation) {
