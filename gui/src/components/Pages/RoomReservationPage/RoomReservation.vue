@@ -23,7 +23,7 @@
             {{ Math.floor(index / 4 + 6) }}:{{ padMinutes(((index % 4) * 15))}}</button>
         </div>
       </form>
-      <button @click="submitReservation()">reserver</button>
+      <button :disabled="rooms.length === 0" @click="submitReservation()">reserver</button>
       <img src="../../../assets/plus.png" alt="add new section"
            @click="$refs.editSectionModal.displayInput(true, selectedRoomId)">
     </div>
@@ -56,8 +56,15 @@ export default {
   methods: {
     changeRoomSelection() {
       const ef = document.getElementById("rooms");
-      this.availableSections = this.sections[ef.selectedIndex];
-      this.selectedRoomId = this.rooms[ef.selectedIndex].roomId;
+      let index = ef.selectedIndex;
+      if (index < 0) index = 0;
+      this.availableSections = this.sections[index];
+      try {
+        this.selectedRoomId = this.rooms[index].roomId;
+      } catch (e) {
+        console.log(e);
+        this.selectedRoomId = "";
+      }
       this.setReservedTimes();
     },
     async setReservedTimes() {
@@ -243,7 +250,6 @@ export default {
       this.sections = [];
       this.availableSections = [];
       this.selectedRoomId = "";
-
       const getRoomsOptions = {
         method: 'GET',
         headers: {'Content-Type': 'application/json'}
@@ -261,6 +267,7 @@ export default {
                   this.sections[room].push(data.rooms[room].sections[i]);
                 }
               }
+              this.changeRoomSelection();
             } else {
               console.log(data.error);
             }
@@ -269,7 +276,6 @@ export default {
           .catch((error) => {
             error.toString();
           });
-      this.changeRoomSelection();
     }
   }
 }
