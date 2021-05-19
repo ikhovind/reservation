@@ -5,9 +5,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.json.JSONObject;
 
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.ManyToOne;
+import javax.persistence.*;
 import java.sql.Timestamp;
 import java.util.Objects;
 
@@ -16,9 +14,13 @@ import java.util.Objects;
 @Setter
 @NoArgsConstructor
 public class Reservation extends BaseModel {
-    @ManyToOne(optional = true, fetch = FetchType.LAZY)
+    @ManyToOne(optional = false,
+                fetch = FetchType.LAZY,
+            targetEntity = Room.class)
     private Room room;
-    @ManyToOne(optional = true, fetch = FetchType.LAZY)
+    @ManyToOne(optional = true,
+            fetch = FetchType.LAZY,
+            targetEntity = Section.class)
     private Section section;
     private Timestamp timeFrom;
     private Timestamp timeTo;

@@ -6,9 +6,8 @@
 
           <div class="modal-header">
             <slot name="header">
-              <h1 v-if="this.newUser">Ny</h1>
-              <h1 v-else>Rediger</h1>
-              <h1>bruker</h1>
+              <h1 v-if="this.newUser">Ny bruker</h1>
+              <h1 v-else>Rediger bruker</h1>
             </slot>
           </div>
 
@@ -56,7 +55,7 @@
                 <br>
                 <br>
                 <label for="userType">Bruker type</label>
-                <select name="userType" type="text" :disabled="!this.admin" id="userType">
+                <select name="userType" :disabled="!this.admin" id="userType">
                   <option value="0">User</option>
                   <option value="9">Admin</option>
                 </select>
@@ -84,15 +83,16 @@ export default {
       this.showModal = false;
       this.admin = false;
     },
-    displayInput(args) {
-      this.showModal = true;
+    async displayInput(args) {
       this.newUser = args.newUser;
-      this.admin = args.userType !== 0;
+      this.admin = parseInt(args.userType) !== 0;
+      this.editSelf = args.self;
       if (!args.newUser) {
-        this.loadExistingUser(args.uid);
+        await this.loadExistingUser(args.uid);
       } else {
-        this.loadNewUserForm();
+        await this.loadNewUserForm();
       }
+      this.showModal = true;
     },
     parseDateIn(dateString) {
       let out = new Date(Date.parse(dateString))
@@ -105,6 +105,9 @@ export default {
     },
     async loadExistingUser(uid) {
       this.uid = uid;
+      if(uid === localStorage.getItem("userId")) {
+        this.editSelf = true;
+      }
       let getUserOptions = {
         method: 'GET',
         headers: {'Content-Type': 'application/json'}
@@ -118,11 +121,13 @@ export default {
                   document.getElementById("email").value = data.user.email;
                   document.getElementById("userType").value = data.user.userType;
                   document.getElementById("validUntil").value = this.parseDateIn(data.user.validUntil);
+                  if(this.editSelf) {
+                    this.disableTypeField();
+                  }
                 })
           }).catch(error => {
             console.log(error);
           })
-      this.showModal = true;
     },
     async loadNewUserForm() {
       this.newUser = true;
@@ -171,8 +176,10 @@ export default {
       userObj["firstName"] = document.getElementById("firstName").value;
       userObj["lastName"] = document.getElementById("lastName").value;
       userObj["validUntil"] = this.parseDateOut(document.getElementById("validUntil").value);
-      userObj["userType"] = document.getElementById("userType").value;
-      if(this.newUser) {
+      if(!this.editSelf){
+        userObj["userType"] = document.getElementById("userType").value;
+      }
+      if (this.newUser) {
         userObj["password"] = document.getElementById("newPassword").value;
         userObj["email"] = document.getElementById("email").value;
         userObj["phone"] = document.getElementById("phone").value;
@@ -199,6 +206,12 @@ export default {
             response.json()
                 .then(data => {
                   if (data.result) {
+                    if(this.editSelf) {
+                      this.$emit('selfEdited')
+                    }
+                    if(!this.newUser) {
+                      this.$emit('userEdited', this.uid)
+                    }
                     this.showModal = false;
                   } else {
                     console.log(data.error)
@@ -206,6 +219,9 @@ export default {
                 })
           })
     },
+    disableTypeField() {
+      document.getElementById("userType").disabled = true;
+    }
   },
   data() {
     return {
@@ -213,6 +229,7 @@ export default {
       showModal: false,
       uid: '',
       passwordFault: false,
+      editSelf: false,
     }
   },
 }

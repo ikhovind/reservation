@@ -3,6 +3,7 @@ package idatt2105.erlinssl.ikhovind.fullstackbooking.web;
 import idatt2105.erlinssl.ikhovind.fullstackbooking.model.User;
 import idatt2105.erlinssl.ikhovind.fullstackbooking.service.UserService;
 import idatt2105.erlinssl.ikhovind.fullstackbooking.util.Constants;
+import idatt2105.erlinssl.ikhovind.fullstackbooking.util.security.UserTokenRequired;
 import idatt2105.erlinssl.ikhovind.fullstackbooking.util.security.service.SecurityService;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
@@ -48,10 +49,21 @@ public class LoginController {
                 .body(jsonBody.toMap());
     }
 
-    @GetMapping(value = "/testing/only/endpoint/delete/me")
+    @GetMapping("/verify")
+    @UserTokenRequired
+    private ResponseEntity verifyToken() {
+        return ResponseEntity
+                .ok()
+                .body(new JSONObject()
+                        .put("result", true)
+                        .toMap());
+    }
+
+    @GetMapping(value = "/testing/only/endpoint/delete/me/or/change/constant")
+    @UserTokenRequired
     public ResponseEntity testTokenEndpoint() {
         JSONObject jsonBody = new JSONObject();
-        if(Constants.TESTING_ENABLED){
+        if (Constants.TESTING_ENABLED) {
             jsonBody.put("token", securityService.createToken(Constants.TESTING_SUBJECT, Constants.TTL_MILLIS));
             return ResponseEntity
                     .ok(jsonBody.toMap());

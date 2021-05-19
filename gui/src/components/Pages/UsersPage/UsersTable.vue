@@ -89,6 +89,29 @@ export default {
         alert("Velg en bruker")
       }
     },
+    async updateChanged(uid) {
+      await fetch(this.$serverUrl + "/users/" + uid, {
+        method: 'GET',
+        headers: {'Content-Type': 'application/json'}
+      })
+          .then(response => {
+            response.json()
+                .then(data => {
+                  this.selected[0].firstName = data.user.firstName;
+                  this.selected[0].lastName = data.user.lastName;
+                  this.selected[0].email = data.user.email;
+                  this.selected[0].userType = data.user.userType;
+                  this.selected[0].validUntil = this.parseDateIn(data.user.validUntil);
+                })
+          }).catch(error => {
+            console.log(error);
+          })
+    },
+    parseDateIn(dateString) {
+      let out = new Date(Date.parse(dateString))
+      return out.toLocaleDateString().split("/").reverse().join("-")
+    },
+
   },
   async created() {
     await this.loadUsers();
