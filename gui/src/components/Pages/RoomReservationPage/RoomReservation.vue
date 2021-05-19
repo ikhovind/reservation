@@ -57,7 +57,11 @@ export default {
     changeRoomSelection() {
       const ef = document.getElementById("rooms");
       this.availableSections = this.sections[ef.selectedIndex];
-      this.selectedRoomId = this.rooms[ef.selectedIndex].roomId;
+      try {
+        this.selectedRoomId = this.rooms[ef.selectedIndex - 1].roomId;
+      } catch (e) {
+        this.selectedRoomId = "";
+      }
       this.setReservedTimes();
     },
     async setReservedTimes() {
