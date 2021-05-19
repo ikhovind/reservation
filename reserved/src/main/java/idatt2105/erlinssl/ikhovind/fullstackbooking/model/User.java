@@ -24,7 +24,8 @@ public class User extends BaseModel {
     private String password;
     @OneToMany(fetch = FetchType.EAGER,
             cascade = CascadeType.ALL,
-            orphanRemoval = true)
+            orphanRemoval = true,
+            mappedBy = "id")
     private List<Reservation> reservations;
     private Timestamp validUntil;
     private int userType;
