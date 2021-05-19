@@ -133,10 +133,12 @@ public class ReservationControllerTest {
     @Test
     @Order(90)
     void failGetAllReservationsTest() throws Exception {
-        // This request should fail, since user1 is not an admin
+        // Normal users can get reservations, but should not
+        // be able to see what user the reservation is for
         mockMvc.perform(get("/reservations")
                 .header("token", user1Json.get("token")))
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.reservations.*.user").doesNotExist());
     }
 
     @Test
@@ -151,17 +153,17 @@ public class ReservationControllerTest {
     @Test
     @Order(110)
     void failGetRoomReservationsTest() throws Exception {
-        // This request should fail, since user1 is not an admin
+        // Normal users can get reservations, but should not
+        // be able to see what user the reservation is for
         mockMvc.perform(get("/reservations/rooms/" + room1.getId())
                 .header("token", user1Json.get("token")))
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.reservations.*.user").doesNotExist());
     }
 
     @Test
     @Order(120)
     void getSectionReservationsTest() throws Exception {
-        System.out.println(room1.getId());
-        System.out.println(section1.getId());
         mockMvc.perform(get("/reservations/rooms/" +
                 room1.getId() + "/sections/" + section1.getId())
                 .header("token", user2Json.get("token")))
@@ -172,11 +174,13 @@ public class ReservationControllerTest {
     @Test
     @Order(130)
     void failGetSectionReservationsTest() throws Exception {
-        // This request should fail, since user1 is not an admin
+        // Normal users can get reservations, but should not
+        // be able to see what user the reservation is for
         mockMvc.perform(get("/reservations/rooms/" +
                 room1.getId() + "/sections/" + section1.getId())
                 .header("token", user1Json.get("token")))
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.reservations.*.user").doesNotExist());
     }
 
     @Test
