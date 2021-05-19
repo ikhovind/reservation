@@ -4,7 +4,7 @@
     <router-link to="reservations">Mine reservasjoner</router-link>
     <router-link to="rooms">Romoversikt</router-link>
     <router-link to="users" v-if="this.admin">Brukere</router-link>
-    <router-link to="userInfo">
+    <router-link to="userInfo" class="userLogo">
      <img id="userLogo" src="../../../assets/userico.png" alt="Min side">
     </router-link>
   </div>
@@ -25,6 +25,7 @@ export default {
   .topnav {
     overflow: hidden;
     background-color:  #93c47d;
+    height: 48px;
   }
 
   #userLink {
@@ -33,16 +34,20 @@ export default {
 
   #userLogo {
     float: right;
-    width: 20%;
+    height: 32px;
+    padding: 8px;
   }
 
-  .topnav a {
+  .topnav a{
     float: left;
     color: #f2f2f2;
     text-align: center;
-    padding: 14px 16px;
     text-decoration: none;
     font-size: 17px;
+  }
+
+  .topnav a:not(.userLogo) {
+    padding: 14px 16px;
   }
 
   .topnav a:hover {

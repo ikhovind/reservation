@@ -2,8 +2,8 @@
   <div>
     <Header></Header>
     <button @click="emitNewUser">Ny bruker</button>
-    <UsersTable v-on:editUser="editUserEmitted"></UsersTable>
-    <EditUserModal ref="editUserModal"></EditUserModal>
+    <UsersTable v-on:editUser="editUserEmitted" ref="usersTable"></UsersTable>
+    <EditUserModal v-on:userEdited="emitUserEdited" ref="editUserModal"></EditUserModal>
   </div>
 </template>
 
@@ -21,13 +21,16 @@ export default {
     UsersTable
   }, methods: {
     editUserEmitted(value) {
-      this.$refs.editUserModal.displayInput(value)
+      this.$refs.editUserModal.displayInput(value);
     },
     emitNewUser() {
       this.$refs.editUserModal.displayInput({
         newUser: true,
         userType: localStorage.getItem("userType")
       })
+    },
+    emitUserEdited(uid) {
+      this.$refs.usersTable.updateChanged(uid)
     }
   }
 }
