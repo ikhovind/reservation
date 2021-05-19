@@ -37,11 +37,11 @@ public class LoginController {
                     .badRequest()
                     .body(jsonBody.toMap());
         }
-        HttpHeaders headers = new HttpHeaders();
         jsonBody.put("result", true);
         jsonBody.put("userid", user.getId());
         String token = securityService.createToken(user.getId() + "=" + user.getUserType(), Constants.TTL_MILLIS);
         jsonBody.put("token", token);
+        jsonBody.put("userType", user.getUserType());
 
         return ResponseEntity
                 .ok()

@@ -104,10 +104,11 @@ public class UserController {
                 }
             }
             jsonBody.put("users", users);
-
+            jsonBody.put("result", true);
             return ResponseEntity
                     .ok()
                     .body(jsonBody.toMap());
+
         } catch (Exception e) {
             log.error("An unexpected error was caught", e);
             jsonBody.put("result", false);
@@ -195,7 +196,7 @@ public class UserController {
         if (map.containsKey("firstName") && !map.get("firstName").toString().isBlank()) {
             u.setFirstName(map.get("firstName").toString());
         }
-        if (map.containsKey("lastName") && !map.get("phone").toString().isBlank()) {
+        if (map.containsKey("lastName") && !map.get("lastName").toString().isBlank()) {
             u.setLastName(map.get("lastName").toString());
         }
         if (map.containsKey("phone") && !map.get("phone").toString().isBlank()) {

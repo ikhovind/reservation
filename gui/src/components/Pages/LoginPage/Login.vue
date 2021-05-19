@@ -4,10 +4,10 @@
     <form>
       <div class="container">
         <p v-if="loginFailed">Login feilet, vennligst prøv igjen</p>
-        <label>Username : </label>
+        <label for="userEmail">Username : </label>
         <input type="text" id="userEmail" placeholder="Epost" name="username" required>
-        <label>Password : </label>
-        <input type="password" id="userPassword" placeholder="Passord" name="password" required>
+        <label for="userPassword">Password : </label>
+        <label for="userPassword"></label><input type="password" id="userPassword" placeholder="Passord" name="password" required>
         <button type="submit" v-on:click="login($event)">Login</button>
       </div>
     </form>
@@ -35,21 +35,27 @@ export default {
         })
       };
 
-      await fetch("https://localhost:8443/login", requestOptions)
-          .then((response) => response.json())
-          //Then with the data from the response in JSON...
-          .then(data => {
-            if (data.result) {
-              localStorage.setItem("userId", data.userid);
-              localStorage.setItem("token", data.token);
-              this.$emit('login');
-            } else {
-              this.loginFailed = true;
-            }
+      await fetch(this.$serverUrl+"/login", requestOptions)
+          .then((response) => {
+            console.log(response)
+            response.json()
+                .then(data => {
+                  //Then with the data from the response in JSON...
+                  if (data.result) {
+                    localStorage.setItem("userId", data.userid);
+                    localStorage.setItem("token", data.token);
+                    localStorage.setItem("userType", data.userType);
+                    console.log(document.cookie)
+                    this.$emit('login');
+                  } else {
+                    this.loginFailed = true;
+                  }
+                })
           })
-          //Then with the error genereted...
+          //Then if an error is generated...
           .catch((error) => {
             error.toString();
+            console.log(error);
           });
     },
   }
@@ -67,7 +73,7 @@ button {
   background-color: #93c47d;
   width: 100%;
   padding: 15px;
-  margin: 10px 0px;
+  margin: 10px 0;
   border: none;
   cursor: pointer;
 }
