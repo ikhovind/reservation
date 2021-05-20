@@ -20,7 +20,7 @@
         <div v-if="this.selectedTime !== ''" class="buttonList">
           <button v-for="index in 56" :key="index"
                   @click="setTime(index)"
-                  :class="[isPast(index) ? 'grey' : (isReserved(index) ? 'red' : isBetween(index) ? 'blue' : 'timeButton')]"
+                  :class="[(isReserved(index) ? 'red' :isPast(index) ? 'grey'  : isBetween(index) ? 'blue' : 'timeButton')]"
                   :disabled="isDisabled(index)">
             {{ Math.floor(index / 4 + 8) }}:{{ padMinutes(((index % 4) * 15))}}</button>
         </div>
@@ -40,8 +40,6 @@ export default {
     if (this.reservation !== undefined) {
       this.edit = true;
       this.selectedRoomId = this.reservation.room.roomId;
-
-      console.log(this.reservation.section.sectionId);
       if (this.reservation.section.sectionId !== undefined) {
         console.log("is set bitch");
         this.selectedSectionId = this.reservation.section.sectionId;
@@ -91,7 +89,7 @@ export default {
           'token': localStorage.getItem("token")}
       };
       this.reservedTimes = [];
-      await fetch("https://localhost:8443/reservations/rooms/" + this.selectedRoomId, addSectionOptions)
+      await fetch("https://" + this.$serverUrl + "/reservations/rooms/" + this.selectedRoomId, addSectionOptions)
           .then((response) => response.json())
           //Then with the data from the response in JSON...
           .then(data => {
@@ -211,7 +209,7 @@ export default {
       this.reservedTimes = [];
       let url= "/reservations/rooms/" + this.selectedRoomId;
 
-      await fetch("https://localhost:8443" + url, addSectionOptions)
+      await fetch("https://" + this.$serverUrl + "" + url, addSectionOptions)
           .then((response) => response.json())
           //Then with the data from the response in JSON...
           .then(data => {
@@ -261,7 +259,7 @@ export default {
       else {
         url = "/reservations/rooms/" + this.selectedRoomId + "/sections/" + this.selectedSectionId;
       }
-      await fetch("https://localhost:8443" + url, requestOptions)
+      await fetch("https://" + this.$serverUrl + "" + url, requestOptions)
           .then((response) => response.json())
           //Then with the data from the response in JSON...
           .then(data => {
@@ -288,10 +286,10 @@ export default {
       if (!this.edit) this.selectedRoomId = "";
       const getRoomsOptions = {
         method: 'GET',
-        headers: {'Content-Type': 'application/json'}
+        headers: {'Content-Type': 'application/json', 'token': localStorage.getItem("token")}
       };
 
-      await fetch("https://localhost:8443/rooms", getRoomsOptions)
+      await fetch("https://" + this.$serverUrl + "/rooms", getRoomsOptions)
           .then((response) => response.json())
           //Then with the data from the response in JSON...
           .then(data => {

@@ -54,13 +54,13 @@ export default {
       e.preventDefault()
       const requestOptions = {
         method: 'POST',
-        headers: {'Content-Type': 'application/json'},
+        headers: {'Content-Type': 'application/json', 'token': localStorage.getItem("token")},
         body: JSON.stringify({
           roomName: document.getElementById("roomName").value,
         })
       };
 
-      await fetch("https://localhost:8443/rooms", requestOptions)
+      await fetch("https://" + this.$serverUrl + "/rooms", requestOptions)
           .then((response) => response.json())
           //Then with the data from the response in JSON...
           .then(data => {
