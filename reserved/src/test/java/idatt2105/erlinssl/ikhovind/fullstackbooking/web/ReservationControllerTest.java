@@ -247,7 +247,7 @@ public class ReservationControllerTest {
 
     @Test
     @Order(1000)
-    void cleanUp() throws Exception {
+    void finish() throws Exception {
         deleteUser(user1Json);
         deleteUser(user2Json);
         deleteRoom(room1);

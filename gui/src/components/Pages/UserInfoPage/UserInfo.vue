@@ -34,7 +34,10 @@ export default {
     async loadOwnUser() {
       let getUserOptions = {
         method: 'GET',
-        headers: {'Content-Type': 'applications/jso'}
+        headers: {
+          'Content-Type': 'applications/jso',
+          "token": localStorage.getItem("token")
+        }
       }
 
       await fetch(this.$serverUrl + "/users/" + localStorage.getItem("userId"), getUserOptions)
