@@ -14,10 +14,22 @@ import java.util.Date;
 import java.util.TimeZone;
 import java.util.UUID;
 
+/**
+ * A class that stores methods that might need to be used several places in the project.
+ * They are put here so they can be conveniently accessed.
+ */
 @Slf4j
 public class Utilities {
-    private static SecurityService securityService = new SecurityService();
+    private static final SecurityService securityService = new SecurityService();
 
+    /**
+     * Parses a date string with format yyyy-MM-dd'T'HH:mm:ss.SSS'Z' into a UTC-based SQL {@link Timestamp}.
+     * Based on ISO 8601.
+     *
+     * @param string of format "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
+     * @return parsed {@link Timestamp}
+     * @see Utilities#timestampToString(Timestamp)
+     */
     public static Timestamp stringToTimestamp(String string) {
         try {
             Date initialDate = Date.from(Instant.from(
@@ -35,22 +47,53 @@ public class Utilities {
         }
     }
 
+    /**
+     * The counterpart of {@link Utilities#stringToTimestamp(String)}. Parses an {@link Timestamp} into a datetime
+     * string with format "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'". Based on ISO 8601.
+     *
+     * @param timestamp SQL {@link Timestamp} to be parsed
+     * @return the given timestamp in String format
+     */
     public static String timestampToString(Timestamp timestamp) {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
         sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
         return sdf.format(timestamp);
     }
 
+    /**
+     * Can be used to check if a given token belongs to a user that is an admin or not.
+     * Compares the users userType, gotten from {@link SecurityService#getUserPartsByToken(String)},
+     * to {@link Constants#ADMIN_TYPE}
+     *
+     * @param token JWT of the user being checked
+     * @return true if the user is an admin, false if not
+     */
     public static boolean isAdmin(String token) {
         return Integer.parseInt(securityService.getUserPartsByToken(token)[1]) == Constants.ADMIN_TYPE;
     }
 
+    /**
+     * Can be used to check if a given token belongs to a given user.
+     * Compares the users UUID, gotten from {@link SecurityService#getUserPartsByToken(String)} to
+     * the given {@link UUID} userId.
+     *
+     * @param token JWT of the user being compared
+     * @param userId {@link UUID} belonging to the user we want to compare to
+     */
     public static void uidMatch(String token, UUID userId) {
         if (!securityService.getUserPartsByToken(token)[0].equals(userId.toString())) {
             throw new PermissionDeniedException();
         }
     }
 
+    /**
+     * Checks whether two given {@link Timestamp}s are within the business opening hours.
+     * These are defined as {@link Constants#OPENING_HOUR} and {@link Constants#CLOSING_HOUR}
+     *
+     * @param timeFrom a to-be-reservations start time
+     * @param timeTo a to-be-reservations end time
+     * @return true if they are within business hours, false if not
+     */
     public static boolean withinBusinessHours(long timeFrom, long timeTo) {
         int timeFromHour = (int) ((timeFrom%(1000L * 60L * 60L * 24L))/(1000L * 60L * 60L));
         int timeToHour = (int) ((timeTo % (1000L * 60L * 60L * 24L))/(1000L * 60L * 60L));
