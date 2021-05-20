@@ -2,28 +2,24 @@
   <div>
     <Header></Header>
     <h2>Romoversikt</h2>
-    <EditRoomModal ref="editRoomModal" v-on:createdRoom="test()"></EditRoomModal>
+    <EditRoomModal ref="editRoomModal" ></EditRoomModal>
     <label for="selectRoom">Velg rom</label>
-    <select id="selectRoom">
-      <option>Rom 1</option>
-      <option>Rom 2</option>
+    <select id="selectRoom" @change="changeRoomSelection()">
+      <option value="all">Alle rom</option>
+      <option v-for="(room,i) in rooms" :key="i" :value="room" >{{room.roomName}}</option>
     </select>
     <label for="selectSection">Velg seksjon</label>
-    <select id="selectSection">
-      <option>section 1</option>
-      <option>section 2</option>
+    <select @change="changeSectionSelection()" id="selectSection">
+      <option value="">Hele rommet</option>
+      <option v-for="(section, i) in currentSections" :key="i" :value="section.sectionId" >{{section.sectionName}}</option>
     </select>
     <label for="selectDate">Velg dato</label>
-    <input type="date" id="selectDate">
+    <input @change="changeDateSelection()" type="date" id="selectDate">
     <h3>Alle reservasjoner for valgt rom</h3>
     <label for="sortReservations">Sorter reservasjoner</label>
-    <select id="sortReservations">
-      <option>Rom</option>
-      <option>Seksjon</option>
+    <select @change="sortReservations()" id="sortReservations">
+      <option value="room">Rom</option>
       <option>Dato</option>
-      <option>Fra</option>
-      <option>Til</option>
-      <option>Varighet</option>
     </select>
     <table @click="selectReservation($event)" id="reservationTable">
       <tr>
@@ -71,23 +67,31 @@ export default {
   components: {EditReservation, EditRoomModal, Header},
   created() {
     this.fetchReservations();
+    this.loadRoomsAndSections();
   },
   data () {
     return {
       showEditModal: false,
       reservations: [],
-      selectedIndex: -1
+      selectedIndex: -1,
+      rooms: [],
+      allSections: [],
+      currentSections: [],
+      currentReservations: [],
+      selectedSection: undefined,
+      currentSort: 'room'
     }
   },
   methods: {
-    test() {
-      console.log("woho");
-    },
     closeModal() {
        this.showEditModal = false;
     },
     isAdmin() {
       return localStorage.getItem("userType") !== "0";
+    },
+    sortReservations() {
+      this.currentSort = document.getElementById("sortReservations").value;
+      this.reservationDemands();
     },
     async fetchReservations() {
       const addSectionOptions = {
@@ -105,7 +109,7 @@ export default {
               for (let reservation in data.reservations) {
                 try {
                   this.reservations.push(data.reservations[reservation]);
-                  this.addReservationToTable(data.reservations[reservation]);
+                  this.addReservationToTable(data.reservations[reservation], "max");
                 } catch (e) {
                   console.log(e);
                 }
@@ -119,9 +123,10 @@ export default {
             error.toString();
           });
     },
-    addReservationToTable(reservation) {
+    addReservationToTable(reservation, index) {
       let table = document.getElementById("reservationTable");
-      let row = table.insertRow(table.rows.length);
+      if (index === "max") index = table.rows.length
+      let row = table.insertRow(index);
       let cell0 = row.insertCell(0);
       let cell1 = row.insertCell(1);
       let cell2 = row.insertCell(2);
@@ -174,6 +179,125 @@ export default {
       } catch (e) {
         console.log(e);
       }
+    },
+    async loadRoomsAndSections() {
+      //we're reloading these so ned to empty them first
+      this.rooms = [];
+      this.allSections = [];
+      this.availableSections = [];
+      const getRoomsOptions = {
+        method: 'GET',
+        headers: {'Content-Type': 'application/json', 'token': localStorage.getItem("token")}
+      };
+
+      await fetch( this.$serverUrl + "/rooms", getRoomsOptions)
+          .then((response) => response.json())
+          //Then with the data from the response in JSON...
+          .then(data => {
+            if (data.result) {
+              for (let room in data.rooms){
+                this.rooms.push(data.rooms[room]);
+                this.allSections.push(new Array());
+                for (let i in data.rooms[room].sections){
+                  this.allSections[room].push(data.rooms[room].sections[i]);
+                }
+              }
+            } else {
+              console.log(data.error);
+            }
+          })
+          //Then with the error genereted...
+          .catch((error) => {
+            error.toString();
+          });
+    },
+    changeRoomSelection() {
+      const ef = document.getElementById("selectRoom");
+      let index = ef.selectedIndex;
+      if (index > 0) {
+        this.currentSections = this.allSections[index - 1];
+      }
+      else {
+        this.currentSections = [];
+      }
+      this.reservationDemands();
+    },
+    changeSectionSelection() {
+      this.reservationDemands();
+    },
+    changeDateSelection() {
+      this.reservationDemands();
+    },
+    reservationDemands() {
+      let table = document.getElementById("reservationTable");
+      let lastChild = document.getElementById("reservationTable").lastChild;
+      //delete table we are filling
+      for (let i = table.rows.length; i > 1; i--) {
+        console.log(i);
+        table.deleteRow(lastChild.rowIndex);
+      }
+      this.currentReservations = [...this.reservations];
+      let date = document.getElementById("selectDate").value;
+      let roomIndex = document.getElementById("selectRoom").selectedIndex;
+      let sectionIndex = document.getElementById("selectSection").selectedIndex;
+      if (date !== "") {
+        let dateObj = new Date(date);
+        //only consider whole day
+        dateObj.setHours(0,0,0,0);
+        //to avoid concurrent modification
+        let length = this.currentReservations.length;
+        //need to keep count of number of elements removed
+        let counter = 0;
+        for (let i = 0; i < length; i++) {
+          let checkDateObj = new Date(this.currentReservations[i - counter].timeFrom)
+          checkDateObj.setHours(0,0,0,0);
+          if (dateObj.getTime() !== checkDateObj.getTime()){
+            //console.log(this.currentReservations[i].room.roomName);
+            this.currentReservations.splice(i - counter, 1);
+            counter++;
+          }
+        }
+      }
+      //if room is selected
+      if (roomIndex > 0) {
+        let roomObj = this.rooms[roomIndex - 1];
+        let length = this.currentReservations.length;
+        let counter = 0;
+        for (let k = 0; k < length; k++) {
+          if (roomObj.roomId !== this.currentReservations[k - counter].room.roomId){
+            this.currentReservations.splice(k - counter, 1);
+            counter++;
+          }
+        }
+        //only care about section if room is selected
+        if (sectionIndex > 0){
+          let length = this.currentReservations.length;
+          let counter = 0;
+          for (let j = 0; j < length; j++) {
+            if (this.currentReservations[j - counter].section === undefined ||
+                this.currentReservations[j - counter].section.sectionId !== this.currentSections[sectionIndex - 1].sectionId) {
+                this.currentReservations.splice(j - counter,1);
+            }
+          }
+        }
+      }
+      if (this.currentSort === "room") {
+        this.currentReservations.sort(function compareRooms(firstRes, secondRes) {
+          return (firstRes.room.roomName.localeCompare(secondRes.room.roomName))
+        });
+      }
+      else if (this.currentSort === "date") {
+        this.currentReservations.sort(function compareRooms(firstRes, secondRes) {
+          let firstDate = new Date(firstRes.timeFrom);
+          let secondDate = new Date(secondRes.timeFrom);
+          if (firstDate.getTime() === secondDate.getTime()) return 0;
+          if (firstDate.getTime() >= secondDate.getTime()) return 1;
+          if (firstDate.getTime() <= secondDate.getTime()) return -1;
+        });
+      }
+      for (let i in this.currentReservations) {
+        this.addReservationToTable(this.currentReservations[i]);
+      }
     }
   }
 }
@@ -181,20 +305,6 @@ export default {
 
 <style scoped>
 
-.buttonList {
-  float: right;
-}
-.timeButton {
-
-  display: block;
-  background-color: #81c485; /* Green */
-  border: none;
-  color: white;
-  padding: 15px 32px;
-  text-align: center;
-  text-decoration: none;
-  font-size: 16px;
-}
 
 .modal-mask {
   position: fixed;
@@ -230,13 +340,6 @@ export default {
   color: #42b983;
 }
 
-.modal-body {
-  margin: 20px 0;
-}
-
-.modal-default-button {
-  float: right;
-}
 
 
 </style>
