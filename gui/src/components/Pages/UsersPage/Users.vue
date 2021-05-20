@@ -3,7 +3,7 @@
     <Header></Header>
     <button @click="emitNewUser">Ny bruker</button>
     <UsersTable v-on:editUser="editUserEmitted" ref="usersTable"></UsersTable>
-    <EditUserModal v-on:userEdited="emitUserEdited" ref="editUserModal"></EditUserModal>
+    <EditUserModal v-on:userEdited="emitUserEdited" v-on:userCreated="this.userCreatedEmitted" ref="editUserModal"></EditUserModal>
   </div>
 </template>
 
@@ -23,6 +23,9 @@ export default {
     editUserEmitted(value) {
       this.$refs.editUserModal.displayInput(value);
     },
+    userCreatedEmitted(values){
+      this.$refs.usersTable.addNewUser(values);
+    },
     emitNewUser() {
       this.$refs.editUserModal.displayInput({
         newUser: true,
@@ -31,7 +34,7 @@ export default {
     },
     emitUserEdited(uid) {
       this.$refs.usersTable.updateChanged(uid)
-    }
+    },
   }
 }
 </script>

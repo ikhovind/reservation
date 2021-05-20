@@ -71,6 +71,7 @@ public class UserController {
                     .body(jsonBody.toMap());
         }
 
+        jsonBody.put("id", newUser.getId());
         jsonBody.put("result", true);
         return ResponseEntity
                 .created(URI.create("/users/" + newUser.getId()))

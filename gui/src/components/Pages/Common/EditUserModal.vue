@@ -14,27 +14,28 @@
           <div class="modal-body">
             <slot name="body">
               <form id="newUserForm">
+                <span style="color: red" id="emailFault">Eposten er allerede registrert</span>
                 <label for="email">Epost</label>
-                <input name="email" type="text" :disabled=!this.newUser id="email">
+                <input class = "formInput" name="email" type="text" :disabled=!this.newUser id="email" required>
                 <br>
                 <br>
                 <div v-if="this.newUser">
                   <label for="phone">Telefon</label>
-                  <input name="phone" type="text" id="phone">
+                  <input class = "formInput" name="phone" type="text" id="phone" required>
                   <br>
                   <br>
                 </div>
                 <label for="firstName">Fornavn</label>
-                <input name="firstName" type="text" id="firstName">
+                <input class = "formInput" name="firstName" type="text" id="firstName" required>
                 <br>
                 <br>
                 <label for="lastName">Etternavn</label>
-                <input name="lastName" type="text" id="lastName">
+                <input class = "formInput" name="lastName" type="text" id="lastName" required>
                 <br>
                 <br>
-                <div v-bind:style="this.newUser ? {'display': 'none'} : {'display': 'inline'}" class="dumb">
+                <div v-bind:style="this.newUser ? {'display': 'none'} : {'display': 'inline'}">
                   <label for="newPasswordBool">Change password?</label>
-                  <input type="checkbox" id="newPasswordBool" v-on:click="toggleChangePassword">
+                  <input class = "formInput" type="checkbox" id="newPasswordBool" v-on:click="toggleChangePassword">
                   <br>
                   <br>
                 </div>
@@ -42,20 +43,20 @@
                   <span class="passwordFault" id="faultText"></span>
                   <br class="passwordFault">
                   <label class="changePassword" for="newPassword">Passord</label>
-                  <input class="changePassword" name="newPassword" type="password" id="newPassword">
+                  <input class="changePassword formInput" name="newPassword" type="password" id="newPassword" required>
                   <br class="changePassword">
                   <br class="changePassword">
                   <label class="changePassword" for="repeatPassword">Gjenta passord</label>
-                  <input class="changePassword" name="repeatPassword" type="password" id="repeatPassword">
+                  <input class="changePassword formInput" name="repeatPassword" type="password" id="repeatPassword" required>
                   <br>
                   <br>
                 </div>
                 <label for="validUntil">Gyldig til</label>
-                <input name="validUntil" type="date" :disabled="!this.admin" id="validUntil">
+                <input class = "formInput" name="validUntil" type="date" :disabled="!this.admin" id="validUntil" required>
                 <br>
                 <br>
                 <label for="userType">Bruker type</label>
-                <select name="userType" :disabled="!this.admin" id="userType">
+                <select class = "formInput" name="userType" :disabled="!this.admin" id="userType" required>
                   <option value="0">User</option>
                   <option value="9">Admin</option>
                 </select>
@@ -105,12 +106,15 @@ export default {
     },
     async loadExistingUser(uid) {
       this.uid = uid;
-      if(uid === localStorage.getItem("userId")) {
+      if (uid === localStorage.getItem("userId")) {
         this.editSelf = true;
       }
       let getUserOptions = {
         method: 'GET',
-        headers: {'Content-Type': 'application/json'}
+        headers: {
+          'Content-Type': 'application/json',
+          "token": localStorage.getItem("token")
+        }
       }
       await fetch(this.$serverUrl + "/users/" + uid, getUserOptions)
           .then(response => {
@@ -121,7 +125,7 @@ export default {
                   document.getElementById("email").value = data.user.email;
                   document.getElementById("userType").value = data.user.userType;
                   document.getElementById("validUntil").value = this.parseDateIn(data.user.validUntil);
-                  if(this.editSelf) {
+                  if (this.editSelf) {
                     this.disableTypeField();
                   }
                 })
@@ -165,9 +169,33 @@ export default {
       }
       return true;
     },
+    validateEntries() {
+      document.getElementById("emailFault").style.display = "none";
+      if(document.getElementById("email").value.length === 0) {
+        console.log("invalid email")
+        return false;
+      }
+      if(document.getElementById("phone").value.length === 0) {
+        console.log("phone")
+        return false;
+      }
+      if(document.getElementById("lastName").value.length === 0) {
+        console.log("lastname")
+        return false;
+      }
+      if(document.getElementById("firstName").value.length === 0) {
+        console.log("fnawe")
+        return false;
+      }
+      return true;
+    },
     async submitUser() {
+      if (!this.validateEntries()) {
+        console.log("invalid entreies")
+        return;
+      }
       let checked = document.getElementById("newPasswordBool").checked;
-      if (checked) {
+      if (checked || this.newUser) {
         if (!this.validatePassword()) {
           return;
         }
@@ -176,7 +204,7 @@ export default {
       userObj["firstName"] = document.getElementById("firstName").value;
       userObj["lastName"] = document.getElementById("lastName").value;
       userObj["validUntil"] = this.parseDateOut(document.getElementById("validUntil").value);
-      if(!this.editSelf){
+      if (!this.editSelf) {
         userObj["userType"] = document.getElementById("userType").value;
       }
       if (this.newUser) {
@@ -187,7 +215,6 @@ export default {
       if (checked) {
         userObj["newPassword"] = document.getElementById("newPassword").value;
       }
-      console.log(JSON.stringify(userObj))
 
       const submitUserOptions = {
         method: this.newUser ? 'POST' : 'PUT',
@@ -206,14 +233,21 @@ export default {
             response.json()
                 .then(data => {
                   if (data.result) {
-                    if(this.editSelf) {
+                    if (this.editSelf) {
                       this.$emit('selfEdited')
                     }
-                    if(!this.newUser) {
+                    if (this.newUser) {
+                      this.newUserCreated(data.id)
+                    }
+                    if (!this.newUser) {
                       this.$emit('userEdited', this.uid)
                     }
                     this.showModal = false;
                   } else {
+                    if(data.error === "email already registered") {
+                      document.getElementById("emailFault").style.display = "block";
+                      document.getElementById("email").style.border = '1px solid red';
+                    }
                     console.log(data.error)
                   }
                 })
@@ -221,6 +255,9 @@ export default {
     },
     disableTypeField() {
       document.getElementById("userType").disabled = true;
+    },
+    newUserCreated(data) {
+      this.$emit('userCreated', data)
     }
   },
   data() {
@@ -230,6 +267,7 @@ export default {
       uid: '',
       passwordFault: false,
       editSelf: false,
+      emailFault: false,
     }
   },
 }
@@ -286,10 +324,13 @@ export default {
   margin: 0;
 }
 
-.dumb {
-  display: none;
+input:invalid {
+  border: 1px solid red;
 }
 
+#emailFault {
+  display: none;
+}
 
 /*
  * The following styles are auto-applied to elements with
