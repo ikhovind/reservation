@@ -1,7 +1,8 @@
 <template>
   <div>
     <div class="reserveDiv">
-      <h3>Reserver rom</h3>
+      <h3 v-if="!edit">Reserver rom</h3>
+        <h3 v-else>Endre tidspunkt til reservasjon</h3>
       <form class="selectRoom">
         <div v-if="!edit">
           <label for="rooms">Velg et rom</label>
@@ -40,12 +41,11 @@ export default {
     if (this.reservation !== undefined) {
       this.edit = true;
       this.selectedRoomId = this.reservation.room.roomId;
-      if (this.reservation.section.sectionId !== undefined) {
-        console.log("is set bitch");
+      if (this.reservation.section !== undefined) {
         this.selectedSectionId = this.reservation.section.sectionId;
       }
       let date = new Date(this.reservation.timeFrom);
-      this.selectedTime = (date.getFullYear() + "-"  + ((date.getMonth() + 1 < 10) ? ("0" + date.getMonth()) : date.getMonth()) + "-" + date.getDate());
+      this.selectedTime = (date.getFullYear() + "-"  + ((date.getMonth() + 1 < 10) ? ("0" + (date.getMonth() + 1)) : date.getMonth() + 1) + "-" + date.getDate());
     }
     let today = new Date().toISOString().split('T')[0];
     document.getElementById("datePicker").setAttribute('min', today);
@@ -147,22 +147,23 @@ export default {
       this.selectedTime = document.getElementById("datePicker").value;
     },
     isDisabled(n) {
+      let org = n;
       if (this.isPast(n)) return true;
       n = (new Date(this.selectedTime + " " + Math.floor(n / 4 + 8) + ":" + this.padMinutes(((n % 4) * 15)) + ":00"));
       for (let i in this.reservedTimes){
         if (this.startTime != null) {
           if(this.startTime.getTime() <= this.reservedTimes[i][0].getTime()){
-            return n.getTime() > this.reservedTimes[i][0].getTime();
+            return n.getTime() >= this.reservedTimes[i][0].getTime();
           }
           if(this.startTime.getTime() >= this.reservedTimes[i][1].getTime()){
-            return n.getTime() < this.reservedTimes[i][1].getTime();
+            return n.getTime() <= this.reservedTimes[i][1].getTime();
           }
         }
         else {
-          return n.getTime() > this.reservedTimes[i][0] && n.getTime() < this.reservedTimes[i][1];
+          return n.getTime() >= this.reservedTimes[i][0] && n.getTime() <= this.reservedTimes[i][1];
         }
       }
-      return false;
+      return this.isReserved(org) || this.isPast(org);
     },
     isPast(n) {
       let today = new Date().toISOString().split('T')[0];
@@ -175,6 +176,11 @@ export default {
     },
     isReserved(n) {
       n = (new Date(this.selectedTime + " " + Math.floor(n / 4 + 8) + ":" + this.padMinutes(((n % 4) * 15)) + ":00"));
+      if (this.edit) {
+        let timeFrom = new Date(this.reservation.timeTo);
+        let timeTo = new Date(this.reservation.timeFrom);
+        if(n.getTime() >= timeFrom.getTime() && n.getTime() <= timeTo.getTime()) return true;
+      }
       for (let arr in this.reservedTimes) {
         if(n.getTime() >= this.reservedTimes[arr][0].getTime() && n.getTime() <= this.reservedTimes[arr][1].getTime()) {
           return true;
