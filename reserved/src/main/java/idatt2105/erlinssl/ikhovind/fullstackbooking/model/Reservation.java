@@ -21,7 +21,7 @@ import java.util.Objects;
 public class Reservation extends BaseModel {
     @ManyToOne(optional = false,
                 fetch = FetchType.LAZY,
-            targetEntity = Room.class)
+            targetEntity = Room.class, cascade = CascadeType.ALL)
     private Room room;
     @ManyToOne(optional = true,
             fetch = FetchType.LAZY,

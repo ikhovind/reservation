@@ -53,14 +53,14 @@ export default {
       e.preventDefault()
       const addSectionOptions = {
         method: 'POST',
-        headers: {'Content-Type': 'application/json'},
+        headers: {'Content-Type': 'application/json', 'token': localStorage.getItem("token")},
         body: JSON.stringify({
           sectionName: document.getElementById("sectionName").value,
           sectionDesc: document.getElementById("sectionDesc").value,
         })
       };
 
-      await fetch("https://localhost:8443/rooms/" + this.selectedRoom + "/sections", addSectionOptions)
+      await fetch(this.$serverUrl + "/rooms/" + this.selectedRoom + "/sections", addSectionOptions)
           .then((response) => response.json())
           //Then with the data from the response in JSON...
           .then(data => {

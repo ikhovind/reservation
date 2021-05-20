@@ -25,18 +25,18 @@
       <option>Til</option>
       <option>Varighet</option>
     </select>
+    <table @click="selectReservation($event)" id="reservationTable">
+      <tr>
+        <th>Rom</th>
+        <th>Seksjon</th>
+        <th>Dato</th>
+        <th>Fra</th>
+        <th>Til</th>
+      </tr>
+    </table>
 
     <div v-if="isAdmin()">
       <button @click="$refs.editRoomModal.displayInput(true)">Legg til nytt rom</button>
-      <table @click="selectReservation($event)" id="reservationTable">
-        <tr>
-          <th>Rom</th>
-          <th>Seksjon</th>
-          <th>Dato</th>
-          <th>Fra</th>
-          <th>Til</th>
-        </tr>
-      </table>
       <button :disabled="selectedIndex === -1" @click="showEditModal = true">Rediger reservasjon</button>
       <div v-if="showEditModal" id="editReservationModal">
         <div id="editSection">
@@ -97,7 +97,7 @@ export default {
           'token': localStorage.getItem("token")
         }
       };
-      await fetch("https://localhost:8443/reservations", addSectionOptions)
+      await fetch(this.$serverUrl + "/reservations", addSectionOptions)
           .then((response) => response.json())
           //Then with the data from the response in JSON...
           .then(data => {
