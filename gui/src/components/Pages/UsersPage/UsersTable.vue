@@ -12,7 +12,7 @@
              :data="users"
              :filters="filters"
              :current-page.sync="currentPage"
-             :page-size="10"
+             :page-size="this.pageSize"
              selection-mode="single"
              selected-class="table-info"
              @totalPagesChanged="totalPages = $event"
@@ -41,9 +41,22 @@
     </v-table>
 
     <div class="footer">
-      <button class="user-button" @click="emitNewUser">Ny bruker</button>
       <button class="user-button" @click="emit_event">Rediger bruker</button>
       <button class="user-button" @click="deleteUser">Slett bruker</button>
+      <button class="user-button" @click="emitNewUser">Opprett bruker</button>
+      <table class="size-buttons">
+        <tr>
+          <td>
+            <button type = "button" class="size-button" @click="changePageSize(5)">5</button>
+          </td>
+          <td>
+            <button class="size-button" @click="changePageSize(10)">10</button>
+          </td>
+          <td>
+            <button class="size-button" @click="changePageSize(15)">15</button>
+          </td>
+        </tr>
+      </table>
       <span class="text text-strong">Valgt bruker:</span>
       <span v-if="selected.length === 0" class="text text-muted">Ingen bruker valgt, velg en fra tabellen</span>
       <span v-else class="text">{{ selected[0].email }}</span>
@@ -177,6 +190,9 @@ export default {
     emitNewUser() {
       console.log("emitting")
       this.$emit('newUser')
+    },
+    changePageSize(x){
+      this.pageSize = x;
     }
   },
   async created() {
@@ -188,6 +204,7 @@ export default {
     filters: {lastName: {value: '', keys: ['lastName']}, firstName: {value: '', keys: ['firstName']}},
     currentPage: 1,
     totalPages: 0,
+    pageSize: 10,
     id: '',
     firstName: '',
     lastName: '',
@@ -209,14 +226,14 @@ div {
   float: left;
 }
 
-table {
+table:not(.size-buttons) {
   font-family: arial, sans-serif;
   border-collapse: collapse;
   width: auto;
   clear: left;
 }
 
-th, td {
+th, td:not(.size-buttons th, .size-buttons td) {
   border: 1px solid #dddddd;
   text-align: left;
   padding: 8px;
@@ -244,8 +261,8 @@ strong + span {
 
 .container {
   float: left;
-  margin-top: 1.25rem;
-  margin-left: 1.75rem;
+  margin-top: 1.25vw;
+  margin-left: 3.75vw;
 }
 
 .form-control {
@@ -262,6 +279,7 @@ strong + span {
 
 .footer {
   margin: .35rem 0;
+  width: 100%;
   height: fit-content;
   float: left;
 }
@@ -280,7 +298,7 @@ strong + span {
   float: left;
 }
 
-.user-button:hover {
+.user-button:hover{
   cursor: pointer;
   color: #5c5c5f;
   background-color: #bce7a8;
@@ -292,6 +310,41 @@ strong + span {
 .user-button + .user-button {
   margin-left: 0.25rem;
   clear: none;
+}
+
+.size-buttons {
+  width: 15%;
+  float: right;
+  clear: none;
+}
+
+.size-buttons tr {
+  display: flex;
+}
+
+.size-buttons tr td {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+button {
+  flex: 1;
+}
+
+.size-button {
+  table-layout: fixed;
+  padding: 5px;
+  width: 100%;
+  height: 100%;
+  border-radius: 0.33rem;
+}
+
+.size-button:hover {
+  cursor: pointer;
+  color: #5c5c5f;
+  background-color: #bce7a8;
+  box-shadow: none;
 }
 
 .text {

@@ -3,10 +3,9 @@
     <div v-if="this.showModal" class="modal-mask">
       <div class="modal-wrapper">
         <div class="modal-container">
-
           <div class="modal-header">
             <slot name="header">
-              <h1 v-if="this.newUser">Ny bruker</h1>
+              <h1 v-if="this.newUser">Opprett bruker</h1>
               <h1 v-else>Rediger bruker</h1>
             </slot>
           </div>
@@ -17,25 +16,20 @@
                 <span style="color: red" id="emailFault">Eposten er allerede registrert</span>
                 <label for="email">Epost</label>
                 <input class="formInput" name="email" type="text" :disabled=!this.newUser id="email" required>
-                <br>
-                <br>
+                <br><br>
                 <label for="phone">Telefon</label>
                 <input class="formInput" name="phone" type="text" id="phone" required :disabled="!this.newUser">
-                <br>
-                <br>
+                <br><br>
                 <label for="firstName">Fornavn</label>
                 <input class="formInput" name="firstName" type="text" id="firstName" required>
-                <br>
-                <br>
+                <br><br>
                 <label for="lastName">Etternavn</label>
                 <input class="formInput" name="lastName" type="text" id="lastName" required>
-                <br>
-                <br>
+                <br><br>
                 <div v-bind:style="this.newUser ? {'display': 'none'} : {'display': 'inline'}">
-                  <label for="newPasswordBool">Change password?</label>
+                  <label for="newPasswordBool">Bytt passord?</label>
                   <input class="formInput" type="checkbox" id="newPasswordBool" v-on:click="toggleChangePassword">
-                  <br>
-                  <br>
+                  <br><br>
                 </div>
                 <div v-bind:style="this.newUser ? {'display': 'inline'} : {'display': 'none'}" class="changePassword">
                   <span class="passwordFault" id="faultText"></span>
@@ -44,7 +38,7 @@
                   <input class="changePassword formInput" name="newPassword" type="password" id="newPassword" required>
                   <br class="changePassword">
                   <br class="changePassword">
-                  <label class="changePassword" for="repeatPassword">Gjenta passord</label>
+                  <label class="changePassword" for="repeatPassword">Bekreft</label>
                   <input class="changePassword formInput" name="repeatPassword" type="password" id="repeatPassword"
                          required>
                   <br>
@@ -55,7 +49,7 @@
                 <br>
                 <br>
                 <label for="userType">Bruker type</label>
-                <select class="formInput" name="userType" :disabled="!this.admin" id="userType" required>
+                <select class="formInput custom-select" name="userType" :disabled="!this.admin" id="userType" required>
                   <option value="0">User</option>
                   <option value="9">Admin</option>
                 </select>
@@ -66,7 +60,7 @@
           <div class="modal-footer">
             <slot name="footer">
               <button class="modal-default-button" @click="submitUser()">Lagre Bruker</button>
-              <button class="modal-default-button" @click="closeModal()">Avbryt</button>
+              <button class="modal-default-button" @click="initCloseModal()">Avbryt</button>
             </slot>
           </div>
         </div>
@@ -79,6 +73,11 @@
 export default {
   name: "EditUserModal",
   methods: {
+    initCloseModal() {
+      if(confirm("Er du sikker på at du vil avbryte?")){
+        this.closeModal();
+      }
+    },
     closeModal() {
       this.showModal = false;
       this.admin = false;
@@ -297,8 +296,8 @@ export default {
   width: auto;
   height: auto;
   display: inline-block;
-  margin: 0px auto;
-  padding: 20px 150px;
+  margin: 0 auto;
+  padding: 20px 75px;
   background-color: #fff;
   border-radius: 2px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.33);
@@ -315,8 +314,24 @@ export default {
   margin: 20px 0;
 }
 
+.modal-footer {
+  margin-top: 2.25rem;
+  margin-bottom: 0.55rem;
+}
+
 .modal-default-button {
-  float: right;
+  padding: 5px 5px;
+  width: 6rem;
+  border-radius: 0.33rem;
+}
+
+.modal-default-button:hover {
+  cursor: pointer;
+  color: #5c5c5f;
+  background-color: #bce7a8;
+  border: 4px #6cf3b2;
+  padding: 7px;
+  box-shadow: none;
 }
 
 .passwordFault {
@@ -324,6 +339,50 @@ export default {
   display: none;
   padding: 0;
   margin: 0;
+}
+
+input {
+  border-radius: 0.35rem;
+  border: 1px solid grey;
+  padding: 3px 2px;
+  margin: 3px 0;
+}
+
+input:focus {
+  outline: none;
+}
+
+label {
+  float: left;
+  padding: 3px 2px;
+  margin: 3px 0;
+}
+
+select {
+  padding: 3px 2px 3px 3px;
+  border-radius: 0.35rem;
+  border: 1px solid grey;
+  -moz-appearance: none;
+  -webkit-appearance: none;
+  appearance: unset;
+}
+
+select:hover {
+  cursor: pointer;
+}
+
+input, select {
+  float: right;
+  width: 125px;
+  box-sizing: content-box;
+}
+
+label + input, label + select {
+  margin-left: .66rem;
+}
+
+button + button {
+  margin-left: 0.75rem;
 }
 
 input:invalid {
