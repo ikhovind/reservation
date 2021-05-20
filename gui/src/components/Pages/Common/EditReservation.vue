@@ -89,7 +89,7 @@ export default {
           'token': localStorage.getItem("token")}
       };
       this.reservedTimes = [];
-      await fetch("https://" + this.$serverUrl + "/reservations/rooms/" + this.selectedRoomId, addSectionOptions)
+      await fetch(this.$serverUrl + "/reservations/rooms/" + this.selectedRoomId, addSectionOptions)
           .then((response) => response.json())
           //Then with the data from the response in JSON...
           .then(data => {
@@ -209,7 +209,7 @@ export default {
       this.reservedTimes = [];
       let url= "/reservations/rooms/" + this.selectedRoomId;
 
-      await fetch("https://" + this.$serverUrl + "" + url, addSectionOptions)
+      await fetch(this.$serverUrl + "" + url, addSectionOptions)
           .then((response) => response.json())
           //Then with the data from the response in JSON...
           .then(data => {
@@ -259,7 +259,7 @@ export default {
       else {
         url = "/reservations/rooms/" + this.selectedRoomId + "/sections/" + this.selectedSectionId;
       }
-      await fetch("https://" + this.$serverUrl + "" + url, requestOptions)
+      await fetch(this.$serverUrl + "" + url, requestOptions)
           .then((response) => response.json())
           //Then with the data from the response in JSON...
           .then(data => {
@@ -289,7 +289,7 @@ export default {
         headers: {'Content-Type': 'application/json', 'token': localStorage.getItem("token")}
       };
 
-      await fetch("https://" + this.$serverUrl + "/rooms", getRoomsOptions)
+      await fetch( this.$serverUrl + "/rooms", getRoomsOptions)
           .then((response) => response.json())
           //Then with the data from the response in JSON...
           .then(data => {

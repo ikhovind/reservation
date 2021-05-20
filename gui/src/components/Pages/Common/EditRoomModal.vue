@@ -60,7 +60,7 @@ export default {
         })
       };
 
-      await fetch("https://" + this.$serverUrl + "/rooms", requestOptions)
+      await fetch(this.$serverUrl + "/rooms", requestOptions)
           .then((response) => response.json())
           //Then with the data from the response in JSON...
           .then(data => {

@@ -51,7 +51,7 @@ export default {
           'token': localStorage.getItem("token")
         }
       };
-      await fetch("https://this.$serverUrl/users/" + localStorage.getItem("userId"), addSectionOptions)
+      await fetch(localStorage.getItem("userId"), addSectionOptions)
           .then((response) => response.json())
           //Then with the data from the response in JSON...
           .then(data => {
@@ -119,7 +119,7 @@ export default {
         }
       };
       console.log(this.reservations);
-      await fetch("https://" + this.$serverUrl + "/reservations/" + this.reservations[this.selectedIndex].reservationId, addSectionOptions)
+      await fetch(this.$serverUrl + "/reservations/" + this.reservations[this.selectedIndex].reservationId, addSectionOptions)
           .then((response) => response.json())
           //Then with the data from the response in JSON...
           .then(data => {
