@@ -17,6 +17,10 @@ import javax.persistence.EntityNotFoundException;
 import java.sql.Timestamp;
 import java.util.*;
 
+/**
+ * Service class that can be used to access the reservation repository, as well as
+ * handling business logic where necessary.
+ */
 @Slf4j
 @Service
 @NoArgsConstructor
@@ -57,6 +61,13 @@ public class ReservationService {
         return reservationRepository.findRoomSectionReservationsBetween(room, timeFrom, timeTo2, timeFrom2, timeTo);
     }
 
+    /**
+     * Attempts to find a reservation by a given ID.
+     *
+     * @param id {@link UUID} of a reservation
+     * @return the {@link Reservation} that was found
+     * @throws EntityNotFoundException if no reservation exists for the given ID
+     */
     public Reservation getReservationById(UUID id) {
         return reservationRepository.findById(id)
                 .orElseThrow(EntityNotFoundException::new);
@@ -71,8 +82,7 @@ public class ReservationService {
         reservationRepository.deleteById(id);
     }
 
-    private static final int POOF = 1;
-
+    // checks the given timestamps for any faults in the timeframe
     private void validateTimeframe(Timestamp timeFrom, Timestamp timeTo) {
         long timeFromMillis = timeFrom.getTime();
         long timeToMillis = timeTo.getTime();
@@ -95,6 +105,9 @@ public class ReservationService {
         }
     }
 
+    // simple int that can reverse the bordering logic, or change how lenient the system should be when deciding
+    // whether or not a reservation already exists
+    private static final int POOF = 1;
     private Timestamp borderTimeFrom(Timestamp time) {
         return new Timestamp(time.getTime() + POOF);
     }
