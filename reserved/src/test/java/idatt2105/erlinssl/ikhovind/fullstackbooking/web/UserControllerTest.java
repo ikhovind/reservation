@@ -41,7 +41,7 @@ public class UserControllerTest {
     private final JSONObject user3Json = userToJson(user3);
     private final JSONObject user1EditJson = editUserJson(user1Json);
 
-    private static String testingToken;
+    private static String testingToken = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1PFIzQHpjazkrNV9jNyQyLyE9OSIsImV4cCI6MTYyMjEwOTI0N30.SN9r84o79qslX_28i3FV5NFT283Akn4Tsk2BYvpia_c";
 
     private static int initialUsers = 0;
 
@@ -65,11 +65,12 @@ public class UserControllerTest {
     void getInitialUsersTest() throws Exception {
         // Gets a test token is to be used exclusively for test, which lets us bypass
         // otherwise, in the context of testing, inconvenient security measures
-        MvcResult result = mockMvc.perform(get("/login/testing/only/endpoint/delete/me"))
+        MvcResult result = mockMvc.perform(get("/login/testing/only/endpoint/delete/me/or/change/constant"))
                 .andReturn();
         testingToken = new JSONObject(result.getResponse().getContentAsString()).getString("token");
 
-        result = mockMvc.perform(get("/users"))
+        result = mockMvc.perform(get("/users")
+                .header("token", testingToken))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.*.*", hasSize(greaterThan(1))))
                 .andReturn();
@@ -145,6 +146,7 @@ public class UserControllerTest {
 
     private void postUser(JSONObject u) throws Exception {
         MvcResult result = mockMvc.perform(post("/users")
+                .header("token", testingToken)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(u.toString()))
                 .andExpect(status().isCreated())

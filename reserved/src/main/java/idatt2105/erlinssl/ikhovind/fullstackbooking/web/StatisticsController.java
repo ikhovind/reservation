@@ -2,6 +2,8 @@ package idatt2105.erlinssl.ikhovind.fullstackbooking.web;
 
 import idatt2105.erlinssl.ikhovind.fullstackbooking.Exceptions.TimestampParsingException;
 import idatt2105.erlinssl.ikhovind.fullstackbooking.model.Room;
+import idatt2105.erlinssl.ikhovind.fullstackbooking.model.Section;
+import idatt2105.erlinssl.ikhovind.fullstackbooking.model.User;
 import idatt2105.erlinssl.ikhovind.fullstackbooking.service.RoomService;
 import idatt2105.erlinssl.ikhovind.fullstackbooking.service.StatisticsService;
 import idatt2105.erlinssl.ikhovind.fullstackbooking.util.Utilities;
@@ -16,7 +18,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import java.sql.Time;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -37,6 +38,16 @@ public class StatisticsController {
     @Autowired
     private SecurityService securityService;
 
+    /**
+     * Gets all sum of millisecond for all reservations, grouped by {@link User}, for a given timeframe.
+     * This endpoint is only available to admins.
+     *
+     * @param timeFromString beginning of the timeframe, see {@link Utilities#stringToTimestamp(String)} for format
+     * @param timeToString end of the timeframe, see {@link Utilities#stringToTimestamp(String)} for format
+     * @param token JWT belonging to the {@link User} making the request
+     * @return 200 OK with JSONArray of consisting of JSONObjects like {"user": String, "totalMillis": long}.
+     * 400 BAD REQUEST if either of the time strings could not be parsed, or other exceptions occurred.
+     */
     @AdminTokenRequired
     @GetMapping("/users")
     public ResponseEntity sortByUser(@RequestParam("timeFrom") String timeFromString,
@@ -66,6 +77,19 @@ public class StatisticsController {
         return getResponseEntity(jsonBody, sums, passed);
     }
 
+    /**
+     * Gets all sum of millisecond for all reservations, grouped by {@link Room}, for a given timeframe.
+     * If sortBy=user, then the sums will also be grouped by {@link User}.
+     * This endpoint is only available to admins.
+     *
+     * @param timeFromString beginning of the timeframe, see {@link Utilities#stringToTimestamp(String)} for format
+     * @param timeToString end of the timeframe, see {@link Utilities#stringToTimestamp(String)} for format
+     * @param sortType optional search feature that decides whether or not to group by user, can be omitted or "user"
+     * @param token JWT belonging to the {@link User} making the request
+     * @return 200 OK with JSONArray of consisting of JSONObjects like {"room": String, "totalMillis": long}
+     * or {"user":String, "room": String, "totalMillis": long} if grouping by User.
+     * 400 BAD REQUEST if either of the time strings could not be parsed, or other exceptions occurred.
+     */
     @UserTokenRequired
     @GetMapping("/rooms")
     public ResponseEntity getAllRoomsStats(@RequestParam("timeFrom") String timeFromString,
@@ -107,6 +131,19 @@ public class StatisticsController {
         return getResponseEntity(jsonBody, sums, passed);
     }
 
+    /**
+     * Gets all sum of millisecond for all reservations, grouped by {@link Section}, for a given timeframe.
+     * If sortBy=user, then the sums will also be grouped by {@link User}.
+     * This endpoint is only available to admins.
+     *
+     * @param timeFromString beginning of the timeframe, see {@link Utilities#stringToTimestamp(String)} for format
+     * @param timeToString end of the timeframe, see {@link Utilities#stringToTimestamp(String)} for format
+     * @param sortType optional search feature that decides whether or not to group by user, can be omitted or "user"
+     * @param token JWT belonging to the {@link User} making the request
+     * @return 200 OK with JSONArray of consisting of JSONObjects like {"section": String, "totalMillis": long}
+     * or {"user":String, "section": String, "totalMillis": long} if grouping by User.
+     * 400 BAD REQUEST if either of the time strings could not be parsed, or other exceptions occurred.
+     */
     @UserTokenRequired
     @GetMapping("/rooms/{id}")
     public ResponseEntity getRoomSectionStats(@PathVariable("id") UUID roomId,

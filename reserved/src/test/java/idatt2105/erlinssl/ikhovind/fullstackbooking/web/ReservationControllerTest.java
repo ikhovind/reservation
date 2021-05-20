@@ -35,6 +35,8 @@ public class ReservationControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
+    private static String testingToken = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1PFIzQHpjazkrNV9jNyQyLyE9OSIsImV4cCI6MTYyMjEwOTI0N30.SN9r84o79qslX_28i3FV5NFT283Akn4Tsk2BYvpia_c";
+
     private static final User user1 = new User("Reservation", "TestUser", "10101010",
             "resrvation@test.no", "Pass", new Timestamp(new Date().getTime()), Constants.USER_TYPE);
     private static final JSONObject user1Json = userToJson(user1);
@@ -301,7 +303,9 @@ public class ReservationControllerTest {
     }
 
     private void postRoom(Room room) throws Exception {
-        String response = mockMvc.perform(post("/rooms").contentType(MediaType.APPLICATION_JSON)
+        String response = mockMvc.perform(post("/rooms")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("token", testingToken)
                 .content("{\n" +
                         "    \"roomName\":\"" + room.getRoomName() + "\"\n" +
                         "}"))
@@ -330,7 +334,9 @@ public class ReservationControllerTest {
     private void postSection(Room room, Section section) throws Exception {
         String body = getBody(section.getSectionName(), section.getSectionDesc());
 
-        String response = mockMvc.perform(post("/rooms/" + room.getId() + "/sections").contentType(MediaType.APPLICATION_JSON)
+        String response = mockMvc.perform(post("/rooms/" + room.getId() + "/sections")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("token", testingToken)
                 .content(body))
                 .andExpect(status().isCreated()).andExpect(
                         MockMvcResultMatchers.jsonPath("$.result").value(true))
@@ -344,7 +350,8 @@ public class ReservationControllerTest {
 
     private void deleteRoom(Room room) throws Exception {
         mockMvc.perform(delete("/rooms/" + room.getId().toString())
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("token", testingToken))
                 .andExpect(status().isOk()).andExpect(
                 MockMvcResultMatchers.jsonPath("$.result").value(true));
     }
@@ -352,6 +359,7 @@ public class ReservationControllerTest {
     private void postUser(JSONObject u) throws Exception {
         MvcResult result = mockMvc.perform(post("/users")
                 .contentType(MediaType.APPLICATION_JSON)
+                .header("token", testingToken)
                 .content(u.toString()))
                 .andExpect(status().isCreated())
                 .andReturn();

@@ -27,6 +27,14 @@ public class LoginController {
     @Autowired
     SecurityService securityService;
 
+    /**
+     * Endpoint for logging users in. Checks whether the given email belongs to a user,
+     * and then if the given password is correct. If either of these are invalid, an
+     * error is returned.
+     *
+     * @param map with values email and password
+     * @return ResponseEntity, if result true body has userId, type and token.
+     */
     @PostMapping(value = "", consumes = "application/json", produces = "application/json")
     public ResponseEntity login(@RequestBody Map<String, String> map) {
         JSONObject jsonBody = new JSONObject();
@@ -49,6 +57,12 @@ public class LoginController {
                 .body(jsonBody.toMap());
     }
 
+    /**
+     * Lightweight endpoint that can be used to simply if a users token is
+     * still valid or not.
+     *
+     * @return ResponseEntity with error from {@link UserTokenRequired} or true if token is valid
+     */
     @GetMapping("/verify")
     @UserTokenRequired
     private ResponseEntity verifyToken() {
@@ -59,12 +73,19 @@ public class LoginController {
                         .toMap());
     }
 
+    /**
+     * An endpoint that lets tests run without having to worry about sending a users
+     * token with every request. Useful for testing for example rooms and sections,
+     * so that you don't have to generate users as well, since they aren't functionally
+     * necessary. This endpoint is enabled/disabled based on {@link Constants#TESTING_ENABLED}
+     *
+     * @return a token created with {@link Constants#TESTING_SUBJECT} if enabled, error if not.
+     */
     @GetMapping(value = "/testing/only/endpoint/delete/me/or/change/constant")
-    @UserTokenRequired
     public ResponseEntity testTokenEndpoint() {
         JSONObject jsonBody = new JSONObject();
         if (Constants.TESTING_ENABLED) {
-            jsonBody.put("token", securityService.createToken(Constants.TESTING_SUBJECT, Constants.TTL_MILLIS));
+            jsonBody.put("token", securityService.createToken(Constants.TESTING_SUBJECT, Constants.TTL_MILLIS * 7L));
             return ResponseEntity
                     .ok(jsonBody.toMap());
         }

@@ -6,6 +6,7 @@ import idatt2105.erlinssl.ikhovind.fullstackbooking.model.User;
 import idatt2105.erlinssl.ikhovind.fullstackbooking.service.UserService;
 import idatt2105.erlinssl.ikhovind.fullstackbooking.util.Utilities;
 import idatt2105.erlinssl.ikhovind.fullstackbooking.util.security.AdminTokenRequired;
+import idatt2105.erlinssl.ikhovind.fullstackbooking.util.security.UserTokenRequired;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -30,7 +31,13 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-    //@AdminTokenRequired
+    /**
+     * An admin-only endpoint that is used to create new user objects and add them to the database.
+     *
+     * @param map with necessary {@link User} information, see {@link User#toSmallJson()} for field names
+     * @return HTTP Status 201 if successful, 400 if input could not be parsed, or 500 if something went wrong
+     */
+    @AdminTokenRequired
     @PostMapping(value = "", consumes = "application/json", produces = "application/json")
     public ResponseEntity createUser(@RequestBody Map<String, Object> map) {
         JSONObject jsonBody = new JSONObject();
@@ -66,7 +73,13 @@ public class UserController {
                 .body(jsonBody.toMap());
     }
 
-    //@AdminTokenRequired
+    /**
+     * An endpoint that lets an admin see information about a given user.
+     *
+     * @param userId id of the user to be checked, of string type {@link UUID}
+     * @return 201 OK with user as json if successful, 400 Bad Request if the user was not found
+     */
+    @AdminTokenRequired
     @GetMapping(value = "/{id}")
     public ResponseEntity getUser(@PathVariable("id") UUID userId) {
         JSONObject jsonBody = new JSONObject();
@@ -87,7 +100,15 @@ public class UserController {
         }
     }
 
-    //@AdminTokenRequired
+    /**
+     * An endpoint admins can get all users in the database, and search through these to find a certain
+     * user if they so wish.
+     *
+     * @param firstName String
+     * @param lastName  String
+     * @return JSONArray with {@link User} objects if successful, error if not
+     */
+    @AdminTokenRequired
     @GetMapping(value = "", produces = "application/json")
     public ResponseEntity getAllUsers(@RequestParam(value = "firstName", required = false, defaultValue = "") String firstName,
                                       @RequestParam(value = "lastName", required = false, defaultValue = "") String lastName) {
@@ -120,6 +141,12 @@ public class UserController {
         }
     }
 
+    /**
+     * Used by admins to delete a certain user.
+     *
+     * @param userId {@link UUID} of user to be deleted
+     * @return 200 OK if successfully deleted, 400/500 with error message if something went wrong
+     */
     @AdminTokenRequired
     @DeleteMapping("/{id}")
     public ResponseEntity deleteUser(@PathVariable("id") UUID userId) {
@@ -147,7 +174,18 @@ public class UserController {
         }
     }
 
-    //@UserTokenRequired
+    /**
+     * An endpoint that can be used by both admins and normal users.
+     * The method checks whether the given token belongs to an admin, if not
+     * an extra check has to be performed to make sure the user being edited belongs
+     * to the owner of the token.
+     *
+     * @param userId {@link UUID} of the user to edit
+     * @param map    with new values to use when updating user
+     * @param token  Request Header with JWT
+     * @return 200 OK if user was successfully edited, 403/404/500 if not
+     */
+    @UserTokenRequired
     @PutMapping("/{id}")
     public ResponseEntity editUser(@PathVariable("id") UUID userId,
                                    @RequestBody Map<String, Object> map,

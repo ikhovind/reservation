@@ -42,6 +42,8 @@ class RoomControllerTest {
     private Room room4 = new Room("romnavn 4");
     private Room room5 = new Room("romnavn 5");
 
+    private static String testingToken = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1PFIzQHpjazkrNV9jNyQyLyE9OSIsImV4cCI6MTYyMjEwOTI0N30.SN9r84o79qslX_28i3FV5NFT283Akn4Tsk2BYvpia_c";
+
     @BeforeEach
     void setUp() throws Exception {
         postRoom(room1);
@@ -56,7 +58,9 @@ class RoomControllerTest {
 
     @Test
     void getAllRooms() throws Exception {
-        mockMvc.perform(get("/rooms").contentType(MediaType.APPLICATION_JSON))
+        mockMvc.perform(get("/rooms")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("token", testingToken))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.rooms.*",hasSize(greaterThanOrEqualTo(2))))
                 /*.andExpect(jsonPath("$.rooms.[*].roomId", containsInAnyOrder(room1.getId().toString(), room2.getId().toString())))*/;
@@ -64,13 +68,17 @@ class RoomControllerTest {
 
     @Test
     void getSingleRoom() throws Exception {
-        mockMvc.perform(get("/rooms/" + room2.getId().toString()).contentType(MediaType.APPLICATION_JSON))
+        mockMvc.perform(get("/rooms/" + room2.getId().toString())
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("token", testingToken))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.result", is(true)))
                 .andExpect(jsonPath("$.room.roomId", is(room2.getId().toString())))
                 .andExpect(jsonPath("$.room.roomName", is(room2.getRoomName())));
                 //.andExpect();
-        mockMvc.perform(get("/rooms/" + room3.getId().toString()).contentType(MediaType.APPLICATION_JSON))
+        mockMvc.perform(get("/rooms/" + room3.getId().toString())
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("token", testingToken))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.result", is(false)))
                 .andExpect(jsonPath("$.error", is("room could not be found")));
@@ -79,20 +87,26 @@ class RoomControllerTest {
     @Test
     void saveSingleRoom() throws Exception {
         //only negative testing, positive tests handled implicitly
-        mockMvc.perform(post("/rooms").contentType(MediaType.APPLICATION_JSON)
-        .content("{\"roomName\":\"\"}"))
+        mockMvc.perform(post("/rooms")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("token", testingToken)
+                .content("{\"roomName\":\"\"}"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error", is("roomname is null or blank")))
                 .andExpect(jsonPath("$.result", is(false)));
 
-        mockMvc.perform(post("/rooms").contentType(MediaType.APPLICATION_JSON)
+        mockMvc.perform(post("/rooms")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("token", testingToken)
                 .content("{\"roomName\":\"" + room1.getRoomName() + "\"}"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error", is("room name must be unique")))
                 .andExpect(jsonPath("$.result", is(false)));
 
-        mockMvc.perform(post("/rooms").contentType(MediaType.APPLICATION_JSON)
-                .content("{\"roomName\":\"                                                         \"}"))
+        mockMvc.perform(post("/rooms")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"roomName\":\"                                                         \"}")
+                .header("token", testingToken))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error", is("roomname is null or blank")))
                 .andExpect(jsonPath("$.result", is(false)));
@@ -100,25 +114,31 @@ class RoomControllerTest {
 
     @Test
     void editRoom() throws Exception {
-        mockMvc.perform(put("/rooms/" + room1.getId()).contentType(MediaType.APPLICATION_JSON)
-                .content("{\"roomName\":" + "\"" + room3.getRoomName() + "\"" + "}"))
+        mockMvc.perform(put("/rooms/" + room1.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"roomName\":" + "\"" + room3.getRoomName() + "\"" + "}")
+                .header("token", testingToken))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.result", is(true)))
                 .andExpect(jsonPath("$.room.roomId", is(room1.getId().toString())))
                 .andExpect(jsonPath("$.room.roomName", is(room3.getRoomName())));
 
-        mockMvc.perform(put("/rooms/" + room4.getId()).contentType(MediaType.APPLICATION_JSON)
+        mockMvc.perform(put("/rooms/" + room4.getId())
+                .contentType(MediaType.APPLICATION_JSON)
                 .content("{" +
                         "    \"roomName\":\"" + room1.getRoomName() + "\"" +
-                        "}"))
+                        "}")
+                .header("token", testingToken))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.result", is(false)))
                 .andExpect(jsonPath("$.error", is("room cannot be found")));
 
-        mockMvc.perform(put("/rooms/" + room1.getId()).contentType(MediaType.APPLICATION_JSON)
+        mockMvc.perform(put("/rooms/" + room1.getId())
+                .contentType(MediaType.APPLICATION_JSON)
                 .content("{\n" +
                         "    \"roomName\":\"" + room2.getRoomName() + "\"" +
-                        "}"))
+                        "}")
+                .header("token", testingToken))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.result", is(false)))
                 .andExpect(jsonPath("$.error", is("room name must be unique")));
@@ -127,17 +147,21 @@ class RoomControllerTest {
     @Test
     void deleteRoom() throws Exception {
         //only negative testing, positive is tested implicitly
-        mockMvc.perform(delete("/rooms/" + room3.getId()).contentType(MediaType.APPLICATION_JSON))
+        mockMvc.perform(delete("/rooms/" + room3.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("token", testingToken))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.result", is(false)))
                 .andExpect(jsonPath("$.error", is("cannot find room to delete")));
     }
 
     private void postRoom(Room room) throws Exception {
-        String response = mockMvc.perform(post("/rooms").contentType(MediaType.APPLICATION_JSON)
-        .content("{\n" +
+        String response = mockMvc.perform(post("/rooms")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\n" +
                 "    \"roomName\":\"" + room.getRoomName() + "\"\n" +
-                "}"))
+                "}")
+                .header("token", testingToken))
                 .andExpect(status().isCreated()).andExpect(
                         MockMvcResultMatchers.jsonPath("$.result").value(true))
                 .andReturn().getResponse().getContentAsString();
@@ -149,7 +173,8 @@ class RoomControllerTest {
 
     private void deleteRoom(Room room) throws Exception {
         mockMvc.perform(delete("/rooms/" + room.getId().toString())
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("token", testingToken))
                 .andExpect(status().isOk()).andExpect(
                         MockMvcResultMatchers.jsonPath("$.result").value(true));
     }

@@ -58,7 +58,6 @@ public class User extends BaseModel {
         res.put("phone", phone);
         res.put("email", email);
         //res.put("password",password);
-        JSONArray reservationJson = new JSONArray();
         res.put("validUntil", validUntil);
         res.put("userType", userType);
 

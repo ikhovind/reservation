@@ -2,6 +2,7 @@ package idatt2105.erlinssl.ikhovind.fullstackbooking.web;
 
 import idatt2105.erlinssl.ikhovind.fullstackbooking.model.Room;
 import idatt2105.erlinssl.ikhovind.fullstackbooking.service.RoomService;
+import idatt2105.erlinssl.ikhovind.fullstackbooking.util.security.AdminTokenRequired;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -24,7 +25,11 @@ public class RoomController {
     @Autowired
     private RoomService roomService;
 
-
+    /**
+     * Used to get information about all the rooms (with sections) that exist in a system.
+     *
+     * @return JSONArray of {@link Room} objects in format {@link Room#toJson()}, or an error if something went wrong
+     */
     @GetMapping
     public ResponseEntity getAllRooms() {
         JSONObject response = new JSONObject();
@@ -43,6 +48,12 @@ public class RoomController {
         }
     }
 
+    /**
+     * Used to get information about a single room and it's sections
+     *
+     * @param roomId {@link UUID} String belonging to the room
+     * @return 200 OK with information if successful, 400 if not
+     */
     @GetMapping(value = "/{roomId}")
     public ResponseEntity getSingleRoom(@PathVariable UUID roomId) {
         log.info("getting single room");
@@ -65,6 +76,13 @@ public class RoomController {
         }
     }
 
+    /**
+     * Used by admins to create new rooms.
+     *
+     * @param map containing the new rooms name {"roomName": String}
+     * @return {@link Room#toJson()}
+     */
+    @AdminTokenRequired
     @PostMapping
     public ResponseEntity saveSingleRoom(@RequestBody HashMap<String, String> map) {
         log.info("saving single room");
@@ -93,6 +111,14 @@ public class RoomController {
         }
     }
 
+    /**
+     * Can be used by admins to edit the name of a room.
+     *
+     * @param roomId the room to be edited
+     * @param map    containing {"roomName": String} with new name
+     * @return 200 OK with {@link Room#toJson()} if successful. 400 if missing/invalid input. 404 if invalid room id.
+     */
+    @AdminTokenRequired
     @PutMapping(value = "/{roomId}")
     public ResponseEntity editRoom(@PathVariable UUID roomId, @RequestBody HashMap<String, String> map) {
         log.info("editing room");
@@ -124,6 +150,13 @@ public class RoomController {
         }
     }
 
+    /**
+     * Used to delete a room given by it's UUID. Requires admin permissions.
+     *
+     * @param roomId {@link UUID} of room to be deleted
+     * @return 200 OK if successful. 404 NOT FOUND if invalid ID, or something went wrong
+     */
+    @AdminTokenRequired
     @DeleteMapping(value = "/{roomId}")
     public ResponseEntity deleteRoom(@PathVariable UUID roomId) {
         log.info("deleting room");

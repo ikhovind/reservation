@@ -5,6 +5,8 @@ import idatt2105.erlinssl.ikhovind.fullstackbooking.model.Room;
 import idatt2105.erlinssl.ikhovind.fullstackbooking.model.Section;
 import idatt2105.erlinssl.ikhovind.fullstackbooking.service.RoomService;
 import idatt2105.erlinssl.ikhovind.fullstackbooking.service.SectionService;
+import idatt2105.erlinssl.ikhovind.fullstackbooking.util.security.AdminTokenRequired;
+import idatt2105.erlinssl.ikhovind.fullstackbooking.util.security.UserTokenRequired;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +29,14 @@ public class SectionController {
     @Autowired
     private RoomService roomService;
 
+    /**
+     * Used to add a new {@link Section} to a given {@link Room}.
+     *
+     * @param roomId {@link Room}
+     * @param map    with sectionName and sectionDesc
+     * @return 201 CREATED if successful. 400 if missing/invalid input, or something went wrong
+     */
+    @UserTokenRequired
     @PostMapping
     public ResponseEntity addSectionToRoom(@PathVariable UUID roomId, @RequestBody Map<String, Object> map) {
         log.info("adding section to room");
@@ -65,6 +75,15 @@ public class SectionController {
         return ResponseEntity.badRequest().body(response.toMap());
     }
 
+    /**
+     * Used to delete a given {@link Section} from a given {@link Room}
+     *
+     * @param roomId    {@link Room} {@link UUID} String
+     * @param sectionId {@link Section} {@link UUID} String
+     * @return 200 OK if successful. 404 NOT FOUND if invalid room or section.
+     * 400 BAD REQUEST if section doesn't belong to room or something else went wrong
+     */
+    @AdminTokenRequired
     @DeleteMapping(value = "/{sectionId}")
     public ResponseEntity deleteSection(@PathVariable UUID roomId, @PathVariable UUID sectionId) {
         log.info("deleting section");
@@ -93,6 +112,15 @@ public class SectionController {
         return ResponseEntity.badRequest().body(response.toMap());
     }
 
+    /**
+     * Used to edit a given section.
+     *
+     * @param roomId    {@link Room} {@link UUID} that the section belongs to
+     * @param sectionId {@link UUID} of the section
+     * @param map       {"sectionName": String, "sectionDesc": String} with new information
+     * @return 200 OK if successful. 400 BAD REQUEST if invalid/missing params. 404 NOT FOUND if invalid room id or section.
+     */
+    @AdminTokenRequired
     @PutMapping(value = "/{sectionId}")
     public ResponseEntity editSection(@PathVariable UUID roomId,
                                       @PathVariable UUID sectionId,
