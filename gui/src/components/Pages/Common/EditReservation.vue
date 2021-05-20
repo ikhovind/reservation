@@ -20,7 +20,7 @@
         <div v-if="this.selectedTime !== ''" class="buttonList">
           <button v-for="index in 56" :key="index"
                   @click="setTime(index)"
-                  :class="[isReserved(index) ? 'red' : isBetween(index) ? 'blue' : 'timeButton']"
+                  :class="[isPast(index) ? 'grey' : (isReserved(index) ? 'red' : isBetween(index) ? 'blue' : 'timeButton')]"
                   :disabled="isDisabled(index)">
             {{ Math.floor(index / 4 + 8) }}:{{ padMinutes(((index % 4) * 15))}}</button>
         </div>
@@ -49,6 +49,8 @@ export default {
       let date = new Date(this.reservation.timeFrom);
       this.selectedTime = (date.getFullYear() + "-"  + ((date.getMonth() + 1 < 10) ? ("0" + date.getMonth()) : date.getMonth()) + "-" + date.getDate());
     }
+    let today = new Date().toISOString().split('T')[0];
+    document.getElementById("datePicker").setAttribute('min', today);
   },
   data () {
     return {
@@ -142,9 +144,12 @@ export default {
       }
     },
     selectDate() {
+      this.startTime = null;
+      this.endTime = null;
       this.selectedTime = document.getElementById("datePicker").value;
     },
     isDisabled(n) {
+      if (this.isPast(n)) return true;
       n = (new Date(this.selectedTime + " " + Math.floor(n / 4 + 8) + ":" + this.padMinutes(((n % 4) * 15)) + ":00"));
       for (let i in this.reservedTimes){
         if (this.startTime != null) {
@@ -161,8 +166,16 @@ export default {
       }
       return false;
     },
+    isPast(n) {
+      let today = new Date().toISOString().split('T')[0];
+      if(this.selectedTime === today) {
+        n = (new Date(this.selectedTime + " " + Math.floor(n / 4 + 8) + ":" + this.padMinutes(((n % 4) * 15)) + ":00"));
+        let time = new Date();
+        return (n.getTime() <= time.getTime());
+      }
+      return false;
+    },
     isReserved(n) {
-      console.log("res leng " + this.reservedTimes.length);
       n = (new Date(this.selectedTime + " " + Math.floor(n / 4 + 8) + ":" + this.padMinutes(((n % 4) * 15)) + ":00"));
       for (let arr in this.reservedTimes) {
         if(n.getTime() >= this.reservedTimes[arr][0].getTime() && n.getTime() <= this.reservedTimes[arr][1].getTime()) {
@@ -183,6 +196,8 @@ export default {
       }
     },
     async selectSection() {
+      this.startTime = null;
+      this.endTime = null;
       try {
         this.selectedSectionId = this.availableSections[document.getElementById("sections").selectedIndex - 1].sectionId;
       } catch (e) {
@@ -332,6 +347,17 @@ export default {
 .yellow {
   display: block;
   background-color: #f6cb49; /* Green */
+  border: none;
+  color: white;
+  padding: 15px 32px;
+  text-align: center;
+  text-decoration: none;
+  font-size: 16px;
+}
+
+.grey {
+  display: block;
+  background-color: #616161; /* Green */
   border: none;
   color: white;
   padding: 15px 32px;
