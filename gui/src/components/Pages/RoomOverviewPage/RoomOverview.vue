@@ -19,7 +19,9 @@
     <label for="sortReservations">Sorter reservasjoner</label>
     <select @change="sortReservations()" id="sortReservations">
       <option value="room">Rom</option>
-      <option>Dato</option>
+      <option value="date">Dato</option>
+      <option value="descroom">Rom synkende</option>
+      <option value="descdate">Dato synkende</option>
     </select>
     <table @click="selectReservation($event)" id="reservationTable">
       <tr>
@@ -233,7 +235,6 @@ export default {
       let lastChild = document.getElementById("reservationTable").lastChild;
       //delete table we are filling
       for (let i = table.rows.length; i > 1; i--) {
-        console.log(i);
         table.deleteRow(lastChild.rowIndex);
       }
       this.currentReservations = [...this.reservations];
@@ -281,20 +282,20 @@ export default {
           }
         }
       }
+      let desc = this.currentSort.includes("desc");
       if (this.currentSort === "room") {
-        this.currentReservations.sort(function compareRooms(firstRes, secondRes) {
-          return (firstRes.room.roomName.localeCompare(secondRes.room.roomName))
-        });
+        this.currentReservations.sort();
       }
       else if (this.currentSort === "date") {
-        this.currentReservations.sort(function compareRooms(firstRes, secondRes) {
+        this.currentReservations.sort(function(firstRes, secondRes) {
           let firstDate = new Date(firstRes.timeFrom);
           let secondDate = new Date(secondRes.timeFrom);
           if (firstDate.getTime() === secondDate.getTime()) return 0;
-          if (firstDate.getTime() >= secondDate.getTime()) return 1;
-          if (firstDate.getTime() <= secondDate.getTime()) return -1;
+          if (firstDate.getTime() > secondDate.getTime()) return 1;
+          if (firstDate.getTime() < secondDate.getTime()) return -1;
         });
       }
+      if (desc) this.currentReservations.reverse();
       for (let i in this.currentReservations) {
         this.addReservationToTable(this.currentReservations[i]);
       }
