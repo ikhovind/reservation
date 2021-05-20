@@ -1,9 +1,13 @@
 <template>
   <div>
     <Header></Header>
-    <button @click="emitNewUser">Ny bruker</button>
-    <UsersTable v-on:editUser="editUserEmitted" ref="usersTable"></UsersTable>
-    <EditUserModal v-on:userEdited="emitUserEdited" v-on:userCreated="this.userCreatedEmitted" ref="editUserModal"></EditUserModal>
+    <UsersTable id="usersTable"
+                v-on:editUser="editUserEmitted"
+                v-on:newUser="emitNewUser"
+                ref="usersTable"></UsersTable>
+    <EditUserModal v-on:userEdited="emitUserEdited"
+                   v-on:userCreated="this.userCreatedEmitted"
+                   ref="editUserModal"></EditUserModal>
   </div>
 </template>
 
@@ -23,10 +27,11 @@ export default {
     editUserEmitted(value) {
       this.$refs.editUserModal.displayInput(value);
     },
-    userCreatedEmitted(values){
+    userCreatedEmitted(values) {
       this.$refs.usersTable.addNewUser(values);
     },
     emitNewUser() {
+      console.log("it was emtied")
       this.$refs.editUserModal.displayInput({
         newUser: true,
         userType: localStorage.getItem("userType")
@@ -40,5 +45,10 @@ export default {
 </script>
 
 <style scoped>
+#usersTable {
+  min-width: 250px;
+  width: auto;
+  min-height: 150px;
+}
 
 </style>

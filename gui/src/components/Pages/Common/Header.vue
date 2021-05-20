@@ -24,7 +24,7 @@ export default {
 <style scoped>
   .topnav {
     overflow: hidden;
-    background-color:  #93c47d;
+    background-color: #93c47d;
     height: 48px;
   }
 
@@ -40,7 +40,7 @@ export default {
 
   .topnav a{
     float: left;
-    color: #f2f2f2;
+    color: #fcfffc;
     text-align: center;
     text-decoration: none;
     font-size: 17px;

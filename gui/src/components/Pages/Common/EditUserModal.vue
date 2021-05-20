@@ -16,26 +16,24 @@
               <form id="newUserForm">
                 <span style="color: red" id="emailFault">Eposten er allerede registrert</span>
                 <label for="email">Epost</label>
-                <input class = "formInput" name="email" type="text" :disabled=!this.newUser id="email" required>
+                <input class="formInput" name="email" type="text" :disabled=!this.newUser id="email" required>
                 <br>
                 <br>
-                <div v-if="this.newUser">
-                  <label for="phone">Telefon</label>
-                  <input class = "formInput" name="phone" type="text" id="phone" required>
-                  <br>
-                  <br>
-                </div>
+                <label for="phone">Telefon</label>
+                <input class="formInput" name="phone" type="text" id="phone" required :disabled="!this.newUser">
+                <br>
+                <br>
                 <label for="firstName">Fornavn</label>
-                <input class = "formInput" name="firstName" type="text" id="firstName" required>
+                <input class="formInput" name="firstName" type="text" id="firstName" required>
                 <br>
                 <br>
                 <label for="lastName">Etternavn</label>
-                <input class = "formInput" name="lastName" type="text" id="lastName" required>
+                <input class="formInput" name="lastName" type="text" id="lastName" required>
                 <br>
                 <br>
                 <div v-bind:style="this.newUser ? {'display': 'none'} : {'display': 'inline'}">
                   <label for="newPasswordBool">Change password?</label>
-                  <input class = "formInput" type="checkbox" id="newPasswordBool" v-on:click="toggleChangePassword">
+                  <input class="formInput" type="checkbox" id="newPasswordBool" v-on:click="toggleChangePassword">
                   <br>
                   <br>
                 </div>
@@ -47,16 +45,17 @@
                   <br class="changePassword">
                   <br class="changePassword">
                   <label class="changePassword" for="repeatPassword">Gjenta passord</label>
-                  <input class="changePassword formInput" name="repeatPassword" type="password" id="repeatPassword" required>
+                  <input class="changePassword formInput" name="repeatPassword" type="password" id="repeatPassword"
+                         required>
                   <br>
                   <br>
                 </div>
                 <label for="validUntil">Gyldig til</label>
-                <input class = "formInput" name="validUntil" type="date" :disabled="!this.admin" id="validUntil" required>
+                <input class="formInput" name="validUntil" type="date" :disabled="!this.admin" id="validUntil" required>
                 <br>
                 <br>
                 <label for="userType">Bruker type</label>
-                <select class = "formInput" name="userType" :disabled="!this.admin" id="userType" required>
+                <select class="formInput" name="userType" :disabled="!this.admin" id="userType" required>
                   <option value="0">User</option>
                   <option value="9">Admin</option>
                 </select>
@@ -122,6 +121,7 @@ export default {
                 .then(data => {
                   document.getElementById("firstName").value = data.user.firstName;
                   document.getElementById("lastName").value = data.user.lastName;
+                  document.getElementById("phone").value = data.user.phone;
                   document.getElementById("email").value = data.user.email;
                   document.getElementById("userType").value = data.user.userType;
                   document.getElementById("validUntil").value = this.parseDateIn(data.user.validUntil);
@@ -171,19 +171,21 @@ export default {
     },
     validateEntries() {
       document.getElementById("emailFault").style.display = "none";
-      if(document.getElementById("email").value.length === 0) {
+      if (document.getElementById("email").value.length === 0) {
         console.log("invalid email")
         return false;
       }
-      if(document.getElementById("phone").value.length === 0) {
-        console.log("phone")
-        return false;
+      if (this.newUser) {
+        if (document.getElementById("phone").value.length === 0) {
+          console.log("phone")
+          return false;
+        }
       }
-      if(document.getElementById("lastName").value.length === 0) {
+      if (document.getElementById("lastName").value.length === 0) {
         console.log("lastname")
         return false;
       }
-      if(document.getElementById("firstName").value.length === 0) {
+      if (document.getElementById("firstName").value.length === 0) {
         console.log("fnawe")
         return false;
       }
@@ -244,7 +246,7 @@ export default {
                     }
                     this.showModal = false;
                   } else {
-                    if(data.error === "email already registered") {
+                    if (data.error === "email already registered") {
                       document.getElementById("emailFault").style.display = "block";
                       document.getElementById("email").style.border = '1px solid red';
                     }
