@@ -1,6 +1,5 @@
 package idatt2105.erlinssl.ikhovind.fullstackbooking.util.security.service;
 
-import idatt2105.erlinssl.ikhovind.fullstackbooking.model.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
@@ -16,10 +15,16 @@ import java.util.Properties;
 import javax.crypto.spec.SecretKeySpec;
 import javax.xml.bind.DatatypeConverter;
 
+/**
+ * This class is used to handle user authentication.
+ * It creates and parses Json Web Tokens.
+ */
 @Slf4j
 @Service
 public class SecurityService {
 
+    // A self-decided secretKey that is used when generating tokens.
+    // Declared in application.properties like "secretKey = ###"
     private static String secretKey;
 
     private static String setSecretKey() throws IOException {
@@ -39,6 +44,14 @@ public class SecurityService {
         }
     }
 
+    /**
+     * Used to create Json Web Tokens (JWT) that users can use to
+     * authenticate themselves.
+     *
+     * @param subject   two-part String in form "xxx=yyy", with UID and userType respectively
+     * @param ttlMillis the amount of milliseconds before the JWT should expire
+     * @return a JWT in the form of a String
+     */
     public String createToken(String subject, long ttlMillis) {
         if (ttlMillis <= 0) {
             throw new RuntimeException("Expiry time must be greater than zero:[" + ttlMillis + "] ");
@@ -52,26 +65,39 @@ public class SecurityService {
                 .signWith(signatureAlgorithm, signingKey);
         long nowMillis = System.currentTimeMillis();
         builder.setExpiration(new Date(nowMillis + ttlMillis));
-        log.info("JWT Token created for user ["+subject+"]");
+        log.info("JWT Token created for user [" + subject + "]");
         return builder.compact();
     }
 
+    /**
+     * Can be used to decode the subject that was used to create a token
+     *
+     * @param token the token to decode
+     * @return the subject
+     */
     String getSubject(String token) {
         Claims claims = Jwts.parser()
                 .setSigningKey(DatatypeConverter.parseBase64Binary(secretKey))
                 .parseClaimsJws(token).getBody();
-        if(claims == null || claims.getSubject() == null) {
+        if (claims == null || claims.getSubject() == null) {
             return null;
         }
         return claims.getSubject();
     }
 
+    /**
+     * Can be used to get the UID and userType of a given subject
+     * that has been parsed out of a token.
+     *
+     * @param token token to parse
+     * @return String[] with values of {UUID, int}
+     */
     public String[] getUserPartsByToken(String token) {
         String subject = getSubject(token);
-        if(subject == null){
+        if (subject == null) {
             return null;
         }
-        if(subject.split("=").length != 2){
+        if (subject.split("=").length != 2) {
             return null;
         }
         return subject.split("=");

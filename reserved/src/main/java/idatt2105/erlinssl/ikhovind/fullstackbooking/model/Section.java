@@ -6,6 +6,11 @@ import org.json.JSONObject;
 
 import javax.persistence.Entity;
 
+/**
+ * Section POJO, defines the variables a Section resource should have.
+ * A section's ID is inherited from the superclass {@link BaseModel}
+ * @see BaseModel
+ */
 @Entity
 @Getter
 @NoArgsConstructor

@@ -8,6 +8,9 @@ import org.springframework.stereotype.Service;
 import java.sql.Timestamp;
 import java.util.List;
 
+/**
+ * Service class that can be used to access the statistics repository.
+ */
 @Service
 public class StatisticsService {
     @Autowired

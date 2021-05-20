@@ -14,6 +14,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Room POJO, defines the variables a Room resource should have.
+ * A room's ID is inherited from the superclass {@link BaseModel}
+ * @see BaseModel
+ */
 @Entity
 @Getter
 @Setter

@@ -16,6 +16,11 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
+/**
+ * Web-Controller for /login endpoints.
+ * Endpoints in this class are used for authenticating users before they can start
+ * properly interacing with the program.
+ */
 @Slf4j
 @CrossOrigin(origins = "*")
 @Controller

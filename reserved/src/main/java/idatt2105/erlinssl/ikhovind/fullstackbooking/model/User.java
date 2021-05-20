@@ -11,6 +11,11 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * User POJO, defines the variables a User resource should have.
+ * A user's ID is inherited from the superclass {@link BaseModel}
+ * @see BaseModel
+ */
 @Entity
 @Getter
 @Setter
@@ -25,7 +30,7 @@ public class User extends BaseModel {
     @OneToMany(fetch = FetchType.EAGER,
             cascade = CascadeType.ALL,
             orphanRemoval = true,
-            mappedBy = "id")
+            mappedBy = "user")
     private List<Reservation> reservations;
     private Timestamp validUntil;
     private int userType;
@@ -67,8 +72,7 @@ public class User extends BaseModel {
     public JSONObject toJson() {
         JSONObject res = toSmallJson();
         JSONArray reservationJson = new JSONArray();
-        for (Reservation r :
-                this.reservations) {
+        for (Reservation r : this.reservations) {
             reservationJson.put(r.toJson());
         }
         res.put("reservations", reservationJson);

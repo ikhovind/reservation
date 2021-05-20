@@ -8,10 +8,12 @@ import idatt2105.erlinssl.ikhovind.fullstackbooking.repo.SectionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.persistence.EntityNotFoundException;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
+/**
+ * Service class that can be used to access the section repository, as well as
+ * handling business logic where necessary.
+ */
 @Service
 public class SectionService {
     @Autowired
@@ -31,6 +33,14 @@ public class SectionService {
         return sectionRepository.getOne(sectionId);
     }
 
+    /**
+     * Used to call {@link SectionRepository#deleteById(Object)}, which deletes a section.
+     * First checks whether the {@link Room} is valid, as well as whether the section
+     * is actually part of that room or not.
+     *
+     * @param roomId    {@link UUID} belonging to the room the section belongs to
+     * @param sectionId {@link UUID} belonging to the section
+     */
     public void deleteSection(UUID roomId, UUID sectionId) {
         Room room = roomRepository.getOne(roomId);
         if (room.removeSectionById(sectionId)) {
@@ -41,6 +51,16 @@ public class SectionService {
         throw new IllegalArgumentException("room and section not connected");
     }
 
+    /**
+     * Used when trying to edit a {@link Section}'s name and/or description, first checks
+     * whether the {@link Room} is valid, as well as whether the section is actually part
+     * of that room or not. Also checks if the room has other sections with the same name.
+     *
+     * @param roomId the {@link Room} the section belongs to
+     * @param section the {@link Section} to edit
+     * @return the new edited {@link Section}, or null if something went wrong
+     * @throws NotUniqueSectionNameException if a section with the same name already exists in the given room
+     */
     public Section editSection(UUID roomId, Section section) {
         if (sectionRepository.existsById(section.getId())) {
             if (roomRepository.getOne(roomId).getSection().stream().anyMatch(

@@ -8,6 +8,10 @@ import org.springframework.stereotype.Service;
 
 import java.util.UUID;
 
+/**
+ * Service class that can be used to access the room repository, as well as
+ * handling business logic where necessary.
+ */
 @Service
 public class RoomService {
     @Autowired

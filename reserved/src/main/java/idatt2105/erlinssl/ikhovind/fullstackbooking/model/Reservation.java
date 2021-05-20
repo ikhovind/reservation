@@ -9,6 +9,11 @@ import javax.persistence.*;
 import java.sql.Timestamp;
 import java.util.Objects;
 
+/**
+ * Reservation POJO, defines the variables a Reservation resource should have.
+ * The reservation's ID is inherited from the superclass {@link BaseModel}
+ * @see BaseModel
+ */
 @Entity
 @Getter
 @Setter
