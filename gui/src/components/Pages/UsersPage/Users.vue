@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="container">
     <Header></Header>
     <UsersTable id="usersTable"
                 v-on:editUser="editUserEmitted"
@@ -45,6 +45,12 @@ export default {
 </script>
 
 <style scoped>
+
+.container {
+  display: block;
+  
+}
+
 #usersTable {
   min-width: 250px;
   width: auto;

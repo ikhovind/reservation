@@ -12,6 +12,7 @@ import java.util.Objects;
 /**
  * Reservation POJO, defines the variables a Reservation resource should have.
  * The reservation's ID is inherited from the superclass {@link BaseModel}
+ *
  * @see BaseModel
  */
 @Entity
@@ -20,12 +21,14 @@ import java.util.Objects;
 @NoArgsConstructor
 public class Reservation extends BaseModel {
     @ManyToOne(optional = false,
-                fetch = FetchType.LAZY,
-            targetEntity = Room.class, cascade = CascadeType.ALL)
+            fetch = FetchType.EAGER)
+    @JoinColumn(name = "room_id",
+            referencedColumnName = "id")
     private Room room;
     @ManyToOne(optional = true,
-            fetch = FetchType.LAZY,
-            targetEntity = Section.class)
+            fetch = FetchType.EAGER)
+    @JoinColumn(name = "section_id",
+            referencedColumnName = "id")
     private Section section;
     private Timestamp timeFrom;
     private Timestamp timeTo;
