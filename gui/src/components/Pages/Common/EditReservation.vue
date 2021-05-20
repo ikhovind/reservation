@@ -18,11 +18,11 @@
 
         </div>
         <div v-if="this.selectedTime !== ''" class="buttonList">
-          <button v-for="index in 72" :key="index"
+          <button v-for="index in 56" :key="index"
                   @click="setTime(index)"
                   :class="[isReserved(index) ? 'red' : isBetween(index) ? 'blue' : 'timeButton']"
                   :disabled="isDisabled(index)">
-            {{ Math.floor(index / 4 + 6) }}:{{ padMinutes(((index % 4) * 15))}}</button>
+            {{ Math.floor(index / 4 + 8) }}:{{ padMinutes(((index % 4) * 15))}}</button>
         </div>
       </form>
       <button :disabled="rooms.length === 0" @click="submitReservation()">Lagre</button>
@@ -69,6 +69,8 @@ export default {
   },
   methods: {
     changeRoomSelection() {
+      this.startTime = null;
+      this.endTime = null;
       const ef = document.getElementById("rooms");
       let index = ef.selectedIndex;
       if (index < 0) index = 0;
@@ -112,7 +114,7 @@ export default {
       return (n < 10) ? ("0" + n) : n;
     },
     setTime(n) {
-      n = (new Date(this.selectedTime + " " + Math.floor(n / 4 + 6) + ":" + this.padMinutes(((n % 4) * 15)) + ":00"));
+      n = (new Date(this.selectedTime + " " + Math.floor(n / 4 + 8) + ":" + this.padMinutes(((n % 4) * 15)) + ":00"));
       if(this.startTime === null && this.endTime === null) {
         this.startTime = n;
       }
@@ -143,7 +145,7 @@ export default {
       this.selectedTime = document.getElementById("datePicker").value;
     },
     isDisabled(n) {
-      n = (new Date(this.selectedTime + " " + Math.floor(n / 4 + 6) + ":" + this.padMinutes(((n % 4) * 15)) + ":00"));
+      n = (new Date(this.selectedTime + " " + Math.floor(n / 4 + 8) + ":" + this.padMinutes(((n % 4) * 15)) + ":00"));
       for (let i in this.reservedTimes){
         if (this.startTime != null) {
           if(this.startTime.getTime() <= this.reservedTimes[i][0].getTime()){
@@ -160,16 +162,17 @@ export default {
       return false;
     },
     isReserved(n) {
-      n = (new Date(this.selectedTime + " " + Math.floor(n / 4 + 6) + ":" + this.padMinutes(((n % 4) * 15)) + ":00"));
+      console.log("res leng " + this.reservedTimes.length);
+      n = (new Date(this.selectedTime + " " + Math.floor(n / 4 + 8) + ":" + this.padMinutes(((n % 4) * 15)) + ":00"));
       for (let arr in this.reservedTimes) {
-        if(n.getTime() > this.reservedTimes[arr][0].getTime() && n.getTime() < this.reservedTimes[arr][1].getTime()) {
+        if(n.getTime() >= this.reservedTimes[arr][0].getTime() && n.getTime() <= this.reservedTimes[arr][1].getTime()) {
           return true;
         }
       }
       return false
     },
     isBetween(n) {
-      n = (new Date(this.selectedTime + " " + Math.floor(n / 4 + 6) + ":" + this.padMinutes(((n % 4) * 15)) + ":00"));
+      n = (new Date(this.selectedTime + " " + Math.floor(n / 4 + 8) + ":" + this.padMinutes(((n % 4) * 15)) + ":00"));
       if (this.endTime === null || this.startTime === null) {
         if (this.endTime != null) return this.endTime.getTime() === n.getTime()
         if (this.startTime != null) return this.startTime.getTime() === n.getTime()
@@ -181,7 +184,7 @@ export default {
     },
     async selectSection() {
       try {
-        this.selectedSectionId = this.availableSections[document.getElementById("sections").selectedIndex -1].sectionId;
+        this.selectedSectionId = this.availableSections[document.getElementById("sections").selectedIndex - 1].sectionId;
       } catch (e) {
         this.selectedSectionId = "";
       }
@@ -248,6 +251,9 @@ export default {
           //Then with the data from the response in JSON...
           .then(data => {
             if (data.result) {
+              this.reservedTimes.push([this.startTime, this.endTime]);
+              this.startTime = null;
+              this.endTime = null;
               this.$emit('createdReservation');
               this.closeModal();
             } else {
