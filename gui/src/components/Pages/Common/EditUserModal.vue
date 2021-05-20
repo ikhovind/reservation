@@ -80,6 +80,7 @@ export default {
     },
     closeModal() {
       this.showModal = false;
+      //todo is needed?
       this.admin = false;
     },
     async displayInput(args) {

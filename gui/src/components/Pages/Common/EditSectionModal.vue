@@ -49,6 +49,11 @@ export default {
     closeModal() {
       this.showModal = false;
     },
+    /**
+     * submits a new section to our backend
+     * @param e event which causes this to be called, is used to prevent reload
+     * @returns {Promise<void>}
+     */
     async submitSection(e) {
       e.preventDefault()
       const addSectionOptions = {

@@ -9,15 +9,15 @@
       <option v-for="(room,i) in rooms" :key="i" :value="room" >{{room.roomName}}</option>
     </select>
     <label for="selectSection">Velg seksjon</label>
-    <select @change="changeSectionSelection()" id="selectSection">
+    <select @change="filterReservationTable()" id="selectSection">
       <option value="">Hele rommet</option>
       <option v-for="(section, i) in currentSections" :key="i" :value="section.sectionId" >{{section.sectionName}}</option>
     </select>
     <label for="selectDate">Velg dato</label>
-    <input @change="changeDateSelection()" type="date" id="selectDate">
+    <input @change="filterReservationTable()" type="date" id="selectDate">
     <h3>Alle reservasjoner for valgt rom</h3>
     <label for="sortReservations">Sorter reservasjoner</label>
-    <select @change="sortReservations()" id="sortReservations">
+    <select @change="changeSorting()" id="sortReservations">
       <option value="room">Rom</option>
       <option value="date">Dato</option>
       <option value="descroom">Rom synkende</option>
@@ -69,7 +69,7 @@ export default {
   components: {EditReservation, EditRoomModal, Header},
   created() {
     this.fetchReservations();
-    this.loadRoomsAndSections();
+    this.getRoomsAndSections();
   },
   data () {
     return {
@@ -91,10 +91,14 @@ export default {
     isAdmin() {
       return localStorage.getItem("userType") !== "0";
     },
-    sortReservations() {
+    changeSorting() {
       this.currentSort = document.getElementById("sortReservations").value;
-      this.reservationDemands();
+      this.filterReservationTable();
     },
+    /**
+     * fetches the reservations from our backend-server
+     * @returns {Promise<void>}
+     */
     async fetchReservations() {
       const addSectionOptions = {
         method: 'GET',
@@ -125,10 +129,13 @@ export default {
             error.toString();
           });
     },
-    addReservationToTable(reservation, index) {
+    /**
+     * inserts the given reservation at the end of the reservation table
+     * @param reservation the reservation you want to add
+     */
+    addReservationToTable(reservation) {
       let table = document.getElementById("reservationTable");
-      if (index === "max") index = table.rows.length
-      let row = table.insertRow(index);
+      let row = table.insertRow(table.rows.length);
       let cell0 = row.insertCell(0);
       let cell1 = row.insertCell(1);
       let cell2 = row.insertCell(2);
@@ -155,34 +162,11 @@ export default {
       cell3.innerText = new Date(reservation.timeFrom).getHours() + ":" + new Date(reservation.timeFrom).getMinutes();
       cell4.innerText = new Date(reservation.timeTo).getHours() + ":" + new Date(reservation.timeTo).getMinutes();
     },
-    selectReservation(i) {
-      if (i.target.parentElement.style.color === 'black') {
-        let table = document.getElementById("userInfo");
-        this.selectedIndex = -1;
-        if (table.rows.length > 1){
-          table.deleteRow(table.rows.length - 1);
-        }
-        return;
-      }
-      try {
-        this.selectedIndex = (i.target.parentElement.rowIndex - 1);
-        let table = document.getElementById("userInfo");
-        if (table.rows.length > 1){
-          table.deleteRow(table.rows.length - 1);
-        }
-        let row = table.insertRow(table.rows.length);
-        let cell0 = row.insertCell(0);
-        let cell1 = row.insertCell(1);
-        let cell2 = row.insertCell(2);
-        cell0.innerText = this.reservations[this.selectedIndex].user.firstName +
-            this.reservations[this.selectedIndex].user.lastName;
-        cell1.innerText = this.reservations[this.selectedIndex].user.phone;
-        cell2.innerText = this.reservations[this.selectedIndex].user.email;
-      } catch (e) {
-        console.log(e);
-      }
-    },
-    async loadRoomsAndSections() {
+    /**
+     * fetches all rooms and sections from our backend-server
+     * @returns {Promise<void>}
+     */
+    async getRoomsAndSections() {
       //we're reloading these so ned to empty them first
       this.rooms = [];
       this.allSections = [];
@@ -213,6 +197,9 @@ export default {
             error.toString();
           });
     },
+    /**
+     * is called when the user filters by a different room, updates the sections they have to choose from
+     */
     changeRoomSelection() {
       const ef = document.getElementById("selectRoom");
       let index = ef.selectedIndex;
@@ -222,15 +209,12 @@ export default {
       else {
         this.currentSections = [];
       }
-      this.reservationDemands();
+      this.filterReservationTable();
     },
-    changeSectionSelection() {
-      this.reservationDemands();
-    },
-    changeDateSelection() {
-      this.reservationDemands();
-    },
-    reservationDemands() {
+    /**
+     * deletes the reservation table and fills it again with only the reservation that fits our current criteria
+     */
+    filterReservationTable() {
       let table = document.getElementById("reservationTable");
       let lastChild = document.getElementById("reservationTable").lastChild;
       //delete table we are filling
@@ -282,6 +266,14 @@ export default {
           }
         }
       }
+      this.sortReservations();
+    },
+    /**
+     * sorts the currentReservations-array and ads it to the table in a sorted order
+     *
+     * sorts on room or date, both ascending and descending
+     */
+    sortReservations() {
       let desc = this.currentSort.includes("desc");
       if (this.currentSort === "room") {
         this.currentReservations.sort();
@@ -303,7 +295,6 @@ export default {
   }
 }
 </script>
-
 <style scoped>
 
 
@@ -340,7 +331,4 @@ export default {
   margin-top: 0;
   color: #42b983;
 }
-
-
-
 </style>

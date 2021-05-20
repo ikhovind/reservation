@@ -46,14 +46,27 @@ export default {
     closeModal() {
       this.showModal = false;
     },
+    /**
+     * is used to show this modal in the component it is placed
+     * @param newRoom
+     */
     displayInput(newRoom) {
       this.newRoom = newRoom;
       this.showModal = true;
     },
+    /**
+     * submits the users room as either put or post-mapping to our backend
+     * @param e event that causes this submit, is used to prevent reload
+     * @returns {Promise<void>}
+     */
     async submitRoom(e) {
       e.preventDefault()
+      let method = 'POST';
+      if (!this.newRoom) {
+        method = 'PUT'
+      }
       const requestOptions = {
-        method: 'POST',
+        method: method,
         headers: {'Content-Type': 'application/json', 'token': localStorage.getItem("token")},
         body: JSON.stringify({
           roomName: document.getElementById("roomName").value,

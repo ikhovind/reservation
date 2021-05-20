@@ -20,7 +20,7 @@
         </div>
         <div v-if="this.selectedTime !== ''" class="buttonList">
           <button v-for="index in 56" :key="index"
-                  @click="setTime(index)"
+                  @click="setTimeSelection(index)"
                   :class="[(isReserved(index) ? 'red' :isPast(index) ? 'grey'  : isBetween(index) ? 'blue' : 'timeButton')]"
                   :disabled="isDisabled(index)">
             {{ Math.floor(index / 4 + 8) }}:{{ padMinutes(((index % 4) * 15))}}</button>
@@ -34,6 +34,9 @@
 
 <script>
 
+/**
+ * is either shown as a modal for admin when they are editing reservation, or as part of page when user is making reservation
+ */
 export default {
   name: "EditReservation",
   async created() {
@@ -68,6 +71,13 @@ export default {
     reservation: undefined
   },
   methods: {
+    /**
+     * is called when the user selects a different room
+     *
+     * resets selected start and end-time, as well as updating the available sections
+     *
+     * lastly sets the times in which a room is reserved
+     */
     changeRoomSelection() {
       this.startTime = null;
       this.endTime = null;
@@ -82,6 +92,12 @@ export default {
       }
       this.setReservedTimes();
     },
+    /**
+     * is called from changeRoomSelection
+     *
+     * fetches the previous reservations from the selected room and marks these for the user
+     * @returns {Promise<void>}
+     */
     async setReservedTimes() {
       const addSectionOptions = {
         method: 'GET',
@@ -113,39 +129,63 @@ export default {
     padMinutes(n) {
       return (n < 10) ? ("0" + n) : n;
     },
-    setTime(n) {
+    /**
+     * is called when the user attempts to select a timestamp, this decides whether that timestamp will be the
+     * beginning or end of their selected period, or if the user is attempting to unselect a timestamp
+     *
+     * @param n int between 0 and 56, the number of 15-minute increments between 8 am and 10 pm on a given day
+     */
+    setTimeSelection(n) {
+      //n only us the time, so we use the selectedDate which the user has selected to get the date
       n = (new Date(this.selectedTime + " " + Math.floor(n / 4 + 8) + ":" + this.padMinutes(((n % 4) * 15)) + ":00"));
+      //if no selections have been made the timestamp is the start
       if(this.startTime === null && this.endTime === null) {
         this.startTime = n;
       }
+      //if the startTime is clicked on the user wants to unselect
       else if (this.startTime.getTime() === n.getTime()) {
         this.startTime = this.endTime;
         this.endTime = null;
       }
+      // the user is attempting to select and endtime
       else if (this.endTime === null) {
+        //start time after selected time, selected time is new starttime
         if(this.startTime.getTime() > n.getTime()) {
           this.endTime = this.startTime;
           this.startTime = n;
         }
         else {
+          //start time after selected time, selected time is end
           this.endTime = n;
         }
       }
+      //user is attempting to unselect end
       else if (this.endTime.getTime() === n.getTime()) {
         this.endTime = null;
       }
+      //user has selected end but is now attempting to select time before their start, selection is expanded
       else if(this.startTime.getTime() > n.getTime()) {
         this.startTime = n;
       }
+      //selection is expanded other way
       else {
         this.endTime = n;
       }
     },
+    /**
+     * stores the date that the user has selected as well as reseting any selected timestamps
+     */
     selectDate() {
       this.startTime = null;
       this.endTime = null;
       this.selectedTime = document.getElementById("datePicker").value;
     },
+    /**
+     * returns whether or not a button with a given integer is disabled based on both previous reservation and the current selection
+     * i.e. cannot select across an existing reservation
+     * @param n n int between 0 and 56, the number of 15-minute increments since 8 am on a given day
+     * @returns {boolean}
+     */
     isDisabled(n) {
       let org = n;
       if (this.isPast(n)) return true;
@@ -165,6 +205,11 @@ export default {
       }
       return this.isReserved(org) || this.isPast(org);
     },
+    /**
+     * only relevant when doing same day bookings, checks whether a timestamp is in the past
+     * @param n
+     * @returns {boolean}
+     */
     isPast(n) {
       let today = new Date().toISOString().split('T')[0];
       if(this.selectedTime === today) {
@@ -174,6 +219,11 @@ export default {
       }
       return false;
     },
+    /**
+     * checks whether or not a given timestamp is already reserved
+     * @param n int between 0 and 56, the number of 15-minute increments between 8 am and 10 pm on a given day
+     * @returns {boolean}
+     */
     isReserved(n) {
       n = (new Date(this.selectedTime + " " + Math.floor(n / 4 + 8) + ":" + this.padMinutes(((n % 4) * 15)) + ":00"));
       if (this.edit) {
@@ -188,6 +238,12 @@ export default {
       }
       return false
     },
+    /**
+     * checks whether or not a given timestamp is between the users selections, this is used to check if the timestamp
+     * should be coloured blue
+     * @param n int between 0 and 56, the number of 15-minute increments between 8 am and 10 pm on a given day
+     * @returns {boolean}
+     */
     isBetween(n) {
       n = (new Date(this.selectedTime + " " + Math.floor(n / 4 + 8) + ":" + this.padMinutes(((n % 4) * 15)) + ":00"));
       if (this.endTime === null || this.startTime === null) {
@@ -199,6 +255,10 @@ export default {
         return (n.getTime() >= this.startTime.getTime() && n <= this.endTime.getTime());
       }
     },
+    /**
+     * is called when the user selects a section within a room, fetches the reservations in that section from our backend
+     * @returns {Promise<void>}
+     */
     async selectSection() {
       this.startTime = null;
       this.endTime = null;
@@ -246,6 +306,10 @@ export default {
             error.toString();
           });
     },
+    /**
+     * sends a put-request to our backend with the user's reservation
+     * @returns {Promise<void>}
+     */
     async submitReservation() {
       let method = (this.edit ? "PUT" : "POST")
       const requestOptions = {
@@ -284,6 +348,10 @@ export default {
             error.toString();
           });
     },
+    /**
+     * gets all rooms and sections from our backend-server
+     * @returns {Promise<void>}
+     */
     async loadRoomsAndSections() {
       //we're reloading these so ned to empty them first
       this.rooms = [];

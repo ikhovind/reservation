@@ -15,6 +15,7 @@ export default {
   name: "Header",
   data() {
     return {
+      //todo is needed?
       admin: true,
     }
   }

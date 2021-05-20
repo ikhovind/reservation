@@ -24,6 +24,11 @@ export default {
   },
   name: "Login",
   methods: {
+    /**
+     * verifies the users login-information
+     * @param e event which causes this to be called, is used to prevent reload
+     * @returns {Promise<void>}
+     */
     async login(e) {
       e.preventDefault()
       const requestOptions = {
