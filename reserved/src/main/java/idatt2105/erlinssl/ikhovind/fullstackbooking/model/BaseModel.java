@@ -11,9 +11,14 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
-import java.util.Objects;
 import java.util.UUID;
 
+/**
+ * A generic POJO, defines some variables that the other models have in common.
+ * The model currently defines an Id in the form of a UUID as well as a CreatedDate
+ * in the form of a {@link Timestamp}. If one were to further develop the system it
+ * could be a good idea to implement other audit variables like ModifiedDate and ModifiedBy.
+ */
 @Getter
 @Setter
 @NoArgsConstructor

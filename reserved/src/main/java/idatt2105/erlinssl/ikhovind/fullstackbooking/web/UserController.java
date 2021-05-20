@@ -23,6 +23,10 @@ import java.text.ParseException;
 import java.util.Map;
 import java.util.UUID;
 
+/**
+ * Web-Controller for /users endpoints.
+ * Endpoints in this class are used to create or interact with {@link User} objects.
+ */
 @Slf4j
 @CrossOrigin(origins = "*")
 @Controller

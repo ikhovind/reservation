@@ -23,6 +23,11 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+/**
+ * Web-Controller for /stats endpoints.
+ * Endpoints in this class are used to get statistics about the registered
+ * {@link idatt2105.erlinssl.ikhovind.fullstackbooking.model.Reservation} resources.
+ */
 @Slf4j
 @CrossOrigin(origins = "*")
 @Controller

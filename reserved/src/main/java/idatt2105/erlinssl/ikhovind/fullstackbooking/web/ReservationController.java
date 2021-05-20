@@ -30,6 +30,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+/**
+ * Web-Controller for /reservations endpoints.
+ * Endpoints in this class are used to create or interact with {@link Reservation} resources.
+ */
 @Slf4j
 @Controller
 @CrossOrigin("*")

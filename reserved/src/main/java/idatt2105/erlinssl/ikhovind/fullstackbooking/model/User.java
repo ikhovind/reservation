@@ -11,6 +11,11 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * User POJO, defines the variables a User resource should have.
+ * A user's ID is inherited from the superclass {@link BaseModel}
+ * @see BaseModel
+ */
 @Entity
 @Getter
 @Setter

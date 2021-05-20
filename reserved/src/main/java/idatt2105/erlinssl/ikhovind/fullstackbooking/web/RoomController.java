@@ -17,6 +17,10 @@ import javax.persistence.EntityNotFoundException;
 import java.util.HashMap;
 import java.util.UUID;
 
+/**
+ * Web-Controller for /rooms endpoints.
+ * Endpoints in this class are used to create or interact with {@link Room} resources.
+ */
 @Slf4j
 @CrossOrigin(origins = "*")
 @Controller
