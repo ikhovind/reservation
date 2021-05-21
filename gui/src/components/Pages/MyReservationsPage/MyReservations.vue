@@ -114,9 +114,9 @@ export default {
       } else {
         cell1.innerText = "Hele rommet"
       }
-      cell2.innerText = new Date(reservation.timeFrom).getDate() + "/" + (new Date(reservation.timeFrom).getMonth() + 1);
-      cell3.innerText = new Date(reservation.timeFrom).getHours() + ":" + new Date(reservation.timeFrom).getMinutes();
-      cell4.innerText = new Date(reservation.timeTo).getHours() + ":" + new Date(reservation.timeTo).getMinutes();
+      cell2.innerText = this.parseDateIn(reservation.timeFrom);
+      cell3.innerText = this.parseTimeIn(reservation.timeFrom);
+      cell4.innerText = this.parseTimeIn(reservation.timeTo);
     },
     /**
      * Used to select update a row's style and this.selectedIndex when a reservation
@@ -161,7 +161,44 @@ export default {
           .catch((error) => {
             error.toString();
           });
-    }
+    },
+    sortReservations() {
+      let desc = this.currentSort.includes("desc");
+      if (this.currentSort === "room") {
+        this.currentReservations.sort();
+      }
+      else if (this.currentSort === "date") {
+        this.currentReservations.sort(function(firstRes, secondRes) {
+          let firstDate = new Date(firstRes.timeFrom);
+          let secondDate = new Date(secondRes.timeFrom);
+          if (firstDate.getTime() === secondDate.getTime()) return 0;
+          if (firstDate.getTime() > secondDate.getTime()) return 1;
+          if (firstDate.getTime() < secondDate.getTime()) return -1;
+        });
+      }
+      if (desc) this.currentReservations.reverse();
+      for (let i in this.currentReservations) {
+        this.addReservationToTable(this.currentReservations[i]);
+      }
+    },
+    /**
+     * Parses the date part of the ISO 8601 string that is fetched from the back-end server
+     * into a more readable format "DD/MM/YYYY"
+     * @param dateString date string in format "DD/MM/YYYY"
+     */
+    parseDateIn(dateString) {
+      let out = new Date(Date.parse(dateString))
+      return out.toLocaleDateString().split("/").join("/")
+    },
+    /**
+     * Parses the time part of the ISO 8601 string that is fetched from the back-end server
+     * into a more readable format "HH:MM"
+     * @param dateString date string in format "HH:MM"
+     */
+    parseTimeIn(dateString) {
+      let out = new Date(Date.parse(dateString))
+      return out.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+    },
   }
 }
 </script>

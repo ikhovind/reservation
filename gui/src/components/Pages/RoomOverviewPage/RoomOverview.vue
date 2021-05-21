@@ -219,9 +219,9 @@ export default {
       } else {
         cell1.innerText = "Hele rommet"
       }
-      cell2.innerText = new Date(reservation.timeFrom).getDate() + "/" + (new Date(reservation.timeFrom).getMonth() + 1);
-      cell3.innerText = new Date(reservation.timeFrom).getHours() + ":" + new Date(reservation.timeFrom).getMinutes();
-      cell4.innerText = new Date(reservation.timeTo).getHours() + ":" + new Date(reservation.timeTo).getMinutes();
+      cell2.innerText = this.parseDateIn(reservation.timeFrom)
+      cell3.innerText = this.parseTimeIn(reservation.timeFrom)
+      cell4.innerText = this.parseTimeIn(reservation.timeTo);
     },
     /**
      * fetches all rooms and sections from our backend-server
@@ -351,7 +351,25 @@ export default {
       for (let i in this.currentReservations) {
         this.addReservationToTable(this.currentReservations[i]);
       }
-    }
+    },
+    /**
+     * Parses the date part of the ISO 8601 string that is fetched from the back-end server
+     * into a more readable format "DD/MM/YYYY"
+     * @param dateString date string in format "DD/MM/YYYY"
+     */
+    parseDateIn(dateString) {
+      let out = new Date(Date.parse(dateString))
+      return out.toLocaleDateString().split("/").join("/")
+    },
+    /**
+     * Parses the time part of the ISO 8601 string that is fetched from the back-end server
+     * into a more readable format "HH:MM"
+     * @param dateString date string in format "HH:MM"
+     */
+    parseTimeIn(dateString) {
+      let out = new Date(Date.parse(dateString))
+      return out.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+    },
   }
 }
 </script>
