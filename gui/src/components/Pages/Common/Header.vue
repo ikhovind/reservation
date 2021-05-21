@@ -32,7 +32,7 @@ export default {
   float: right;
   height: 32px;
   padding: 8px;
-  margin: 0.75vw 0;
+  margin: 0 1.75vw;
 }
 
 .topnav {

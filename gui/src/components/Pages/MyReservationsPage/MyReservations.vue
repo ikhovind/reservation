@@ -1,19 +1,24 @@
 <template>
-  <div>
+  <div id="root">
     <Header></Header>
-    <label for="datePicker">Velg dag</label>
-    <input id="datePicker" type="date">
-    <label for="sortReservations">sorter reservasjonene dine</label>
-    <select id="sortReservations">
-      <option>Rom</option>
-      <option>Seksjon</option>
-      <option>dato</option>
-      <option>Fra-tidspunkt</option>
-      <option>Til-tidspunkt</option>
-      <option>Varighet</option>
-    </select>
-    <form>
-      <table @click="selectReservation($event)" id="reservationTable">
+    <div class="container">
+      <div class="text-header">
+        Reservasjonsoversikt
+      </div>
+      <div class="sort-box">
+        <label for="datePicker" class="text-strong">Velg dag</label>
+        <input class="formInput" id="datePicker" type="date">
+        <label for="sortReservations" class="text-strong">Sorter etter</label>
+        <select class="formInput" id="sortReservations">
+          <option>Rom</option>
+          <option>Seksjon</option>
+          <option>dato</option>
+          <option>Fra-tidspunkt</option>
+          <option>Til-tidspunkt</option>
+          <option>Varighet</option>
+        </select>
+      </div>
+      <table @click="selectReservation($event)" id="reservationTable" class="tables">
         <tr>
           <th>Rom</th>
           <th>Seksjon</th>
@@ -22,8 +27,8 @@
           <th>Til</th>
         </tr>
       </table>
-    </form>
-    <button :disabled="this.selectedIndex === -1" @click="deleteReservation()">Slett reservasjon</button>
+      <button :disabled="this.selectedIndex === -1" @click="deleteReservation()">Slett reservasjon</button>
+    </div>
   </div>
 </template>
 
@@ -87,6 +92,11 @@ export default {
       let cell2 = row.insertCell(2);
       let cell3 = row.insertCell(3);
       let cell4 = row.insertCell(4);
+      if (table.rows.length % 2 === 1) {
+        row.style.backgroundColor = "#e7e7e7";
+      }
+      row.style.textAlign = "left";
+      row.style.border = "1px solid #999999"
       row.addEventListener('click', function () {
         if (row.style.color === "blue") {
           row.style.color = "black";
@@ -158,5 +168,92 @@ export default {
 </script>
 
 <style scoped>
+.formInput {
+  border-radius: 0.35rem;
+  border: 0;
+  padding: 8px 2px;
+  margin: 10px 0;
+}
+
+.formInput:focus {
+  outline: none;
+}
+
+.container {
+  margin-top: 4vh;
+}
+
+.sort-box {
+  margin-top: 0.673rem;
+}
+
+.text-header {
+  font-size: 36px;
+}
+
+.text-strong {
+  font-weight: bold;
+  color: #474545;
+}
+
+.tables {
+  font-family: Arial, Helvetica, sans-serif;
+  border-collapse: collapse;
+  width: 60%;
+  margin: auto;
+  max-height: 300px;
+  overflow-y: scroll;
+  margin-top: 20px;
+}
+
+.tables th {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  text-align: left;
+  background-color: #4CAF50;
+  color: white;
+}
+
+.tables td, .tables th {
+  border: 1px solid #999999;
+  padding: 8px;
+}
+
+button {
+  padding: 5px 5px;
+  border-radius: 0.33rem;
+  color: #393b39;
+  margin-top: 0.673rem;
+}
+
+button:hover{
+  cursor: pointer;
+  color: #395e52;
+  background-color: #bce7a8;
+  border: 4px #6cf3b2;
+  padding: 7px;
+  box-shadow: none;
+}
+
+select {
+  padding: 3px 2px 3px 3px;
+  border-radius: 0.35rem;
+  border: 1px solid grey;
+  -moz-appearance: none;
+  -webkit-appearance: none;
+  appearance: unset;
+}
+
+select:hover:enabled {
+  cursor: pointer;
+}
+
+.formInput + label {
+  margin-left: 0.748rem;
+}
+
+label + .formInput {
+  margin-left: 0.39rem;
+}
 
 </style>
