@@ -7,7 +7,7 @@ import SmartTable from 'vuejs-smart-table';
 Vue.config.productionTip = false
 Vue.use(VueRouter);
 Vue.use(SmartTable);
-Vue.prototype.$serverUrl = "https://localhost:8443"
+Vue.prototype.$serverUrl = "https://13.51.58.86:8443"
 const router = new VueRouter({
     routes: Routes
 });
