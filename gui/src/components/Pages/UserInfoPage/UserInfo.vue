@@ -36,8 +36,12 @@
       </div>
     </section>
     <div class="clickable" @click="emitEditUser">
-      <img id="editIcon" src="../../../assets/edit.png" alt="Rediger bruker">
+      <img class="image-icon" id="editIcon" src="../../../assets/edit.png" alt="Rediger bruker">
       <span class="text-button">Rediger</span>
+    </div>
+    <div class="clickable" @click="logoutAction">
+      <img class="image-icon" id="logoutIcon" src="../../../assets/logout.png" alt="Logg ut">
+      <span class="text-button">Logg ut</span>
     </div>
     <EditUserModal ref="editUserModal"
                    v-on:selfEdited="loadOwnUser"></EditUserModal>
@@ -91,6 +95,14 @@ export default {
         self: true,
       });
     },
+    logoutAction() {
+      if(confirm("Er du sikker på at\ndu vil logge ut?")){
+        localStorage.removeItem("token");
+        localStorage.removeItem("userId");
+        localStorage.removeItem("userType");
+        this.$router.push("/");
+      }
+    }
   },
   async created() {
     await this.loadOwnUser();
@@ -99,7 +111,7 @@ export default {
 </script>
 
 <style scoped>
-#editIcon {
+.image-icon {
   height: 32px;
   margin: 0.55rem 0 0.55rem 0.55rem;
 }
