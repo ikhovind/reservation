@@ -2,7 +2,7 @@
   <div>
     <Header></Header>
     <EditReservation ref="editReservation"></EditReservation>
-      <img src="../../../assets/plus.png" alt="add new section"
+      <img id="addSection" src="../../../assets/plus.png" alt="add new section"
            @click="$refs.editSectionModal.displayInput(true, $refs.editReservation.selectedRoomId)">
     <EditSectionModal ref="editSectionModal" v-on:createdSection="$refs.editReservation.loadRoomsAndSections()"></EditSectionModal>
   </div>
@@ -18,4 +18,12 @@ export default {
 </script>
 
 <style scoped>
+#addSection {
+  margin-left: auto;
+  margin-right: auto;
+  position: relative;
+  top: -150px;
+  left: 100px;
+  width: 50px;
+}
 </style>

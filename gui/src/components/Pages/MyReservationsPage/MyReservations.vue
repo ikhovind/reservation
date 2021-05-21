@@ -146,7 +146,6 @@ export default {
           'token': localStorage.getItem("token")
         }
       };
-      console.log(this.reservations);
       await fetch(this.$serverUrl + "/reservations/" + this.reservations[this.selectedIndex].reservationId, addSectionOptions)
           .then((response) => response.json())
           //Then with the data from the response in JSON...

@@ -119,7 +119,6 @@ export default {
       }
       try {
         this.selectedIndex = (i.target.parentElement.rowIndex - 1);
-        console.log("sel " + this.selectedIndex)
         let table = document.getElementById("userInfo");
         if (table.rows.length > 1){
           table.deleteRow(table.rows.length - 1);
@@ -299,7 +298,6 @@ export default {
           let checkDateObj = new Date(this.currentReservations[i - counter].timeFrom)
           checkDateObj.setHours(0,0,0,0);
           if (dateObj.getTime() !== checkDateObj.getTime()){
-            //console.log(this.currentReservations[i].room.roomName);
             this.currentReservations.splice(i - counter, 1);
             counter++;
           }
