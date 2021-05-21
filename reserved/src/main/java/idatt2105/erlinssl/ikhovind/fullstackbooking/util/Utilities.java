@@ -72,6 +72,10 @@ public class Utilities {
         return Integer.parseInt(securityService.getUserPartsByToken(token)[1]) == Constants.ADMIN_TYPE;
     }
 
+    public static boolean isSelf(String token, UUID id) {
+        return securityService.getUserPartsByToken(token)[0].equals(id.toString());
+    }
+
     /**
      * Can be used to check if a given token belongs to a given user.
      * Compares the users UUID, gotten from {@link SecurityService#getUserPartsByToken(String)} to
