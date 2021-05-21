@@ -16,7 +16,8 @@
 
 <script>
 export default {
-
+  created() {
+  },
   data() {
     return {
       loginFailed: false
@@ -30,7 +31,7 @@ export default {
      * @returns {Promise<void>}
      */
     async login(e) {
-      e.preventDefault()
+      e.preventDefault();
       const requestOptions = {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
@@ -63,6 +64,7 @@ export default {
             console.log(error);
           });
     },
+
   }
 }
 </script>
