@@ -2,11 +2,11 @@
   <div class="container">
     <Header></Header>
     <UsersTable id="usersTable"
-                v-on:editUser="editUserEmitted"
+                v-on:editUser="emitEditUser"
                 v-on:newUser="emitNewUser"
                 ref="usersTable"></UsersTable>
-    <EditUserModal v-on:userEdited="emitUserEdited"
-                   v-on:userCreated="this.userCreatedEmitted"
+    <EditUserModal v-on:userEdited="userEditedEmitted"
+                   v-on:userCreated="userCreatedEmitted"
                    ref="editUserModal"></EditUserModal>
   </div>
 </template>
@@ -24,20 +24,41 @@ export default {
     EditUserModal,
     UsersTable
   }, methods: {
-    editUserEmitted(value) {
-      this.$refs.editUserModal.displayInput(value);
+    /**
+     * Runs when UsersTable emits "editUser", which signalizes that an admin wants to edit a user.
+     * The newUser bool will always be false when set by this method, but the userType and
+     * uid will change dependent on the user selected in the UsersTable.
+     * @param values newUser: bool, userType: int, uid: String
+     */
+    emitEditUser(values) {
+      this.$refs.editUserModal.displayInput(values);
     },
-    userCreatedEmitted(values) {
-      this.$refs.usersTable.addNewUser(values);
-    },
+    /**
+     * Does not actually emit anything, but tells the EditUserModal that it should
+     * load the form to create a new user by calling it's method directly.
+     */
     emitNewUser() {
-      console.log("it was emtied")
       this.$refs.editUserModal.displayInput({
         newUser: true,
         userType: localStorage.getItem("userType")
       })
     },
-    emitUserEdited(uid) {
+    /**
+     * Runs when EditUserModal emits "userCreated", which signalizes that a new
+     * user has been created and should be added to the table. The UID of the newly created
+     * user is carried through, so that we can get information about this single user
+     * instead of refreshing the entire table.
+     * @param uid String id of a user
+     */
+    userCreatedEmitted(uid) {
+      this.$refs.usersTable.addNewUser(uid);
+    },
+    /**
+     * Let's the UserTable know that a user was edited from the EditUserModal. Passes on the uid so that we can simply
+     * replace the old information with the new, instead of refreshing the whole table.
+     * @param uid String id of a user
+     */
+    userEditedEmitted(uid) {
       this.$refs.usersTable.updateChanged(uid)
     },
   }
@@ -48,7 +69,7 @@ export default {
 
 .container {
   display: block;
-  
+
 }
 
 #usersTable {

@@ -41,7 +41,7 @@
     </v-table>
 
     <div class="footer">
-      <button class="user-button" @click="emit_event">Rediger bruker</button>
+      <button class="user-button" @click="emitEditUser">Rediger bruker</button>
       <button class="user-button" @click="deleteUser">Slett bruker</button>
       <button class="user-button" @click="emitNewUser">Opprett bruker</button>
       <table class="size-buttons">
@@ -68,7 +68,15 @@
 
 export default {
   name: "UsersTable",
+  async created() {
+    await this.loadUsers();
+  },
   methods: {
+    /**
+     * Called when the document is created. Fetches all users that are saved in the
+     * system and places them into the table. If the Request fails, the error is
+     * logged instead and the table remains empty.
+     */
     async loadUsers() {
       const getUsersOptions = {
         method: 'GET',
@@ -95,6 +103,10 @@ export default {
             console.log(error);
           })
     },
+    /**
+     * Parses a date received from the backend system in format YYYY-MM-DD'T'hh:mm:ss'Z'
+     * into format DD/MM/YYYY
+     */
     parseDate(date) {
       return new Date(Date.parse(date)).toLocaleDateString();
     },
@@ -102,7 +114,12 @@ export default {
       let out = new Date(Date.parse(dateString))
       return out.toLocaleDateString().split("/").reverse().join("-")
     },
-    emit_event: function () {
+    /**
+     * First checks if a user is selected in the table. If not, then it will
+     * tell the admin to select one. Otherwise, it will emit an "editUser" signal
+     * that will be picked up in Users.vue
+     */
+    emitEditUser: function () {
       if (this.selected.length !== 0) {
         this.$emit('editUser', {
           newUser: false,
@@ -113,6 +130,11 @@ export default {
         alert("Velg en bruker")
       }
     },
+    /**
+     * Updates the currently selected user in the table with new values that have been
+     * gotten from the database. This is called after a user has been edited.
+     * @param uid id of the user being updated
+     */
     async updateChanged(uid) {
       await fetch(this.$serverUrl + "/users/" + uid, {
         method: 'GET',
@@ -134,7 +156,12 @@ export default {
             console.log(error);
           })
     },
-    async addNewUser(data) {
+    /**
+     * Adds a new user to the table using values that are fetched from the database.
+     * This is called after a new user has been created.
+     * @param uid id of the new user
+     */
+    async addNewUser(uid) {
       const getUsersOptions = {
         method: 'GET',
         headers: {
@@ -143,7 +170,7 @@ export default {
         }
       }
 
-      await fetch(this.$serverUrl + "/users/" + data, getUsersOptions)
+      await fetch(this.$serverUrl + "/users/" + uid, getUsersOptions)
           .then(response =>
               response.json()
                   .then(data => {
@@ -158,7 +185,17 @@ export default {
                     })
                   }))
     },
+    /**
+     * Attempts to delete the currently selected user from the database.
+     * If no user is selected, the admin will be prompted to select one.
+     * If the admin has selected their own user, they will be alerted
+     * that they cannot delete themselves.
+     */
     async deleteUser() {
+      if(this.selected.length === 0){
+        return alert("Velg en bruker.");
+      }
+
       if (this.selected[0].id === localStorage.getItem("userId")) {
         alert("Du kan ikke slette deg selv!");
         return;
@@ -188,15 +225,11 @@ export default {
       }
     },
     emitNewUser() {
-      console.log("emitting")
       this.$emit('newUser')
     },
     changePageSize(x){
       this.pageSize = x;
     }
-  },
-  async created() {
-    await this.loadUsers();
   },
   data: () => ({
     users: [],
