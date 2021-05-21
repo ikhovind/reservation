@@ -153,6 +153,12 @@ public class ReservationController {
             Reservation reservation = new Reservation(room, section, timeFrom, timeTo);
             return addReservationToUser(jsonBody, user, reservation);
 
+        } catch (TimestampParsingException e) {
+            jsonBody.put("error", "the given timestamp could not be parsed");
+            return ResponseEntity
+                    .badRequest()
+                    .body(jsonBody.toMap());
+
         } catch (IllegalTimeframeException e) {
             jsonBody.put("error", e.getMessage());
             return ResponseEntity

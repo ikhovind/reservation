@@ -15,8 +15,7 @@ export default {
   name: "Header",
   data() {
     return {
-      //todo is needed?
-      admin: true,
+      admin: localStorage.getItem("userType")!=='0',
     }
   }
 }

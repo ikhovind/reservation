@@ -1,13 +1,19 @@
 package idatt2105.erlinssl.ikhovind.fullstackbooking.service;
 
 import idatt2105.erlinssl.ikhovind.fullstackbooking.Exceptions.NotUniqueSectionNameException;
+import idatt2105.erlinssl.ikhovind.fullstackbooking.model.Reservation;
 import idatt2105.erlinssl.ikhovind.fullstackbooking.model.Room;
 import idatt2105.erlinssl.ikhovind.fullstackbooking.model.Section;
+import idatt2105.erlinssl.ikhovind.fullstackbooking.model.User;
+import idatt2105.erlinssl.ikhovind.fullstackbooking.repo.ReservationRepository;
 import idatt2105.erlinssl.ikhovind.fullstackbooking.repo.RoomRepository;
 import idatt2105.erlinssl.ikhovind.fullstackbooking.repo.SectionRepository;
+import idatt2105.erlinssl.ikhovind.fullstackbooking.repo.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 
+import javax.persistence.EntityNotFoundException;
 import java.util.UUID;
 
 /**
@@ -20,6 +26,10 @@ public class SectionService {
     private SectionRepository sectionRepository;
     @Autowired
     private RoomRepository roomRepository;
+    @Autowired
+    private ReservationRepository reservationRepository;
+    @Autowired
+    private UserRepository userRepository;
 
     public Iterable<Section> getAllSectionsFromRoom(UUID roomId) {
         return sectionRepository.getSectionByRoomId(roomId);
@@ -43,7 +53,15 @@ public class SectionService {
      */
     public void deleteSection(UUID roomId, UUID sectionId) {
         Room room = roomRepository.getOne(roomId);
+        Section section = sectionRepository.getOne(sectionId);
         if (room.removeSectionById(sectionId)) {
+            for (Reservation r : reservationRepository.findBySection(section)) {
+                User user = userRepository.findById(r.getUser().getId())
+                        .orElseThrow(EntityNotFoundException::new);
+                user.removeReservation(r);
+                userRepository.save(user);
+                reservationRepository.delete(r);
+            }
             roomRepository.save(room);
             sectionRepository.deleteById(sectionId);
             return;
