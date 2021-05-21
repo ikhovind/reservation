@@ -1,9 +1,9 @@
 # Reservio
-Vi har lagt opp prosjektet slik at vi har deployet backend til en AWS server, ip-adressen
-til denne serveren er konfigurert i frontend, så man trenger ikke å endre på noe som helst der. 
-Frontend må derimot kjøres lokalt. Det er også mulig å kjøre backend lokalt om ønskelig.
+Både frontend og backend er deployet, så for å teste applikasjonen så kan man simpelthen gå til http://13.51.58.86:5000
 
-Hvis man vil kjøre backend lokalt i tillegg så er man nødt til å endre på serverUrl-variabelen i
+Hvis man ønsker å kjøre backend eller frontend lokalt så er det beskrevet hvordan man gjør dette under:
+
+Hvis man vil kjøre backend lokalt i tillegg til frontend så er man nødt til å endre på serverUrl-variabelen i
 ``gui/src/main.js`` fra 13.51.58.86 til localhost
 ## Backend
 ### Databastilgang
@@ -11,12 +11,24 @@ Hvis man ønsker å kjøre backend lokalt så er man avhengig av egen database, 
 ```
 reserved/src/main/resources/
 ```
-Vår application.properties-fil ser slik ut:
+Backend kjører på HTTPS så man er også avhengig av å generere eget sertifikat (med mindre man er villig til å betale for
+slikt da)
+
+Vår sertifikat ligger her:
+```
+reserved/src/main/resources/keypair/reservio.p12
+```
+Hvis man ønsker å endre navn på filen så er man nødt til å endre det i application.properties under også.
 
 Det er en del ekstra informasjon som er inkludert her som ikke er strengt tatt nødvendig inkludere for funksjonaliteten
 men er inkludert fordi det ble brukt av oss under utvikling.
 
-Det eneste man trenger å sette in for å kjøre backend lokalt er de tre første verdiene
+Det eneste man trenger å sette in for databasetilgang er de tre første verdiene
+
+Siden backend kjører på HTTPS så må man også sette inn alias og passord til egen nøkkelfil (og eget filnavn om man 
+ønsker å endre fra reservio.p12)
+
+Vår application.properties-fil ser slik ut:
 ```
 spring.datasource.url=*sett in link til egen databasetabell her, inkluder navnet til databasen*
 spring.datasource.username=*sett inn brukernavn til databaseinloggingen*
@@ -31,8 +43,8 @@ spring.jpa.hibernate.naming-strategy = org.hibernate.cfg.ImprovedNamingStrategy
 spring.jpa.properties.hibernate.dialect = org.hibernate.dialect.MySQL5Dialect
 server.ssl.key-store-type=PKCS12
 server.ssl.key-store=src/main/resources/keypair/reservio.p12
-server.ssl.key-store-password=reservedpassword
-server.ssl.key-alias=reservio
+server.ssl.key-store-password=*sett in passord her*
+server.ssl.key-alias=*sett inn alias her*
 server.ssl.enabled=true
 server.ssl.key.alias=ode-https
 server.ssl.protocol=TLS
@@ -66,7 +78,7 @@ Og så kjøres ved hjelp av kommandoen:
 sudo docker run backend
 ```
 
-Backend vil da lytte på port 8080 og 8443
+Backend vil da lytte på port 8080 og 8443 (mest sannsynlig, men man kan sjekke output i programmet om noe virker feil)
 
 ## Frontend
 Frontend kan kjøres ved hjelp av npm eller ved hjelp av den vedlagte dockerfilen
