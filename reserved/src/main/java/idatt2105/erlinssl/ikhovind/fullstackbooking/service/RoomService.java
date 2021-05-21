@@ -1,11 +1,16 @@
 package idatt2105.erlinssl.ikhovind.fullstackbooking.service;
 
+import idatt2105.erlinssl.ikhovind.fullstackbooking.model.Reservation;
 import idatt2105.erlinssl.ikhovind.fullstackbooking.model.Room;
 import idatt2105.erlinssl.ikhovind.fullstackbooking.model.Section;
+import idatt2105.erlinssl.ikhovind.fullstackbooking.model.User;
+import idatt2105.erlinssl.ikhovind.fullstackbooking.repo.ReservationRepository;
 import idatt2105.erlinssl.ikhovind.fullstackbooking.repo.RoomRepository;
+import idatt2105.erlinssl.ikhovind.fullstackbooking.repo.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.persistence.EntityNotFoundException;
 import java.util.UUID;
 
 /**
@@ -16,6 +21,12 @@ import java.util.UUID;
 public class RoomService {
     @Autowired
     private RoomRepository roomRepository;
+
+    @Autowired
+    private ReservationRepository reservationRepository;
+
+    @Autowired
+    private UserRepository userRepository;
 
     public Iterable<Room> getAllRooms() {
         return roomRepository.findAll();
@@ -29,8 +40,21 @@ public class RoomService {
         return roomRepository.getOne(roomId);
     }
 
+    private Room getSingleRoom(UUID roomId) {
+        return roomRepository.findById(roomId)
+                .orElseThrow(EntityNotFoundException::new);
+    }
+
     public void deleteRoomById(UUID roomId) {
-        roomRepository.deleteById(roomId);
+        Room room = getSingleRoom(roomId);
+        for (Reservation r : reservationRepository.findByRoom(room)) {
+            User user = userRepository.findById(r.getUser().getId())
+                    .orElseThrow(EntityNotFoundException::new);
+            user.removeReservation(r);
+            userRepository.save(user);
+            reservationRepository.delete(r);
+        }
+        roomRepository.delete(room);
     }
 
     public boolean roomContainsSection(UUID roomId, UUID sectionId) {

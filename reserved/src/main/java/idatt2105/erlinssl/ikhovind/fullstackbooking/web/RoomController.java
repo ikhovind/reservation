@@ -171,7 +171,7 @@ public class RoomController {
             response.put("result", true);
             log.info("deletion successful");
             return ResponseEntity.ok().body(response.toMap());
-        } catch (EmptyResultDataAccessException e) {
+        } catch (EmptyResultDataAccessException | EntityNotFoundException e) {
             response.put("error", "cannot find room to delete");
             return ResponseEntity.status(404).body(response.toMap());
         } catch (Exception e) {
