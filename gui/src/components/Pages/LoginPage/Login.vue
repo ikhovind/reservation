@@ -18,6 +18,9 @@
 export default {
   created() {
   },
+  mounted() {
+    this.verifyToken();
+  },
   data() {
     return {
       loginFailed: false
@@ -64,6 +67,30 @@ export default {
             console.log(error);
           });
     },
+    async verifyToken() {
+      if (this.$router.currentRoute.path === "/" && localStorage.getItem("token") !== null) {
+        const requestOptions = {
+          method: 'GET',
+          headers: {'Content-Type': 'application/json',
+            'token': localStorage.getItem(localStorage.getItem('token'))}};
+        await fetch(this.$serverUrl + "/login/verify", requestOptions)
+            .then((response) => {
+              console.log(response)
+              response.json()
+                  .then(data => {
+                    //Then with the data from the response in JSON...
+                    if (data.result) {
+                      this.$router.push("reservations");
+                    }
+                  })
+            })
+            //Then if an error is generated...
+            .catch((error) => {
+              error.toString();
+              console.log(error);
+            });
+      }
+    }
 
   }
 }
