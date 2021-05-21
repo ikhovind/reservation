@@ -11,38 +11,7 @@ export default {
   components: {
 
   },
-  mounted() {
-    this.verifyToken();
-  },
   methods: {
-    async verifyToken() {
-      if (this.$router.currentRoute.path === "/" && localStorage.getItem("token") !== null) {
-        const requestOptions = {
-          method: 'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({
-            token: localStorage.getItem("token"),
-          })
-        };
-
-        await fetch(this.$serverUrl + "/login/verify", requestOptions)
-            .then((response) => {
-              console.log(response)
-              response.json()
-                  .then(data => {
-                    //Then with the data from the response in JSON...
-                    if (data.result) {
-                      this.$router.push("reservations");
-                    }
-                  })
-            })
-            //Then if an error is generated...
-            .catch((error) => {
-              error.toString();
-              console.log(error);
-            });
-      }
-    }
   }
 }
 </script>
