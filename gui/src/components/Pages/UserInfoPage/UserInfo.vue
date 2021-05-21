@@ -6,18 +6,37 @@
       <img id="editIcon" src="../../../assets/edit.png" alt="Rediger bruker">
       <p class="inside">Rediger</p>
     </div>
-    <br><br>
-    <label for="myFirstName">Fornavn</label>
-    <input type="text" id="myFirstName" disabled>
-    <label for="myLastName">Etternavn</label>
-    <input type="text" id="myLastName" disabled>
-    <label for="myValidUntil">Gyldig til</label>
-    <input type="date" id="myValidUntil" disabled>
-    <br><br>
-    <label for="myEmail">Epost</label>
-    <input type="text" id="myEmail" disabled>
-    <label for="myPhone">Telefonnummer</label>
-    <input type="text" id="myPhone" disabled>
+    <section class="container-outer">
+      <div class="container-info">
+        <span class="text-strong">Personalia</span>
+        <div class="container-info-field">
+          <label for="myFirstName">Fornavn</label>
+          <input type="text" id="myFirstName" disabled>
+        </div>
+        <div class="container-info-field">
+          <label for="myLastName">Etternavn</label>
+          <input type="text" id="myLastName" disabled>
+        </div>
+      </div>
+      <div class="container-info">
+        <span class="text-strong">Kontakt</span>
+        <div class="container-info-field">
+          <label for="myEmail">Epost</label>
+          <input type="text" id="myEmail" disabled>
+        </div>
+        <div class="container-info-field">
+          <label for="myPhone">Telefonnummer</label>
+          <input type="text" id="myPhone" disabled>
+        </div>
+      </div>
+      <div class="container-info">
+        <span class="text-strong">Annet</span>
+        <div class="container-info-field">
+          <label for="myValidUntil">Gyldig til</label>
+          <input type="date" id="myValidUntil" disabled>
+        </div>
+      </div>
+    </section>
     <EditUserModal ref="editUserModal"
                    v-on:selfEdited="loadOwnUser"></EditUserModal>
   </div>
@@ -82,7 +101,28 @@ export default {
   height: 32px;
 }
 
-.inside {
+.container-outer {
+  -moz-box-align: stretch;
+  box-align: stretch;
+  align-items: stretch;
+  display: flex;
+  -moz-flex-wrap: wrap;
+  flex-wrap: wrap;
+  max-width: 840px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.container-info {
+  display: flex;
+  -moz-box-orient: vertical;
+  box-orient: vertical;
+  flex-direction: column;
+  width: 100%;
+}
+
+.text-strong {
+  font-weight: bolder;
 }
 
 .clickable {

@@ -280,6 +280,11 @@ th, td:not(.size-buttons th, .size-buttons td) {
   background-color: #d5efba;
 }
 
+thead th {
+  background-color: #60cd64;
+  color: #ffffff;
+}
+
 tr:nth-child(odd) {
   background-color: #faf6f6;
 }

@@ -37,7 +37,7 @@ export default {
 
 .topnav {
   overflow: hidden;
-  background-color: #93c47d;
+  background-color: #60cd64;
   height: 48px;
   display: flex;
   horiz-align: center;
@@ -51,6 +51,7 @@ export default {
   color: #fcfffc;
   width: 100%;
   font-size: 18px;
+  font-weight: bolder;
   height: 48px;
   display: flex;
   justify-content: center;
