@@ -17,8 +17,6 @@
               <form id="newSectionForm">
                 <label for="sectionName">Navn på seksjon</label>
                 <input name="sectionName" id="sectionName" type="text">
-                <label for="sectionName">Valgfri beskrivelse av seksjon</label>
-                <input name="sectionDesc" id="sectionDesc" type="text">
               </form>
             </slot>
           </div>
@@ -61,7 +59,7 @@ export default {
         headers: {'Content-Type': 'application/json', 'token': localStorage.getItem("token")},
         body: JSON.stringify({
           sectionName: document.getElementById("sectionName").value,
-          sectionDesc: document.getElementById("sectionDesc").value,
+          sectionDesc: "",
         })
       };
 

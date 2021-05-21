@@ -1,0 +1,6 @@
+FROM node:latest
+
+ADD gui /Frontend
+WORKDIR "/Frontend"
+RUN npm install
+CMD ["npm", "run", "serve"]

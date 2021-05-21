@@ -1,0 +1,6 @@
+FROM adoptopenjdk/maven-openjdk11
+
+ADD gui /Frontend
+WORKDIR "/Frontend"
+RUN "npm install"
+CMD ["npm", "run", "serve"]
