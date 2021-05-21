@@ -14,7 +14,7 @@ reserved/src/main/resources/
 Backend kjører på HTTPS så man er også avhengig av å generere eget sertifikat (med mindre man er villig til å betale for
 slikt da)
 
-Vår sertifikat ligger her:
+Sertifikatet må plasseres slik:
 ```
 reserved/src/main/resources/keypair/reservio.p12
 ```
@@ -27,6 +27,11 @@ Det eneste man trenger å sette in for databasetilgang er de tre første verdien
 
 Siden backend kjører på HTTPS så må man også sette inn alias og passord til egen nøkkelfil (og eget filnavn om man 
 ønsker å endre fra reservio.p12)
+
+Man kan generere egen nøkkelfil med følgende kommando:
+```
+keytool -genkeypair -alias *sett inn alias her* -keyalg RSA -keysize 2048 -storetype PKCS12 -keystore reservio.p12 -validity 3650 -storepass *sett in passord her*
+```
 
 Vår application.properties-fil ser slik ut:
 ```
@@ -65,7 +70,7 @@ Denne må kjøres i reservation-mappen
 ```
 mvn spring-boot:run
 ```
-Backend vil da kjøre og lytte på port 8080 og 8443
+Backend vil da kjøre og lytte på port 8080 (kanskje 8081 hvis 8080 var opptatt) og 8443
 
 Man kan alternativt kjøre den vedlagte dockerfilen, denne ligger i roten av prosjektet
 
@@ -78,7 +83,7 @@ Og så kjøres ved hjelp av kommandoen:
 sudo docker run backend
 ```
 
-Backend vil da lytte på port 8080 og 8443 (mest sannsynlig, men man kan sjekke output i programmet om noe virker feil)
+Backend vil da lytte på port 8080 (kanskje 8081 hvis 8080 var opptatt) og 8443 (mest sannsynlig, men man kan sjekke output i programmet om noe virker feil)
 
 ## Frontend
 Frontend kan kjøres ved hjelp av npm eller ved hjelp av den vedlagte dockerfilen
@@ -109,4 +114,4 @@ Den kan så kjøres slik:
 sudo docker run frontend
 ```
 I output av prosessen så vil man se hvilken port applikasjonen kjører på, mest sannsynlig så vil man ha tilgang på den 
-på http://localhost:8080
+på http://localhost:8080 men porten kan endre seg hvis 8080 er opptatt når man starter applikasjonen
