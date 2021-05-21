@@ -188,10 +188,14 @@ export default {
      * @returns {boolean}
      */
     isDisabled(n) {
-      let org = n;
       if (this.isPast(n)) return true;
+      if (this.isReserved(n)) return true;
       n = (new Date(this.selectedTime + " " + Math.floor(n / 4 + 8) + ":" + this.padMinutes(((n % 4) * 15)) + ":00"));
       for (let i in this.reservedTimes){
+        if (this.edit) {
+          this.reservedTimes[i][0] = new Date(this.reservation.timeFrom);
+          this.reservedTimes[i][1] = new Date(this.reservation.timeTo);
+        }
         if (this.startTime != null) {
           if(this.startTime.getTime() <= this.reservedTimes[i][0].getTime()){
             return n.getTime() >= this.reservedTimes[i][0].getTime();
@@ -204,7 +208,7 @@ export default {
           return n.getTime() >= this.reservedTimes[i][0] && n.getTime() <= this.reservedTimes[i][1];
         }
       }
-      return this.isReserved(org) || this.isPast(org);
+      return false;
     },
     /**
      * only relevant when doing same day bookings, checks whether a timestamp is in the past
@@ -228,12 +232,8 @@ export default {
     isReserved(n) {
       n = (new Date(this.selectedTime + " " + Math.floor(n / 4 + 8) + ":" + this.padMinutes(((n % 4) * 15)) + ":00"));
       if (this.edit) {
-        let timeFrom = new Date(this.reservation.timeTo);
-        let timeTo = new Date(this.reservation.timeFrom);
-        console.log("------------------")
-        console.log(n);
-        console.log(timeFrom);
-        console.log(timeTo);
+        let timeFrom = new Date(this.reservation.timeFrom);
+        let timeTo = new Date(this.reservation.timeTo);
         if(n.getTime() >= timeFrom.getTime() && n.getTime() <= timeTo.getTime()) return true;
       }
       for (let arr in this.reservedTimes) {
