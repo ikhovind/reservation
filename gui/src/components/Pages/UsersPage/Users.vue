@@ -1,13 +1,15 @@
 <template>
-  <div class="container">
+  <div>
     <Header></Header>
-    <UsersTable id="usersTable"
-                v-on:editUser="emitEditUser"
-                v-on:newUser="emitNewUser"
-                ref="usersTable"></UsersTable>
-    <EditUserModal v-on:userEdited="userEditedEmitted"
-                   v-on:userCreated="userCreatedEmitted"
-                   ref="editUserModal"></EditUserModal>
+    <div class="content">
+      <UsersTable id="usersTable"
+                  v-on:editUser="emitEditUser"
+                  v-on:newUser="emitNewUser"
+                  ref="usersTable"></UsersTable>
+      <EditUserModal v-on:userEdited="userEditedEmitted"
+                     v-on:userCreated="userCreatedEmitted"
+                     ref="editUserModal"></EditUserModal>
+    </div>
   </div>
 </template>
 
@@ -67,9 +69,9 @@ export default {
 
 <style scoped>
 
-.container {
-  display: block;
-
+.content {
+  width: 100%;
+  height: 100%;
 }
 
 #usersTable {
