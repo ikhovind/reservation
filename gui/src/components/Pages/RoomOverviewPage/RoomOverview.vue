@@ -391,6 +391,7 @@ export default {
   margin: auto;
   margin-top: 20px;
 }
+
 .tables td, .tables th {
   border: 1px solid #999999;
   padding: 8px;
@@ -426,6 +427,7 @@ export default {
 label {
   font-weight: bold;
 }
+
 .modal-container {
   width: 40%;
   height: 600px;

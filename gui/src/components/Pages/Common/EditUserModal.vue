@@ -45,11 +45,11 @@
                   <br>
                 </div>
                 <label for="validUntil">Gyldig til</label>
-                <input class="formInput" name="validUntil" type="date" :disabled="!this.admin" id="validUntil" required>
+                <input class="formInput" name="validUntil" type="date" :disabled="!this.admin" id="validUntil" required v-bind:min="this.today">
                 <br>
                 <br>
                 <label for="userType">Bruker type</label>
-                <select class="formInput custom-select" name="userType" :disabled="!this.admin" id="userType" required>
+                <select class="formInput" name="userType" :disabled="!this.admin" id="userType" required>
                   <option value="0">User</option>
                   <option value="9">Admin</option>
                 </select>
@@ -304,6 +304,7 @@ export default {
       newUser: true,
       showModal: false,
       uid: '',
+      today: new Date().toISOString().split('T')[0],
       passwordFault: false,
       editSelf: false,
       emailFault: false,

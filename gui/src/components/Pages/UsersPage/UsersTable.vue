@@ -329,6 +329,7 @@ strong + span {
 .user-button {
   padding: 5px 5px;
   border-radius: 0.33rem;
+  color: #393b39;
   float: left;
 }
 
