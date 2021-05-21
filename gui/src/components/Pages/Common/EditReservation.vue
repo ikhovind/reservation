@@ -5,16 +5,23 @@
         <h3 v-else>Endre tidspunkt til reservasjon</h3>
       <form class="selectRoom">
         <div v-if="!edit">
-          <label for="rooms">Velg et rom</label>
+          <label class="labels" for="rooms">Velg et rom:</label>
+          <br>
           <select id="rooms" @change="changeRoomSelection()">
             <option v-for="(room,i) in rooms" :key="i" :value="room" >{{room.roomName}}</option>
           </select>
-          <label for="sections">Velg en seksjon</label>
+          <br>
+          <br>
+          <label class="labels" for="sections">Velg en seksjon:</label>
+          <br>
           <select @change="selectSection()" id="sections">
             <option value="">Hele rommet</option>
             <option v-for="(section, i) in availableSections" :key="i" :value="section" >{{section.sectionName}}</option>
           </select>
-          <label for="datePicker">Velg en dato</label>
+          <br>
+          <br>
+          <label class="labels" for="datePicker">Velg en dato:</label>
+          <br>
           <input @change="selectDate()" type="date" id="datePicker">
 
         </div>
@@ -402,12 +409,22 @@ export default {
 
 <style scoped>
 
+.labels {
+  font-weight: bold;
+}
 .buttonList {
   float: right;
   overflow-y: scroll;
   height: 500px;
+  position: relative;
+  top: -200px;
+  min-width: 120px;
+  max-width: 120px;
+  margin-right: 100px;
+  margin-left: -500px;
 }
 .blue {
+  width: 100px;
   display: block;
   background-color: #45ccea; /* Green */
   border: none;
@@ -418,6 +435,7 @@ export default {
   font-size: 16px;
 }
 .red {
+  width: 100px;
   display: block;
   background-color: #f54f4f; /* Green */
   border: none;
@@ -427,17 +445,6 @@ export default {
   text-decoration: none;
   font-size: 16px;
 }
-.yellow {
-  display: block;
-  background-color: #f6cb49; /* Green */
-  border: none;
-  color: white;
-  padding: 15px 32px;
-  text-align: center;
-  text-decoration: none;
-  font-size: 16px;
-}
-
 .user-button {
   padding: 5px 5px;
   border-radius: 0.33rem;
@@ -460,6 +467,7 @@ export default {
 }
 
 .grey {
+  width: 100px;
   display: block;
   background-color: #616161; /* Green */
   border: none;
@@ -472,6 +480,7 @@ export default {
 
 
 .timeButton {
+  width: 100px;
   display: block;
   background-color: #81c485; /* Green */
   border: none;
