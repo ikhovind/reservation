@@ -28,6 +28,11 @@ Det eneste man trenger å sette in for databasetilgang er de tre første verdien
 Siden backend kjører på HTTPS så må man også sette inn alias og passord til egen nøkkelfil (og eget filnavn om man 
 ønsker å endre fra reservio.p12)
 
+Man kan generere egen nøkkelfil med følgende kommando:
+```
+keytool -genkeypair -alias *sett inn alias her* -keyalg RSA -keysize 2048 -storetype PKCS12 -keystore reservio.p12 -validity 3650 -storepass *sett in passord her*
+```
+
 Vår application.properties-fil ser slik ut:
 ```
 spring.datasource.url=*sett in link til egen databasetabell her, inkluder navnet til databasen*
