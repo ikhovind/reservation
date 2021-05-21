@@ -80,14 +80,24 @@ public class UserController {
 
     /**
      * An endpoint that lets an admin see information about a given user.
+     * It is also available to normal users, but can only be used towards their own UUID.
      *
      * @param userId id of the user to be checked, of string type {@link UUID}
-     * @return 201 OK with user as json if successful, 400 Bad Request if the user was not found
+     * @return 201 OK with user as json if successful, 400 Bad Request if the user was not found.
+     * 403 FORBIDDEN if normal user tries to access someone else's information.
      */
-    @AdminTokenRequired
+    @UserTokenRequired
     @GetMapping(value = "/{id}")
-    public ResponseEntity getUser(@PathVariable("id") UUID userId) {
+    public ResponseEntity getUser(@PathVariable("id") UUID userId,
+                                  @RequestHeader("token") String token) {
         JSONObject jsonBody = new JSONObject();
+        if(!(Utilities.isAdmin(token) || Utilities.isSelf(token, userId))){
+            jsonBody.put("result", false);
+            jsonBody.put("error", "you do not have the permissions to do that");
+            return ResponseEntity
+                    .status(HttpStatus.FORBIDDEN)
+                    .body(jsonBody.toMap());
+        }
         try {
             User user = userService.getSingleUser(userId);
             jsonBody.put("user", user.toJson());

@@ -1,35 +1,35 @@
 <template>
-<div>
-  <Header></Header>
-  <label for="datePicker">Velg dag</label>
-  <input id="datePicker" type="date">
-  <label for="sortReservations">sorter reservasjonene dine</label>
-  <select id="sortReservations">
-    <option>Rom</option>
-    <option>Seksjon</option>
-    <option>dato</option>
-    <option>Fra-tidspunkt</option>
-    <option>Til-tidspunkt</option>
-    <option>Varighet</option>
-  </select>
-  <form>
-    <table @click="selectReservation($event)" id="reservationTable">
-      <tr>
-        <th>Rom</th>
-        <th>Seksjon</th>
-        <th>Dato</th>
-        <th>Fra</th>
-        <th>Til</th>
-      </tr>
-    </table>
-
-  </form>
-  <button :disabled="this.selectedIndex === -1" @click="deleteReservation()">Slett reservasjon</button>
-</div>
+  <div>
+    <Header></Header>
+    <label for="datePicker">Velg dag</label>
+    <input id="datePicker" type="date">
+    <label for="sortReservations">sorter reservasjonene dine</label>
+    <select id="sortReservations">
+      <option>Rom</option>
+      <option>Seksjon</option>
+      <option>dato</option>
+      <option>Fra-tidspunkt</option>
+      <option>Til-tidspunkt</option>
+      <option>Varighet</option>
+    </select>
+    <form>
+      <table @click="selectReservation($event)" id="reservationTable">
+        <tr>
+          <th>Rom</th>
+          <th>Seksjon</th>
+          <th>Dato</th>
+          <th>Fra</th>
+          <th>Til</th>
+        </tr>
+      </table>
+    </form>
+    <button :disabled="this.selectedIndex === -1" @click="deleteReservation()">Slett reservasjon</button>
+  </div>
 </template>
 
 <script>
 import Header from "@/components/Pages/Common/Header";
+
 export default {
   name: "MyReservations",
   created() {
@@ -43,7 +43,12 @@ export default {
   },
   components: {Header},
   methods: {
+    /**
+     * Called upon component creation, fetches the signed in users' reservations and then
+     * loads them into the reservations array and adds them to the table.
+     */
     async fetchReservations() {
+      console.log("Fetching")
       const addSectionOptions = {
         method: 'GET',
         headers: {
@@ -51,8 +56,9 @@ export default {
           'token': localStorage.getItem("token")
         }
       };
-      await fetch(localStorage.getItem("userId"), addSectionOptions)
-          .then((response) => response.json())
+      await fetch(this.$serverUrl + "/users/" + localStorage.getItem("userId"), addSectionOptions)
+          .then(response =>
+              response.json())
           //Then with the data from the response in JSON...
           .then(data => {
             if (data.result) {
@@ -69,6 +75,10 @@ export default {
             error.toString();
           });
     },
+    /**
+     * Converts a reservation into a table row to be added into the reservation table.
+     * @param reservation reservation to be added
+     */
     addReservationToTable(reservation) {
       let table = document.getElementById("reservationTable");
       let row = table.insertRow(table.rows.length);
@@ -89,16 +99,20 @@ export default {
         row.style.color = 'blue';
       });
       cell0.innerText = reservation.room.roomName;
-      if("section" in reservation) {
+      if ("section" in reservation) {
         cell1.innerText = reservation.section.sectionName;
-      }
-      else {
+      } else {
         cell1.innerText = "Hele rommet"
       }
       cell2.innerText = new Date(reservation.timeFrom).getDate() + "/" + (new Date(reservation.timeFrom).getMonth() + 1);
       cell3.innerText = new Date(reservation.timeFrom).getHours() + ":" + new Date(reservation.timeFrom).getMinutes();
       cell4.innerText = new Date(reservation.timeTo).getHours() + ":" + new Date(reservation.timeTo).getMinutes();
     },
+    /**
+     * Used to select update a row's style and this.selectedIndex when a reservation
+     * is selected from the table
+     * @param i the row being selected
+     */
     selectReservation(i) {
       if (i.target.parentElement.style.color === 'black') {
         this.selectedIndex = -1;
@@ -110,6 +124,10 @@ export default {
         console.log(e);
       }
     },
+    /**
+     * Attempts to the delete the reservation that is currently selected.
+     * Removes the reservation from the table and array if the request is successful.
+     */
     async deleteReservation() {
       const addSectionOptions = {
         method: 'DELETE',

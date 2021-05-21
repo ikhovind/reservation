@@ -13,18 +13,18 @@
           <div class="modal-body">
             <slot name="body">
               <form id="newUserForm">
+                <label for="firstName">Fornavn</label>
+                <input class="formInput" name="firstName" type="text" id="firstName" required>
+                <br><br>
+                <label for="lastName">Etternavn</label>
+                <input class="formInput" name="lastName" type="text" id="lastName" required>
+                <br><br>
                 <span style="color: red" id="emailFault">Eposten er allerede registrert</span>
                 <label for="email">Epost</label>
                 <input class="formInput" name="email" type="text" :disabled=!this.newUser id="email" required>
                 <br><br>
                 <label for="phone">Telefon</label>
                 <input class="formInput" name="phone" type="text" id="phone" required :disabled="!this.newUser">
-                <br><br>
-                <label for="firstName">Fornavn</label>
-                <input class="formInput" name="firstName" type="text" id="firstName" required>
-                <br><br>
-                <label for="lastName">Etternavn</label>
-                <input class="formInput" name="lastName" type="text" id="lastName" required>
                 <br><br>
                 <div v-bind:style="this.newUser ? {'display': 'none'} : {'display': 'inline'}">
                   <label for="newPasswordBool">Bytt passord?</label>
@@ -74,15 +74,20 @@ export default {
   name: "EditUserModal",
   methods: {
     initCloseModal() {
-      if(confirm("Er du sikker på at du vil avbryte?")){
+      if (confirm("Er du sikker på at du vil avbryte?")) {
         this.closeModal();
       }
     },
     closeModal() {
       this.showModal = false;
-      //todo is needed?
-      this.admin = false;
     },
+    /**
+     * Used to initialize the form. Variables are set to determine which fields should be shown and/or disabled.
+     * If a new user is to be created, no fields are hidden or disabled, and the form is then shown.
+     * If an existing user is to be edited, the email and phone fields are disabled and password fields hidden,
+     * before information about that user is fetched and loaded into the form.
+     * @param args newUser: bool, userType: String/int, self: bool
+     */
     async displayInput(args) {
       this.newUser = args.newUser;
       this.admin = parseInt(args.userType) !== 0;
@@ -90,19 +95,33 @@ export default {
       if (!args.newUser) {
         await this.loadExistingUser(args.uid);
       } else {
-        await this.loadNewUserForm();
+        this.newUser = true;
       }
       this.showModal = true;
     },
+    /**
+     * Parses a date received from the backend system in format YYYY-MM-DD'T'hh:mm:ss'Z'
+     * into format DD/MM/YYYY
+     */
     parseDateIn(dateString) {
       let out = new Date(Date.parse(dateString))
       return out.toLocaleDateString().split("/").reverse().join("-")
     },
+    /**
+     * Parses a date string from format DD/MM/YYYY into the format accepted by
+     * the backend system; YYYY-MM-DD'T'hh:mm:ss'Z'
+     */
     parseDateOut(dateString) {
       let out = new Date(Date.parse(dateString))
       out.setUTCHours(23, 45)
       return out.toISOString()
     },
+    /**
+     * Fetches information tied to a given user from the backend system and loads
+     * it into the form. Additionally, checks if an admin is editing their own user, and
+     * disables the UserType field if this is the case.
+     * @param uid id of the user
+     */
     async loadExistingUser(uid) {
       this.uid = uid;
       if (uid === localStorage.getItem("userId")) {
@@ -133,9 +152,9 @@ export default {
             console.log(error);
           })
     },
-    async loadNewUserForm() {
-      this.newUser = true;
-    },
+    /**
+     * Toggles the display state of the password fields.
+     */
     toggleChangePassword() {
       let elements = document.getElementsByClassName("changePassword");
       let checkBox = document.getElementById("newPasswordBool").checked
@@ -143,6 +162,11 @@ export default {
         elements[i].style.display = checkBox ? "inline" : "none";
       }
     },
+    /**
+     * Toggles the display state of an error text that is shown
+     * above the passwords in the case of password faults.
+     * @param message an error text to be shown
+     */
     togglePasswordFault(message) {
       this.passwordFault = !this.passwordFault
       document.getElementById("faultText").innerHTML = message;
@@ -151,6 +175,12 @@ export default {
         elements[i].style.display = this.passwordFault ? "block" : "none";
       }
     },
+    /**
+     * Validates whether a password is valid or not. If a password fault took place earlier, it is
+     * toggled off. Then checks if the password is long enough, and if both fields match. If either
+     * of these are untrue, a message stating what is wrong is sent as a passwordFault.
+     * @returns {boolean} true if passwords are valid, false if not
+     */
     validatePassword() {
       if (this.passwordFault) {
         this.togglePasswordFault()
@@ -169,31 +199,38 @@ export default {
       }
       return true;
     },
+    /**
+     * Checks all the fields in the form if any of them are empty.
+     * Additional logic can be added, dependent on what requirements you
+     * wish to set for the different values.
+     * @returns {boolean} true if all fields are valid, false if one or more fails
+     */
     validateEntries() {
       document.getElementById("emailFault").style.display = "none";
       if (document.getElementById("email").value.length === 0) {
-        console.log("invalid email")
         return false;
       }
       if (this.newUser) {
         if (document.getElementById("phone").value.length === 0) {
-          console.log("phone")
           return false;
         }
       }
       if (document.getElementById("lastName").value.length === 0) {
-        console.log("lastname")
         return false;
       }
       if (document.getElementById("firstName").value.length === 0) {
-        console.log("fnawe")
         return false;
       }
       return true;
     },
+    /**
+     * Used to send a form. First checks whether the fields are valid. If the form is for a new user
+     * or the admin selected change password while editing a user, the password is validated as well.
+     * If all fields have valid values, they are parsed into an object which is then JSON.stringified
+     * and sent in a POST/PUT request to the backend server.
+     */
     async submitUser() {
       if (!this.validateEntries()) {
-        console.log("invalid entreies")
         return;
       }
       let checked = document.getElementById("newPasswordBool").checked;
@@ -368,7 +405,7 @@ select {
   appearance: unset;
 }
 
-select:hover {
+select:hover:enabled {
   cursor: pointer;
 }
 
