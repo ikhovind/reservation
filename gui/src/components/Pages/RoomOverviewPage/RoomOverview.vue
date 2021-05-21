@@ -96,6 +96,7 @@ export default {
   },
   methods: {
     closeModal() {
+      this.fetchReservations();
       let table = document.getElementById("userInfo");
       if (table.rows.length > 1){
         table.deleteRow(table.rows.length - 1);
@@ -150,6 +151,12 @@ export default {
      * @returns {Promise<void>}
      */
     async fetchReservations() {
+      let table = document.getElementById("reservationTable");
+      let lastChild = document.getElementById("reservationTable").lastChild;
+
+      for (let i = table.rows.length; i > 1; i--) {
+        table.deleteRow(lastChild.rowIndex);
+      }
       const addSectionOptions = {
         method: 'GET',
         headers: {
@@ -165,7 +172,7 @@ export default {
               for (let reservation in data.reservations) {
                 try {
                   this.reservations.push(data.reservations[reservation]);
-                  this.addReservationToTable(data.reservations[reservation], "max");
+                  this.addReservationToTable(data.reservations[reservation]);
                 } catch (e) {
                   console.log(e);
                 }

@@ -21,7 +21,7 @@
         <div v-if="this.selectedTime !== ''" class="buttonList">
           <button v-for="index in 56" :key="index"
                   @click="setTimeSelection(index)"
-                  :class="[(isReserved(index) ? 'red' :isPast(index) ? 'grey'  : isBetween(index) ? 'blue' : 'timeButton')]"
+                  :class="[(isBetween(index) ? 'blue' : isReserved(index) ? 'red' :isPast(index) ? 'grey'  :  'timeButton')]"
                   :disabled="isDisabled(index)">
             {{ Math.floor(index / 4 + 8) }}:{{ padMinutes(((index % 4) * 15))}}</button>
         </div>
@@ -49,6 +49,7 @@ export default {
       }
       let date = new Date(this.reservation.timeFrom);
       this.selectedTime = (date.getFullYear() + "-"  + ((date.getMonth() + 1 < 10) ? ("0" + (date.getMonth() + 1)) : date.getMonth() + 1) + "-" + date.getDate());
+      this.setReservedTimes();
     }
     let today = new Date().toISOString().split('T')[0];
     document.getElementById("datePicker").setAttribute('min', today);
@@ -188,13 +189,16 @@ export default {
      */
     isDisabled(n) {
       if (this.isPast(n)) return true;
-      if (this.isReserved(n)) return true;
+      if (!this.edit && this.isReserved(n)) return true;
       n = (new Date(this.selectedTime + " " + Math.floor(n / 4 + 8) + ":" + this.padMinutes(((n % 4) * 15)) + ":00"));
-      for (let i in this.reservedTimes){
-        if (this.edit) {
-          this.reservedTimes[i][0] = new Date(this.reservation.timeFrom);
-          this.reservedTimes[i][1] = new Date(this.reservation.timeTo);
+      if (this.edit) {
+        let timeFrom = new Date(this.reservation.timeFrom);
+        let timeTo = new Date(this.reservation.timeTo);
+        if (n.getTime() >= timeFrom.getTime() && n.getTime() <= timeTo.getTime()){
+          return false;
         }
+      }
+      for (let i in this.reservedTimes){
         if (this.startTime != null) {
           if(this.startTime.getTime() <= this.reservedTimes[i][0].getTime()){
             return n.getTime() >= this.reservedTimes[i][0].getTime();
@@ -204,7 +208,7 @@ export default {
           }
         }
         else {
-          return n.getTime() >= this.reservedTimes[i][0] && n.getTime() <= this.reservedTimes[i][1];
+          return n.getTime() >= this.reservedTimes[i][0].getTime() && n.getTime() <= this.reservedTimes[i][1].getTime();
         }
       }
       return false;
@@ -235,7 +239,7 @@ export default {
         let timeTo = new Date(this.reservation.timeTo);
         if(n.getTime() >= timeFrom.getTime() && n.getTime() <= timeTo.getTime()) return true;
       }
-      for (let arr in this.reservedTimes) {
+      for (let arr = 0; arr < this.reservedTimes.length - 1; arr++) {
         if(n.getTime() >= this.reservedTimes[arr][0].getTime() && n.getTime() <= this.reservedTimes[arr][1].getTime()) {
           return true;
         }
@@ -327,7 +331,10 @@ export default {
       };
       //let sectionIndex = document.getElementById("sections").selectedIndex;
       let url;
-      if (this.selectedSectionId === "") {
+      if (this.edit) {
+        url = "/reservations/" + this.reservation.reservationId;
+      }
+      else if (this.selectedSectionId === "") {
         url = "/reservations/rooms/" + this.selectedRoomId;
       }
       else {
