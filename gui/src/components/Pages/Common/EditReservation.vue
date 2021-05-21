@@ -42,7 +42,6 @@ export default {
   async created() {
     await this.loadRoomsAndSections();
     if (this.reservation !== undefined) {
-      console.log("du vet du vet");
       this.edit = true;
       this.selectedRoomId = this.reservation.room.roomId;
       if (this.reservation.section !== undefined) {

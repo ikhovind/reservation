@@ -96,7 +96,11 @@ export default {
   },
   methods: {
     closeModal() {
-       this.showEditModal = false;
+      let table = document.getElementById("userInfo");
+      if (table.rows.length > 1){
+        table.deleteRow(table.rows.length - 1);
+      }
+      this.showEditModal = false;
     },
     showModal() {
       this.filterReservationTable();
