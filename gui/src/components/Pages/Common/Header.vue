@@ -5,7 +5,7 @@
     <router-link to="rooms">Romoversikt</router-link>
     <router-link to="users" v-if="this.admin">Brukere</router-link>
     <router-link to="userInfo" class="userLogo">
-     <img id="userLogo" src="../../../assets/userico.png" alt="Min side">
+      <img id="userLogo" src="../../../assets/userico.png" alt="Min side">
     </router-link>
   </div>
 </template>
@@ -23,42 +23,49 @@ export default {
 </script>
 
 <style scoped>
-  .topnav {
-    overflow: hidden;
-    background-color: #93c47d;
-    height: 48px;
-  }
 
-  #userLink {
-    float: right;
-  }
+#userLink {
+  float: right;
+}
 
-  #userLogo {
-    float: right;
-    height: 32px;
-    padding: 8px;
-  }
+#userLogo {
+  float: right;
+  height: 32px;
+  padding: 8px;
+  margin: 0.75vw 0;
+}
 
-  .topnav a{
-    float: left;
-    color: #fcfffc;
-    text-align: center;
-    text-decoration: none;
-    font-size: 17px;
-  }
+.topnav {
+  overflow: hidden;
+  background-color: #93c47d;
+  height: 48px;
+  display: flex;
+  horiz-align: center;
+  align-items: center;
+}
 
-  .topnav a:not(.userLogo) {
-    padding: 14px 16px;
-  }
+.topnav a:not(.userLogo) {
+  display: block;
+  margin: auto;
+  text-decoration: none;
+  color: #fcfffc;
+  width: 100%;
+  font-size: 18px;
+  height: 48px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  horiz-align: center;
+}
 
-  .topnav a:hover {
-    background-color: #ddd;
-    color: black;
-  }
+.topnav a:hover {
+  background-color: #ddd;
+  color: black;
+}
 
-  .topnav a.active {
-    background-color: #a5afaf;
-    color: white;
-  }
+.topnav a.active {
+  background-color: #a5afaf;
+  color: white;
+}
 
 </style>
