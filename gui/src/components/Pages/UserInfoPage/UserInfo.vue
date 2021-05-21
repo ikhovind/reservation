@@ -56,6 +56,9 @@ export default {
   name: "UserInfo",
   components: {Header, EditUserModal},
   methods: {
+    /**
+     * Fetches information about the User's account and loads them into the document
+     */
     async loadOwnUser() {
       let getUserOptions = {
         method: 'GET',
@@ -78,10 +81,18 @@ export default {
                   )
           )
     },
+    /**
+     * Parses a date received from the backend system in format YYYY-MM-DD'T'hh:mm:ss'Z'
+     * into a more readable format; DD/MM/YYYY
+     */
     parseDateIn(dateString) {
       let out = new Date(Date.parse(dateString))
       return out.toDateString();
     },
+    /**
+     * Parses the front-end's readable DD/MM/YYYY format into the format accepted by the
+     * backend system; YYYY-MM-DD'T'hh:mm:ss'Z'
+     */
     parseDateOut(dateString) {
       let out = new Date(Date.parse(dateString))
       out.setUTCHours(23, 45)
@@ -95,6 +106,10 @@ export default {
         self: true,
       });
     },
+    /**
+     * Prompts the user to make sure they actually want to log out before clearing localStorage
+     * and sending them back to the login page.
+     */
     logoutAction() {
       if(confirm("Er du sikker på at\ndu vil logge ut?")){
         localStorage.removeItem("token");

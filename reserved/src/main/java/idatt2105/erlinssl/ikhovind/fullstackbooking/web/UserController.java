@@ -217,7 +217,7 @@ public class UserController {
                 newPass = editUser(user, map, false);
             }
             user = userService.updateUser(user, newPass);
-            jsonBody.put("user", user);
+            jsonBody.put("user", user.toSmallJson());
             jsonBody.put("result", true);
             return ResponseEntity
                     .ok()
