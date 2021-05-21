@@ -3,27 +3,33 @@
     <Header></Header>
     <h2>Romoversikt</h2>
     <EditRoomModal ref="editRoomModal" ></EditRoomModal>
-    <label for="selectRoom">Velg rom</label>
+    <label for="selectRoom">Velg rom:</label>
+    <br>
     <select id="selectRoom" @change="changeRoomSelection()">
-      <option value="all">Alle rom</option>
+      <option value="all">Alle rom:</option>
       <option v-for="(room,i) in rooms" :key="i" :value="room" >{{room.roomName}}</option>
     </select>
-    <label for="selectSection">Velg seksjon</label>
+    <br>
+    <label for="selectSection">Velg seksjon:</label>
+    <br>
     <select @change="filterReservationTable()" id="selectSection">
       <option value="">Hele rommet</option>
       <option v-for="(section, i) in currentSections" :key="i" :value="section.sectionId" >{{section.sectionName}}</option>
     </select>
-    <label for="selectDate">Velg dato</label>
+    <br>
+    <label for="selectDate">Velg dato:</label>
+    <br>
     <input @change="filterReservationTable()" type="date" id="selectDate">
-    <h3>Alle reservasjoner for valgt rom</h3>
-    <label for="sortReservations">Sorter reservasjoner</label>
+    <h3>Alle reservasjoner med passende kriterier:</h3>
+    <label for="sortReservations">Sorter reservasjoner:</label>
+    <br>
     <select @change="changeSorting()" id="sortReservations">
       <option value="room">Rom</option>
       <option value="date">Dato</option>
       <option value="descroom">Rom synkende</option>
       <option value="descdate">Dato synkende</option>
     </select>
-    <table @click="selectReservation($event)" id="reservationTable">
+    <table @click="selectReservation($event)" class="tables" id="reservationTable">
       <tr>
         <th>Rom</th>
         <th>Seksjon</th>
@@ -34,22 +40,26 @@
     </table>
 
     <div v-if="isAdmin()">
-      <button @click="$refs.editRoomModal.displayInput(true)">Legg til nytt rom</button>
-      <button :disabled="selectedIndex === -1" @click="showEditModal = true">Rediger reservasjon</button>
+      <br>
+      <button class="user-button" :disabled="selectedIndex === -1" @click="showModal()">Rediger reservasjon</button>
+      <br>
+      <button class="user-button" @click="$refs.editRoomModal.displayInput(true)">Legg til nytt rom</button>
       <div v-if="showEditModal" id="editReservationModal">
         <div id="editSection">
           <div class="modal-mask">
             <div class="modal-wrapper">
               <div class="modal-container">
-              <EditReservation :reservation="reservations[this.selectedIndex]" v-on:createdReservation="closeModal()"></EditReservation>
-                <button @click="closeModal()">Avbryt</button>
+              <EditReservation :reservation="this.currentReservations[this.selectedIndex]" v-on:createdReservation="closeModal()"></EditReservation>
+                <button class="user-button" @click="closeModal()">Avbryt</button>
               </div>
             </div>
           </div>
         </div>
       </div>
-      <label for="userInfo">Brukerinfo</label>
-      <table id="userInfo">
+      <br>
+      <br>
+      <label id="userInfoLabel" for="userInfo">Brukerinfo:</label>
+      <table class="tables" id="userInfo">
         <tr>
           <th>Navn</th>
           <th>Telefonnummer</th>
@@ -87,6 +97,42 @@ export default {
   methods: {
     closeModal() {
        this.showEditModal = false;
+    },
+    showModal() {
+      this.filterReservationTable();
+      this.showEditModal = true;
+    },
+
+    selectReservation(i) {
+      if (i.target.parentElement.style.color === 'black') {
+        let table = document.getElementById("userInfo");
+        this.selectedIndex = -1;
+        if (table.rows.length > 1){
+          table.deleteRow(table.rows.length - 1);
+        }
+        return;
+      }
+      try {
+        this.selectedIndex = (i.target.parentElement.rowIndex - 1);
+        console.log("sel " + this.selectedIndex)
+        let table = document.getElementById("userInfo");
+        if (table.rows.length > 1){
+          table.deleteRow(table.rows.length - 1);
+        }
+        let row = table.insertRow(table.rows.length);
+        row.style.textAlign = "left";
+        row.style.border = "1px solid #999999"
+
+        let cell0 = row.insertCell(0);
+        let cell1 = row.insertCell(1);
+        let cell2 = row.insertCell(2);
+        cell0.innerText = this.reservations[this.selectedIndex].user.firstName +
+            this.reservations[this.selectedIndex].user.lastName;
+        cell1.innerText = this.reservations[this.selectedIndex].user.phone;
+        cell2.innerText = this.reservations[this.selectedIndex].user.email;
+      } catch (e) {
+        console.log(e);
+      }
     },
     isAdmin() {
       return localStorage.getItem("userType") !== "0";
@@ -141,6 +187,11 @@ export default {
       let cell2 = row.insertCell(2);
       let cell3 = row.insertCell(3);
       let cell4 = row.insertCell(4);
+      if (table.rows.length % 2 === 1) {
+        row.style.backgroundColor = "#e7e7e7";
+      }
+      row.style.textAlign = "left";
+      row.style.border = "1px solid #999999"
       row.addEventListener('click', function () {
         if (row.style.color === "blue") {
           row.style.color = "black";
@@ -296,7 +347,53 @@ export default {
 }
 </script>
 <style scoped>
+.user-button {
+  padding: 5px 5px;
+  border-radius: 0.33rem;
+  margin: auto;
+  margin-top: 8px;
+}
 
+.user-button:hover:enabled{
+  cursor: pointer;
+  color: #5c5c5f;
+  background-color: #bce7a8;
+  border: 4px #6cf3b2;
+  padding: 7px;
+  box-shadow: none;
+}
+
+.user-button + .user-button {
+  margin-left: 0.25rem;
+  clear: none;
+}
+
+.tables {
+  font-family: Arial, Helvetica, sans-serif;
+  border-collapse: collapse;
+  width: 60%;
+  margin: auto;
+  max-height: 300px;
+  overflow-y: scroll;
+  margin-top: 20px;
+}
+
+#userInfoLabel{
+  margin: auto;
+  margin-top: 20px;
+}
+.tables td, .tables th {
+  border: 1px solid #999999;
+  padding: 8px;
+}
+
+.tables th {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  text-align: left;
+  background-color: #4CAF50;
+  color: white;
+}
 
 .modal-mask {
   position: fixed;
@@ -308,23 +405,29 @@ export default {
   background-color: rgba(0, 0, 0, 0.5);
   display: table;
   transition: opacity 0.3s ease;
+  overflow: hidden;
 }
 
 .modal-wrapper {
   display: table-cell;
   vertical-align: middle;
+  overflow: hidden;
 }
 
+label {
+  font-weight: bold;
+}
 .modal-container {
   width: 40%;
-  height: 379px;
+  height: 600px;
   margin: 0px auto;
   padding: 20px 30px;
-  background-color: #fff;
+  background-color: #c4c4c4;
   border-radius: 2px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.33);
   transition: all 0.3s ease;
   font-family: Helvetica, Arial, sans-serif;
+  overflow: hidden;
 }
 
 .modal-header h3 {

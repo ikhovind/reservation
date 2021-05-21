@@ -26,7 +26,7 @@
             {{ Math.floor(index / 4 + 8) }}:{{ padMinutes(((index % 4) * 15))}}</button>
         </div>
       </form>
-      <button :disabled="rooms.length === 0" @click="submitReservation()">Lagre</button>
+      <button class="user-button" :disabled="rooms.length === 0" @click="submitReservation()">Lagre</button>
 
     </div>
   </div>
@@ -42,6 +42,7 @@ export default {
   async created() {
     await this.loadRoomsAndSections();
     if (this.reservation !== undefined) {
+      console.log("du vet du vet");
       this.edit = true;
       this.selectedRoomId = this.reservation.room.roomId;
       if (this.reservation.section !== undefined) {
@@ -229,6 +230,10 @@ export default {
       if (this.edit) {
         let timeFrom = new Date(this.reservation.timeTo);
         let timeTo = new Date(this.reservation.timeFrom);
+        console.log("------------------")
+        console.log(n);
+        console.log(timeFrom);
+        console.log(timeTo);
         if(n.getTime() >= timeFrom.getTime() && n.getTime() <= timeTo.getTime()) return true;
       }
       for (let arr in this.reservedTimes) {
@@ -425,6 +430,27 @@ export default {
   text-align: center;
   text-decoration: none;
   font-size: 16px;
+}
+
+.user-button {
+  padding: 5px 5px;
+  border-radius: 0.33rem;
+  margin: auto;
+  margin-top: 8px;
+}
+
+.user-button:hover:enabled{
+  cursor: pointer;
+  color: #5c5c5f;
+  background-color: #bce7a8;
+  border: 4px #6cf3b2;
+  padding: 7px;
+  box-shadow: none;
+}
+
+.user-button + .user-button {
+  margin-left: 0.25rem;
+  clear: none;
 }
 
 .grey {

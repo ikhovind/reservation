@@ -8,7 +8,7 @@
             <slot name="header">
               <h1 v-if="this.newRoom">Nytt</h1>
               <h1 v-else>Rediger</h1>
-              <h1>seksjon</h1>
+              <h1>Rom</h1>
             </slot>
           </div>
 
