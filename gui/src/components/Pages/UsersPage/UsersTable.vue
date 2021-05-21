@@ -57,7 +57,7 @@
           </td>
         </tr>
       </table>
-      <span class="text text-strong">Valgt bruker:</span>
+      <span class="text text-field">Valgt bruker:</span>
       <span v-if="selected.length === 0" class="text text-muted">Ingen bruker valgt, velg en fra tabellen</span>
       <span v-else class="text">{{ selected[0].email }}</span>
     </div>
@@ -251,12 +251,9 @@ export default {
 </script>
 
 <style scoped>
-html {
-}
 
 div {
   display: inline-block;
-  float: left;
 }
 
 table:not(.size-buttons) {
@@ -298,7 +295,6 @@ strong + span {
 }
 
 .container {
-  float: left;
   margin-top: 1.25vw;
   margin-left: 3.75vw;
 }
@@ -392,7 +388,7 @@ button {
   clear: left;
 }
 
-.text-strong {
+.text-field {
   font-weight: bold;
 }
 

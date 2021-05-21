@@ -1,42 +1,44 @@
 <template>
   <div>
     <Header></Header>
-    <h2>Min info</h2>
-    <div class="clickable" @click="emitEditUser">
-      <img id="editIcon" src="../../../assets/edit.png" alt="Rediger bruker">
-      <p class="inside">Rediger</p>
-    </div>
+    <div class="text-header">Min info</div>
     <section class="container-outer">
       <div class="container-info">
-        <span class="text-strong">Personalia</span>
+        <span class="text-field">Personalia</span>
         <div class="container-info-field">
-          <label for="myFirstName">Fornavn</label>
-          <input type="text" id="myFirstName" disabled>
+          <div class="field-name"><label for="myFirstName">Fornavn</label></div>
+          <div class="field-value"><span id="myFirstName"></span></div>
         </div>
+        <div class="hr"></div>
         <div class="container-info-field">
-          <label for="myLastName">Etternavn</label>
-          <input type="text" id="myLastName" disabled>
-        </div>
-      </div>
-      <div class="container-info">
-        <span class="text-strong">Kontakt</span>
-        <div class="container-info-field">
-          <label for="myEmail">Epost</label>
-          <input type="text" id="myEmail" disabled>
-        </div>
-        <div class="container-info-field">
-          <label for="myPhone">Telefonnummer</label>
-          <input type="text" id="myPhone" disabled>
+          <div class="field-name"><label for="myLastName">Etternavn</label></div>
+          <div class="field-value"><span id="myLastName"></span></div>
         </div>
       </div>
       <div class="container-info">
-        <span class="text-strong">Annet</span>
+        <span class="text-field">Kontakt</span>
         <div class="container-info-field">
-          <label for="myValidUntil">Gyldig til</label>
-          <input type="date" id="myValidUntil" disabled>
+          <div class="field-name"><label for="myEmail">Epost</label></div>
+          <div class="field-value"><span id="myEmail"></span></div>
+        </div>
+        <div class="hr"></div>
+        <div class="container-info-field">
+          <div class="field-name"><label for="myPhone">Telefonnummer</label></div>
+          <div class="field-value"><span id="myPhone"></span></div>
+        </div>
+      </div>
+      <div class="container-info">
+        <span class="text-field">Annet</span>
+        <div class="container-info-field">
+          <div class="field-name"><span>Gyldig til</span></div>
+          <div class="field-value"><span id="myValidUntil"></span></div>
         </div>
       </div>
     </section>
+    <div class="clickable" @click="emitEditUser">
+      <img id="editIcon" src="../../../assets/edit.png" alt="Rediger bruker">
+      <span class="text-button">Rediger</span>
+    </div>
     <EditUserModal ref="editUserModal"
                    v-on:selfEdited="loadOwnUser"></EditUserModal>
   </div>
@@ -63,18 +65,18 @@ export default {
           .then(response =>
               response.json()
                   .then(data => {
-                        document.getElementById("myEmail").value = data.user.email;
-                        document.getElementById("myFirstName").value = data.user.firstName;
-                        document.getElementById("myLastName").value = data.user.lastName;
-                        document.getElementById("myPhone").value = data.user.phone;
-                        document.getElementById("myValidUntil").value = this.parseDateIn(data.user.validUntil);
+                        document.getElementById("myEmail").innerHTML = data.user.email;
+                        document.getElementById("myFirstName").innerHTML = data.user.firstName;
+                        document.getElementById("myLastName").innerHTML = data.user.lastName;
+                        document.getElementById("myPhone").innerHTML = data.user.phone;
+                        document.getElementById("myValidUntil").innerHTML = this.parseDateIn(data.user.validUntil);
                       }
                   )
           )
     },
     parseDateIn(dateString) {
       let out = new Date(Date.parse(dateString))
-      return out.toLocaleDateString().split("/").reverse().join("-")
+      return out.toDateString();
     },
     parseDateOut(dateString) {
       let out = new Date(Date.parse(dateString))
@@ -99,6 +101,7 @@ export default {
 <style scoped>
 #editIcon {
   height: 32px;
+  margin: 0.55rem 0 0.55rem 0.55rem;
 }
 
 .container-outer {
@@ -108,7 +111,9 @@ export default {
   display: flex;
   -moz-flex-wrap: wrap;
   flex-wrap: wrap;
-  max-width: 840px;
+  width: 33vw;
+  min-width: 355px;
+  max-width: 750px;
   margin-left: auto;
   margin-right: auto;
 }
@@ -119,22 +124,74 @@ export default {
   box-orient: vertical;
   flex-direction: column;
   width: 100%;
+  border-radius: 0.54rem;
+  border: 2px solid #c8eed2;
+  padding: 25px 25px 10px 25px;
+  background-color: #fcfcfc;
 }
 
-.text-strong {
-  font-weight: bolder;
+.container-info + .container-info {
+  margin-top: 2.65rem;
+}
+
+.container-info-field {
+  display: flex;
+  align-items: center;
+  padding: 12px 0;
+}
+
+
+.field-name {
+  display: flex;
+  flex-basis: 156px;
+  -moz-box-align: center;
+  align-items: center;
+  text-transform: uppercase;
+  color: #5f6368;
+  font-size: 0.865rem;
+}
+
+.field-value {
+  align-items: center;
+  display: flex;
+  font-size: 1.23rem;
+}
+
+.text-field {
+  align-items: center;
+  display: flex;
+  font-size: 1.75rem;
+  font-weight: bold;
+}
+
+.hr {
+  border-top: 1px solid #dbe2dc;
+}
+
+.text-header {
+  font-size: 48px;
+  font-weight: bold;
+  padding: 0.86rem 3vw;
+}
+
+.text-button {
+  margin: 0.75rem .45rem;
 }
 
 .clickable {
+  margin-top: 12px;
   border-radius: 12px;
-  border: 1px solid black;
+  border: 1px solid #c8eed2;
   display: inline-flex;
   justify-content: center;
   align-items: center;
-  padding: 3px 12px;
+  background-color: #fcfcfc;
 }
 
 .clickable:hover {
   cursor: pointer;
+  color: #5c5c5f;
+  background-color: #bce7a8;
+  border: 1px dot-dot-dash #bce7a8;
 }
 </style>
